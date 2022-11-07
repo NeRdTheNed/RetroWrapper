@@ -23,7 +23,7 @@ jobs:
       uses: gradle/gradle-build-action@v2
       with:
         gradle-version: wrapper
-        cache-read-only: cache-read-only: ${{ github.ref != 'refs/heads/master' }}
+        cache-read-only: ${{ github.ref != 'refs/heads/master' }}
         arguments: build --scan --stacktrace --warning-mode all
     - name: Rezip built .jar files to remove directory entries
       run: bash removeDirectoryEntries.sh

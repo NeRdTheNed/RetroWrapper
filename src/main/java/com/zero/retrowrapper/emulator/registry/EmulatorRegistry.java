@@ -38,6 +38,7 @@ public final class EmulatorRegistry {
         register(new SkinOrCapeHandler("/skin/", false));
         register(new SkinOrCapeHandler("/MinecraftSkins/", false));
         register(new SkinOrCapeHandler("/capes/", true));
+        register(new SkinOrCapeHandler("/cloak/get.jsp?user=", true));
         register(new SkinOrCapeHandler("/MinecraftCloaks/", true));
     }
 }

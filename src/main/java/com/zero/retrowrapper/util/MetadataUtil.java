@@ -25,7 +25,7 @@ public final class MetadataUtil {
         try {
             return IOUtils.toString(ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperVersion.txt"), Charset.defaultCharset());
         } catch (final IOException e) {
-            return "v0.0.0+Missingno";
+            return "0.0.0-SNAPSHOT+Missingno";
         }
     }
 

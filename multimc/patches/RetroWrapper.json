@@ -1,0 +1,40 @@
+{
+  "+traits": [
+    "noapplet"
+  ],
+  "+tweakers": [
+    "com.zero.retrowrapper.RetroTweaker"
+  ],
+  "formatVersion": 1,
+  "libraries": [
+    {
+      "MMC-hint": "local",
+      "name": "org.multimc:retrowrapper:@rrVersion@"
+    },
+    {
+      "name": "net.minecraft:launchwrapper:1.6"
+    },
+    {
+      "name": "net.sf.jopt-simple:jopt-simple:4.5"
+    },
+    {
+      "name": "org.ow2.asm:asm-all:4.1"
+    },
+    {
+      "name": "net.java.jinput:jinput:2.0.5"
+    },
+    {
+      "name": "net.java.jutils:jutils:1.0.0"
+    }
+  ],
+  "mainClass": "net.minecraft.launchwrapper.Launch",
+  "name": "retrowrapper",
+  "requires": [
+    {
+      "uid": "net.minecraft"
+    }
+  ],
+  "uid": "RetroWrapper",
+  "version": "@rrVersion@",
+  "minecraftArguments": "${auth_player_name} ${auth_session} --gameDir ${game_directory} --assetsDir ${game_assets}"
+}

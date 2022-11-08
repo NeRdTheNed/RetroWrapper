@@ -32,12 +32,8 @@ jobs:
         gradle-version: wrapper
         cache-disabled: true
         arguments: build --scan --stacktrace --warning-mode all
-    - name: Rezip build .jar files to remove directory entries
+    - name: Rezip built .jar files to remove directory entries
       run: bash removeDirectoryEntries.sh
-    - name: Run strip-nondeterminism on built .jar files
-      run: strip-nondeterminism build/libs/*.jar
-    - name: Run advzip (-i 9999) on built .jar files
-      run: advzip --shrink-insane -kzi 9999 -p build/libs/*.jar
     - name: Draft release
       uses: softprops/action-gh-release@v1
       with:
@@ -46,4 +42,4 @@ jobs:
         body: Replace this text with the description of this release!
         draft: true
         prerelease: false
-        files: build/libs/*.jar
+        files: build/libs/*

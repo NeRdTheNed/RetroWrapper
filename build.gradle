@@ -14,6 +14,8 @@ plugins {
     //id 'checkstyle' // TODO: This is a reminder for me to setup checkstyle.
 }
 
+import org.apache.tools.ant.filters.ReplaceTokens
+
 // Reproducible builds! https://docs.gradle.org/4.9/userguide/working_with_files.html#sec:reproducible_archives
 tasks.withType(AbstractArchiveTask) {
     preserveFileTimestamps = false
@@ -100,7 +102,7 @@ version = project.version
 
 task checkRelease {
     if (!(System.getenv("BUILD_RELEASE") == "true")) {
-        version += ("-SNAPSHOT")
+        version += ("+SNAPSHOT")
     }
 }
 
@@ -185,6 +187,25 @@ task sourcesJar(type: Jar) {
     classifier = "sources"
     from sourceSets.main.allSource
 }
+
+// This task creates a MultiMC instance with the current build of RetroWrapper.
+task createMultiMCInstance(dependsOn: proguard, type: Zip) {
+    inputs.property "rrVersion", project.version
+    archiveFileName = rootProject.name + "-" + project.version + "-MultiMC.zip"
+    destinationDirectory = layout.buildDirectory.dir('libs')
+
+    from('multimc') {
+        filesMatching(["mmc-pack.json", "patches/RetroWrapper.json"]) {
+            filter(ReplaceTokens, tokens: [rrVersion: project.version])
+        }
+    }
+
+    from(proguard.outputs.files.singleFile) {
+        into 'libraries/'
+    }
+}
+
+build.finalizedBy(createMultiMCInstance)
 
 artifacts {
     archives sourcesJar

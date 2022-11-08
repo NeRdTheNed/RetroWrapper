@@ -57,7 +57,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             }
 
             final Map<String, String> params = new HashMap<>();
-            final String username = args.length > 0 ? args[0] : ("Player" + (System.currentTimeMillis() % 1000));
+            final String username = args.length > 0 ? args[0] : "Player" + (System.currentTimeMillis() % 1000);
             final String sessionId = args.length > 1 ? args[1] : "-";
             params.put("username", username);
             params.put("sessionid", sessionId);

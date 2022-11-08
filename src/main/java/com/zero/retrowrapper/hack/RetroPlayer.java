@@ -40,9 +40,9 @@ public final class RetroPlayer {
         Double tempX = null, tempY = null, tempZ = null;
 
         try {
-            tempX = (Math.floor(getX() * 10) / 10);
-            tempY = (Math.floor(getY() * 10) / 10);
-            tempZ = (Math.floor(getZ() * 10) / 10);
+            tempX = Math.floor(getX() * 10) / 10;
+            tempY = Math.floor(getY() * 10) / 10;
+            tempZ = Math.floor(getZ() * 10) / 10;
         } catch (final Exception e) {
             e.printStackTrace();
         }

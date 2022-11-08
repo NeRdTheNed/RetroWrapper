@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.zero.retrowrapper.emulator.EmulatorConfig;
+import com.zero.retrowrapper.emulator.registry.EmulatorRegistry;
 
 public final class RetroTweakClassWriter extends ClassWriter {
+    private static final String foundUrlTextString = "Found URL!: ";
+    private static final String replacedWithTextString = "Replaced with: ";
     private static final int CLASS = 7;
     private static final int FIELD = 9;
     private static final int METH = 10;
@@ -60,35 +63,45 @@ public final class RetroTweakClassWriter extends ClassWriter {
         for (final Item item : items) {
             switch (item.b) {
             case UTF8:
-                if (item.g.contains("random.splash") || item.g.contains("char.png")) {
-                    if (EmulatorConfig.getInstance().mobClass == null) {
-                        EmulatorConfig.getInstance().mobClass = className;
-                    }
+                final String constant = item.g;
+
+                if ((constant.contains("random.splash") || constant.contains("char.png")) && (EmulatorConfig.getInstance().mobClass == null)) {
+                    EmulatorConfig.getInstance().mobClass = className;
                 }
 
-                if (item.g.contains(".com")) {
-                    System.out.println("Found URL!: " + item.g);
-                    String finalstr = item.g;
-                    // TODO optimize
-                    finalstr = (item.g.contains("https://") || item.g.contains("http://") ? "http://" : "") + "127.0.0.1:" + EmulatorConfig.getInstance().getPort() + item.g.replace(finalstr.split(".com")[0] + ".com", "");
-                    System.out.println("Replaced with: " + finalstr);
-                    writer.d.putByte(UTF8).putUTF8(finalstr);
-                } else if (item.g.contains(".net")) {
-                    System.out.println("Found URL!: " + item.g);
-                    String finalstr = item.g;
+                final String transformed;
 
-                    if ("minecraft.net".equals(finalstr)) {
-                        finalstr = "127.0.0.1";
-                    } else {
-                        // TODO optimize
-                        finalstr = (item.g.contains("https://") ? "https://" : "") + (item.g.contains("http://") ? "http://" : "") + "127.0.0.1:" + EmulatorConfig.getInstance().getPort() + item.g.replace(finalstr.split(".net")[0] + ".net", "");
-                    }
-
-                    System.out.println("Replaced with: " + finalstr);
-                    writer.d.putByte(UTF8).putUTF8(finalstr);
+                if ("minecraft.net".equals(constant)) {
+                    System.out.println(foundUrlTextString + constant);
+                    transformed = "127.0.0.1";
+                    System.out.println(replacedWithTextString + transformed);
                 } else {
-                    writer.d.putByte(UTF8).putUTF8(item.g);
+                    final boolean isNet = constant.contains(".net");
+                    final boolean isCom = constant.contains(".com");
+                    if (isNet || isCom) {
+                        System.out.println(foundUrlTextString + constant);
+                        if (EmulatorRegistry.getHandlerByUrl(constant) != null) {
+
+                            final String prepend = isCom ?
+                                    constant.contains("https://") || constant.contains("http://") ? "http://" : "" :
+                                    (constant.contains("https://") ? "https://" : "") + (constant.contains("http://") ? "http://" : "");
+
+                            final String postpend = isCom ?
+                                    constant.replace(constant.split(".com")[0] + ".com", "") :
+                                    constant.replace(constant.split(".net")[0] + ".net", "");
+
+                            transformed = prepend + "127.0.0.1:" + EmulatorConfig.getInstance().getPort() + postpend;
+                            System.out.println(replacedWithTextString + transformed);
+                        } else {
+                            transformed = constant;
+                            System.out.println("No handler for " + transformed + ", did not replace.");
+                        }
+                    } else {
+                        transformed = constant;
+                    }
                 }
+
+                writer.d.putByte(UTF8).putUTF8(transformed);
 
                 break;
 

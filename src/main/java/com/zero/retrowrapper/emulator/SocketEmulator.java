@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import com.zero.retrowrapper.emulator.registry.EmulatorRegistry;
 import com.zero.retrowrapper.emulator.registry.IHandler;
 import com.zero.retrowrapper.util.ByteUtil;
 
@@ -62,7 +63,7 @@ public final class SocketEmulator {
             data = bos.toByteArray();
         }
 
-        final IHandler handler = RetroEmulator.getInstance().getRegistry().getHandlerByUrl(get);
+        final IHandler handler = EmulatorRegistry.getHandlerByUrl(get);
 
         if (handler != null) {
             try {

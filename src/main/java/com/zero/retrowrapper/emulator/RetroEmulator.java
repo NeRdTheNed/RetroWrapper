@@ -4,14 +4,11 @@ import java.io.File;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.zero.retrowrapper.emulator.registry.EmulatorRegistry;
-
 import net.minecraft.launchwrapper.Launch;
 
 public final class RetroEmulator extends Thread {
     private static RetroEmulator instance;
 
-    private EmulatorRegistry registry;
     private File directory;
     private File mapsDirectory;
     private File cacheDirectory;
@@ -21,8 +18,6 @@ public final class RetroEmulator extends Thread {
         // TODO Is this threadsafe, and does it need to be?
         instance = this;
         System.out.println("Old servers emulator is running!");
-        registry = new EmulatorRegistry();
-        registry.registerAll();
         directory = new File(Launch.minecraftHome, "retrowrapper");
         directory.mkdirs();
         mapsDirectory = new File(RetroEmulator.getInstance().getDirectory(), "maps");
@@ -46,10 +41,6 @@ public final class RetroEmulator extends Thread {
             // TODO Better error handling
             e.printStackTrace();
         }
-    }
-
-    public EmulatorRegistry getRegistry() {
-        return registry;
     }
 
     public File getDirectory() {

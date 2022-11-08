@@ -15,7 +15,7 @@ public final class MetadataUtil {
         try {
             return IOUtils.readLines(ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperInstallerSplashes.txt"), Charset.defaultCharset());
         } catch (final IOException e) {
-            final ArrayList<String> missingno = new ArrayList<>();
+            final ArrayList<String> missingno = new ArrayList<String>();
             missingno.add("missingno");
             return missingno;
         }

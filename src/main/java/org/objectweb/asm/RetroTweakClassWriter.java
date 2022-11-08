@@ -36,7 +36,7 @@ public final class RetroTweakClassWriter extends ClassWriter {
     public byte[] toByteArray() {
         final ClassWriter writer = new ClassWriter(0);
         final byte[] bytes = super.toByteArray();
-        final List<Item> items = new ArrayList<>();
+        final List<Item> items = new ArrayList<Item>();
 
         for (final Item item : e) {
             Item next = item;

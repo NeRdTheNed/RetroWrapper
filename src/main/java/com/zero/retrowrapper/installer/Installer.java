@@ -60,8 +60,8 @@ public final class Installer {
     private static JButton install;
     private static JButton uninstall;
 
-    private static DefaultListModel<String> model = new DefaultListModel<>();
-    private static JList<String> list = new JList<>(model);
+    private static DefaultListModel<String> model = new DefaultListModel<String>();
+    private static JList<String> list = new JList<String>(model);
 
     private static boolean refreshList(String givenDirectory) {
         int versionCount = 0;
@@ -90,8 +90,7 @@ public final class Installer {
                         final File jar = new File(f, f.getName() + ".jar");
 
                         if (json.exists() && jar.exists() && !f.getName().contains("-wrapped")) {
-                            try
-                                (Scanner s = new Scanner(json).useDelimiter("\\A")) {
+                            try (Scanner s = new Scanner(json).useDelimiter("\\A")) {
                                 final String content = s.next();
 
                                 if (content.contains("old_") && !content.contains("retrowrapper")) {
@@ -221,8 +220,7 @@ public final class Installer {
                         FileUtils.deleteQuietly(new File(directory, "versions" + File.separator + version + "-wrapped"));
                     }
 
-                    try
-                        (Reader s = new FileReader(new File(versions, version + File.separator + version + ".json"))) {
+                    try (Reader s = new FileReader(new File(versions, version + File.separator + version + ".json"))) {
                         finalVersions.append(version).append("\n");
                         final JsonObject versionJson = Json.parse(s).asObject();
                         final String versionWrapped = version + "-wrapped";
@@ -254,14 +252,15 @@ public final class Installer {
                         final File libDir = new File(directory, "libraries" + File.separator + "com" + File.separator + "zero" + File.separator + "retrowrapper" + File.separator + "installer");
                         libDir.mkdirs();
 
-                        try
-                            (FileOutputStream fos = new FileOutputStream(new File(wrapDir, versionWrapped + ".json"))) {
+                        try (FileOutputStream fos = new FileOutputStream(new File(wrapDir, versionWrapped + ".json"))) {
                             Files.copy(new File(versions, version + File.separator + version + ".jar").toPath(), new File(wrapDir, versionWrapped + ".jar").toPath(), StandardCopyOption.REPLACE_EXISTING);
                             fos.write(versionJson.toString().getBytes());
                             final File jar = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation().toURI());
                             Files.copy(jar.toPath(), new File(libDir, "retrowrapper-installer.jar").toPath(), StandardCopyOption.REPLACE_EXISTING);
-                        } catch (IOException | URISyntaxException ee) {
+                        } catch (final IOException ee) {
                             ee.printStackTrace();
+                        } catch (final URISyntaxException ee) {
+                        	ee.printStackTrace();
                         }
                     } catch (final IOException ee) {
                         ee.printStackTrace();

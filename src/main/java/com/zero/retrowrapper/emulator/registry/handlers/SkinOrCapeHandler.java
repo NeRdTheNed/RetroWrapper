@@ -26,7 +26,7 @@ import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
 
 public final class SkinOrCapeHandler extends EmulatorHandler {
-    private final HashMap<String, byte[]> imagesCache = new HashMap<>();
+    private final HashMap<String, byte[]> imagesCache = new HashMap<String, byte[]>();
     // TODO Refactor
     private final boolean isCape;
 
@@ -78,14 +78,12 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
 
         final File imageCache = new File(RetroEmulator.getInstance().getCacheDirectory(), username + fileNameEnd);
 
-        try
-            (InputStreamReader reader = new InputStreamReader(new URL("https://api.mojang.com/users/profiles/minecraft/" + username + "?at=" + System.currentTimeMillis()).openStream())) {
+        try (InputStreamReader reader = new InputStreamReader(new URL("https://api.mojang.com/users/profiles/minecraft/" + username + "?at=" + System.currentTimeMillis()).openStream())) {
             final JsonObject profile1 = (JsonObject) Json.parse(reader);
             final String uuid = profile1.get("id").asString();
             System.out.println(uuid);
 
-            try
-                (InputStreamReader reader2 = new InputStreamReader(new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid).openStream())) {
+            try (InputStreamReader reader2 = new InputStreamReader(new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid).openStream())) {
                 final JsonObject profile2 = (JsonObject) Json.parse(reader2);
                 final JsonArray properties = (JsonArray) profile2.get("properties");
                 String base64 = "";
@@ -123,8 +121,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                 final InputStream is = new URL(imageURL).openStream();
                 final byte[] imageBytes = IOUtils.toByteArray(is);
 
-                try
-                    (FileOutputStream fos = new FileOutputStream(imageCache)) {
+                try (FileOutputStream fos = new FileOutputStream(imageCache)) {
                     fos.write(imageBytes);
                 }
 
@@ -134,8 +131,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
             e.printStackTrace();
 
             if (imageCache.exists()) {
-                try
-                    (FileInputStream fis = new FileInputStream(imageCache)) {
+                try (FileInputStream fis = new FileInputStream(imageCache)) {
                     return IOUtils.toByteArray(fis);
                 }
             }

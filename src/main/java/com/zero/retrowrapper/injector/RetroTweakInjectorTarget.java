@@ -56,7 +56,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
                 clazz = getaClass("com.mojang.minecraft.MinecraftApplet");
             }
 
-            final Map<String, String> params = new HashMap<>();
+            final Map<String, String> params = new HashMap<String, String>();
             final String username = args.length > 0 ? args[0] : "Player" + (System.currentTimeMillis() % 1000);
             final String sessionId = args.length > 1 ? args[1] : "-";
             params.put("username", username);

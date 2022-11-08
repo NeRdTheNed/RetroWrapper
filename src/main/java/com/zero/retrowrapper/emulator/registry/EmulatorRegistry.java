@@ -15,7 +15,7 @@ public final class EmulatorRegistry {
     private static final List<IHandler> handlers;
 
     static {
-        handlers = new ArrayList<>();
+        handlers = new ArrayList<IHandler>();
         handlers.add(new GameHandler());
         handlers.add(new SaveHandler());
         handlers.add(new LoadHandler());

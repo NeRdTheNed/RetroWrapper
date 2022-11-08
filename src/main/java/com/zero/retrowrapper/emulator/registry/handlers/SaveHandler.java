@@ -32,13 +32,11 @@ public final class SaveHandler extends EmulatorHandler {
         final File fileMap = new File(RetroEmulator.getInstance().getMapsDirectory(), "map" + id + ".mclevel");
         final File fileMapMeta = new File(RetroEmulator.getInstance().getMapsDirectory(), "map" + id + ".txt");
 
-        try
-            (FileOutputStream fos = new FileOutputStream(fileMap)) {
+        try (FileOutputStream fos = new FileOutputStream(fileMap)) {
             fos.write(level);
         }
 
-        try
-            (FileOutputStream fos = new FileOutputStream(fileMapMeta)) {
+        try (FileOutputStream fos = new FileOutputStream(fileMapMeta)) {
             fos.write(levelName.getBytes());
         }
     }

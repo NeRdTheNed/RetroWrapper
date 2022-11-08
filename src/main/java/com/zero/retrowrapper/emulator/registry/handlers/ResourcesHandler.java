@@ -47,8 +47,7 @@ public final class ResourcesHandler extends EmulatorHandler {
     }
 
     private void downloadSoundData() {
-        try
-            (Scanner sc = new Scanner(new URL("https://launchermeta.mojang.com/mc/assets/legacy/c0fd82e8ce9fbc93119e40d96d5a4e62cfa3f729/legacy.json").openStream()).useDelimiter("\\A")) {
+        try (Scanner sc = new Scanner(new URL("https://launchermeta.mojang.com/mc/assets/legacy/c0fd82e8ce9fbc93119e40d96d5a4e62cfa3f729/legacy.json").openStream()).useDelimiter("\\A")) {
             final JsonValue json = Json.parse(sc.next());
             final JsonObject obj = json.asObject();
             jsonObjects = obj.get("objects").asObject();
@@ -77,8 +76,7 @@ public final class ResourcesHandler extends EmulatorHandler {
         final File resourceCache = new File(RetroEmulator.getInstance().getCacheDirectory(), res);
 
         if (resourceCache.exists()) {
-            try
-                (FileInputStream fis = new FileInputStream(resourceCache)) {
+            try (FileInputStream fis = new FileInputStream(resourceCache)) {
                 return IOUtils.toByteArray(fis);
             }
         }
@@ -94,8 +92,7 @@ public final class ResourcesHandler extends EmulatorHandler {
             final byte[] resourceBytes = IOUtils.toByteArray(is);
             new File(resourceCache.getParent()).mkdirs();
 
-            try
-                (FileOutputStream fos = new FileOutputStream(resourceCache)) {
+            try (FileOutputStream fos = new FileOutputStream(resourceCache)) {
                 fos.write(resourceBytes);
             }
 

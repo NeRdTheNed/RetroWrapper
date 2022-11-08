@@ -12,7 +12,7 @@ import com.zero.retrowrapper.emulator.EmulatorConfig;
 public final class LauncherFake extends Applet implements AppletStub {
     private static final long serialVersionUID = 1L;
 
-    private Map<String, String> params = new HashMap<>();
+    private Map<String, String> params = new HashMap<String, String>();
 
     public LauncherFake(Map<String, String> params, Applet applet) {
         this.params = params;

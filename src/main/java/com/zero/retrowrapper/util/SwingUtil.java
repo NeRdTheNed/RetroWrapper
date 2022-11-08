@@ -44,14 +44,14 @@ public class SwingUtil {
     }
 
     public static void loadIconsOnFrames() {
-        final List<File> iconList = new ArrayList<>();
+        final List<File> iconList = new ArrayList<File>();
         final File[] files = { FileUtil.tryFindResourceFile("icons/icon_16x16.png"), FileUtil.tryFindResourceFile("icons/icon_32x32.png") };
         CollectionUtil.addNonNullToCollection(iconList, files);
 
         if (!iconList.isEmpty()) {
             System.out.println("Loading current icons for window from: " + iconList);
             // TODO Refactor
-            final List<ByteBuffer> iconsAsByteBufferArrayList = new ArrayList<>();
+            final List<ByteBuffer> iconsAsByteBufferArrayList = new ArrayList<ByteBuffer>();
 
             for (final File icon : iconList) {
                 try {
@@ -67,7 +67,7 @@ public class SwingUtil {
             final java.awt.Frame[] frames = java.awt.Frame.getFrames();
 
             if (frames != null) {
-                final List<BufferedImage> bufferedImageList = new ArrayList<>();
+                final List<BufferedImage> bufferedImageList = new ArrayList<BufferedImage>();
 
                 for (final File icon : iconList) {
                     try {

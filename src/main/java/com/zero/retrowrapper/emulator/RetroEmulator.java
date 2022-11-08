@@ -25,8 +25,7 @@ public final class RetroEmulator extends Thread {
         cacheDirectory = new File(RetroEmulator.getInstance().getDirectory(), "cache");
         cacheDirectory.mkdir();
 
-        try
-            (ServerSocket server = new ServerSocket(EmulatorConfig.getInstance().getPort())) {
+        try (ServerSocket server = new ServerSocket(EmulatorConfig.getInstance().getPort())) {
             while (true) {
                 final Socket socket = server.accept();
 

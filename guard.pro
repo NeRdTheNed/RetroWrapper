@@ -382,6 +382,12 @@
 #    com.zero.retrowrapper.shadow.minimal-json.PrettyPrint createWriter(java.io.Writer);
 #}
 
+-keepclassmembers class * extends java.lang.Enum {
+    <fields>;
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
 # Debug info
 
 -printusage

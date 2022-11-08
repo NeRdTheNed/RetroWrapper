@@ -1,5 +1,8 @@
 package com.zero.retrowrapper.installer;
 
+import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
+
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -11,6 +14,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
@@ -27,10 +32,14 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
@@ -141,7 +150,7 @@ public final class Installer {
 
     // TODO Refactor parts into separate method
     // TODO The installer can take a very long time to start up when there are large amounts of instances
-    private Installer() {
+    private Installer() throws Exception {
         workingDirectory = FileUtil.defaultMinecraftDirectory();
 
         try {
@@ -298,7 +307,48 @@ public final class Installer {
         frame.setLocationRelativeTo(null);
     }
 
+    @SuppressWarnings("deprecation")
     public static void main(String[] args) {
-        new Installer();
+    	try {
+    		new Installer();
+    	} catch (final Exception e) {
+    		e.printStackTrace();
+
+    		final String exeptText = ExceptionUtils.getStackTrace(e);
+
+    		try {
+    			final JTextPane textPane = new JTextPane();
+    			textPane.setEditable(false);
+    			textPane.setBorder(null);
+    			textPane.setContentType("text/html");
+
+    			textPane.setText("<html><p>Error thrown when trying to launch RetroWrapper installer:</p>" +
+    					"<br><p>" + escapeHtml4(exeptText).replace("\n", "<br>") + "</p>" +
+    					"<p>Please report this issue on GitHub:</p>" +
+    					"<a href=\"https://github.com/NeRdTheNed/RetroWrapper/issues/new?title=" + URLEncoder.encode(e.getClass().getSimpleName() + " thrown when installing RetroWrapper (modify to add context)", StandardCharsets.UTF_8.name()) + "&body=" + URLEncoder.encode("Add some context about what you were doing when this error occurred.\n\nStacktrace (don't modify):\n```java\n" + exeptText + "```", StandardCharsets.UTF_8.name()) + "\">Create an issue on Github!</a>"
+    					);
+
+    			textPane.addHyperlinkListener(new HyperlinkListener() {
+    				@Override
+    				public void hyperlinkUpdate(HyperlinkEvent e) {
+    					if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+    						try {
+    							Desktop.getDesktop().browse(e.getURL().toURI());
+    						} catch (final Exception ignored) {
+    							ignored.printStackTrace();
+    							JOptionPane.showMessageDialog(null, "Your platform doesn't let Java open links.\nPlease browse to https://github.com/NeRdTheNed/RetroWrapper/issues/new to create an issue.\nI'd appriciate it if you'd copy paste the stack trace into the issue.\nThanks for putting up with this!", "Sorry", JOptionPane.INFORMATION_MESSAGE);
+    						}
+    					}
+    				}
+    			});
+
+    			final JScrollPane jsp = new JScrollPane(textPane);
+    			jsp.setBorder(null);
+    			JOptionPane.showMessageDialog(null, jsp, "Error", JOptionPane.ERROR_MESSAGE);
+    		} catch (final Exception ignored) {
+    			ignored.printStackTrace();
+    			JOptionPane.showMessageDialog(null, "Error thrown when trying to launch RetroWrapper installer:\n" + exeptText + "\nPlease report this issue on GitHub!\nhttps://github.com/NeRdTheNed/RetroWrapper/issues/new\nI'd appriciate it if you'd screenshot the stack trace for the issue.", "Error", JOptionPane.ERROR_MESSAGE);
+    		}
+    	}
     }
 }

@@ -64,7 +64,9 @@ public final class RetroTweakClassWriter extends ClassWriter {
                     if (EmulatorConfig.getInstance().mobClass == null) {
                         EmulatorConfig.getInstance().mobClass = className;
                     }
-                } else if (item.g.contains(".com")) {
+                }
+
+                if (item.g.contains(".com")) {
                     System.out.println("Found URL!: " + item.g);
                     String finalstr = item.g;
                     // TODO optimize

@@ -117,6 +117,9 @@ public final class RetroTweakInjector implements IClassTransformer {
             classNode.accept(writer);
             return writer.toByteArray();
         } catch (final Exception e) {
+            System.out.println("Exception while transforming class " + name);
+            e.printStackTrace();
+            System.out.println(e);
             return bytesOld;
         }
     }

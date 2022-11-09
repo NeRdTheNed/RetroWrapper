@@ -22,6 +22,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
@@ -63,7 +66,7 @@ public final class Installer {
     private static DefaultListModel<String> model = new DefaultListModel<String>();
     private static JList<String> list = new JList<String>(model);
 
-    private static boolean refreshList(String givenDirectory) {
+    private static boolean refreshList(String givenDirectory, final Logger installerLogger) {
         int versionCount = 0;
         int wrappedVersionCount = 0;
         model.removeAllElements();
@@ -103,8 +106,8 @@ public final class Installer {
                                     }
                                 }
                             } catch (final FileNotFoundException e) {
-                                // TODO Better error handling
-                                e.printStackTrace();
+                                // TODO Better logging
+                                installerLogger.log(Level.SEVERE, "A FileNotFoundException was thrown while trying to refresh the list of versions", e);
                             }
                         }
                     }
@@ -149,14 +152,13 @@ public final class Installer {
 
     // TODO Refactor parts into separate method
     // TODO The installer can take a very long time to start up when there are large amounts of instances
-    private Installer() throws Exception {
+    private Installer(final Logger installerLogger) throws Exception {
         workingDirectory = FileUtil.defaultMinecraftDirectory();
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (final Exception e) {
-            // Ignore
-            e.printStackTrace();
+            installerLogger.log(Level.WARNING, "setLookAndFeel failed", e);
         }
 
         final JFrame frame = new JFrame("Retrowrapper - NeRd Fork");
@@ -182,7 +184,7 @@ public final class Installer {
                 final String workDirPath = ((JTextField)e.getSource()).getText();
                 final File minecraftDir = new File(workDirPath);
 
-                if (minecraftDir.exists() && refreshList(workDirPath)) {
+                if (minecraftDir.exists() && refreshList(workDirPath, installerLogger)) {
                     workingDirectory = workDirPath;
                 } else {
                     if (!minecraftDir.exists()) {
@@ -190,7 +192,7 @@ public final class Installer {
                     }
 
                     ((JTextField)e.getSource()).setText(workingDirectory);
-                    refreshList(workingDirectory);
+                    refreshList(workingDirectory, installerLogger);
                 }
             }
         });
@@ -258,18 +260,29 @@ public final class Installer {
                             final File jar = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation().toURI());
                             Files.copy(jar.toPath(), new File(libDir, "retrowrapper-installer.jar").toPath(), StandardCopyOption.REPLACE_EXISTING);
                         } catch (final IOException ee) {
-                            ee.printStackTrace();
+                            // TODO better logging
+                            final LogRecord logRecord = new LogRecord(Level.SEVERE, "An IOException was thrown while trying to wrap version {0}");
+                            logRecord.setParameters(new Object[] { version });
+                            logRecord.setThrown(ee);
+                            installerLogger.log(logRecord);
                         } catch (final URISyntaxException ee) {
-                            ee.printStackTrace();
+                            // TODO better logging
+                            final LogRecord logRecord = new LogRecord(Level.SEVERE, "An URISyntaxException was thrown while trying to wrap version {0}");
+                            logRecord.setParameters(new Object[] { version });
+                            logRecord.setThrown(ee);
+                            installerLogger.log(logRecord);
                         }
                     } catch (final IOException ee) {
-                        ee.printStackTrace();
-                        // TODO Better error handling
+                        // TODO better logging
+                        final LogRecord logRecord = new LogRecord(Level.SEVERE, "An IOException was thrown while trying to wrap version {0}");
+                        logRecord.setParameters(new Object[] { version });
+                        logRecord.setThrown(ee);
+                        installerLogger.log(logRecord);
                     }
                 }
 
                 JOptionPane.showMessageDialog(null, (versionList.size() > 1 ? "Successfully wrapped versions\n" : "Successfully wrapped version\n") + finalVersions.toString(), "Success", JOptionPane.INFORMATION_MESSAGE);
-                refreshList(workingDirectory);
+                refreshList(workingDirectory, installerLogger);
             }
         });
         SwingUtil.addJButtonCentered(frame, install);
@@ -292,7 +305,7 @@ public final class Installer {
                 }
 
                 JOptionPane.showMessageDialog(null, "Successfully uninstalled wrapper", "Success", JOptionPane.INFORMATION_MESSAGE);
-                refreshList(workingDirectory);
+                refreshList(workingDirectory, installerLogger);
             }
         });
         SwingUtil.addJButtonCentered(frame, uninstall);
@@ -300,18 +313,30 @@ public final class Installer {
         final JLabel copyrightLabel = new JLabel("\u00a92018 000");
         copyrightLabel.setFont(copyrightLabel.getFont().deriveFont(12F));
         SwingUtil.addJLabelCentered(frame, copyrightLabel);
-        refreshList(workingDirectory);
+        refreshList(workingDirectory, installerLogger);
         frame.pack();
         frame.setVisible(true);
         frame.setLocationRelativeTo(null);
     }
 
-    @SuppressWarnings("deprecation")
     public static void main(String[] args) {
+        final Logger installerLogger;
+        Logger temp;
+
         try {
-            new Installer();
+            temp = Logger.getLogger(Installer.class.getName());
+        } catch (final Exception notPossible) {
+            temp = Logger.getAnonymousLogger();
+            temp.log(Level.WARNING, "An Exception was thrown while trying to get the logger for the installer", notPossible);
+        }
+
+        installerLogger = temp;
+        installerLogger.log(Level.INFO, "Starting RetroWrapper installer");
+
+        try {
+            new Installer(installerLogger);
         } catch (final Exception e) {
-            e.printStackTrace();
+            installerLogger.log(Level.SEVERE, "An Exception was thrown while running the RetroWrapper installer", e);
             final String exeptText = ExceptionUtils.getStackTrace(e);
 
             try {
@@ -331,7 +356,7 @@ public final class Installer {
                             try {
                                 Desktop.getDesktop().browse(e.getURL().toURI());
                             } catch (final Exception ignored) {
-                                ignored.printStackTrace();
+                                installerLogger.log(Level.WARNING, "Could not open link from hyperlinkUpdate", ignored);
                                 JOptionPane.showMessageDialog(null, "Your platform doesn't let Java open links.\nPlease browse to https://github.com/NeRdTheNed/RetroWrapper/issues/new to create an issue.\nI'd appriciate it if you'd copy paste the stack trace into the issue.\nThanks for putting up with this!", "Sorry", JOptionPane.INFORMATION_MESSAGE);
                             }
                         }
@@ -341,7 +366,7 @@ public final class Installer {
                 jsp.setBorder(null);
                 JOptionPane.showMessageDialog(null, jsp, "Error", JOptionPane.ERROR_MESSAGE);
             } catch (final Exception ignored) {
-                ignored.printStackTrace();
+                installerLogger.log(Level.WARNING, "An Exception was thrown while trying to display the exception handler", ignored);
                 JOptionPane.showMessageDialog(null, "Error thrown when trying to launch RetroWrapper installer:\n" + exeptText + "\nPlease report this issue on GitHub!\nhttps://github.com/NeRdTheNed/RetroWrapper/issues/new\nI'd appriciate it if you'd screenshot the stack trace for the issue.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }

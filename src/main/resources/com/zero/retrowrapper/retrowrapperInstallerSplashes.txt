@@ -3,7 +3,7 @@ JSON! JSON! JSON!
 minecraftApplet!
 More reproducible builds!
 Mostly undocumented!
-Now Java 6!
+Now Java 7!
 Now with more Mac support!
 Now with more wrapping!
 Over 10 years old!

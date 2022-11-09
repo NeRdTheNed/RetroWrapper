@@ -344,6 +344,8 @@ public final class Installer {
             keyboardFocusManager.addKeyEventDispatcher(new KeyEventDispatcher() {
                 boolean f3Pressed = false;
                 boolean cPressed = false;
+                boolean hPressed = false;
+                boolean qPressed = false;
                 boolean tPressed = false;
                 boolean openDebug = false;
                 @Override
@@ -353,6 +355,14 @@ public final class Installer {
                         switch (e.getKeyCode()) {
                         case KeyEvent.VK_C:
                             cPressed = true;
+                            break;
+
+                        case KeyEvent.VK_H:
+                            hPressed = true;
+                            break;
+
+                        case KeyEvent.VK_Q:
+                            qPressed = true;
                             break;
 
                         case KeyEvent.VK_T:
@@ -373,6 +383,16 @@ public final class Installer {
                         switch (e.getKeyCode()) {
                         case KeyEvent.VK_C:
                             cPressed = false;
+                            openDebug = false;
+                            break;
+
+                        case KeyEvent.VK_H:
+                            hPressed = false;
+                            openDebug = false;
+                            break;
+
+                        case KeyEvent.VK_Q:
+                            qPressed = false;
                             openDebug = false;
                             break;
 
@@ -400,6 +420,45 @@ public final class Installer {
                         openDebug = true;
                         JOptionPane.showMessageDialog(null, "Debug F3 + C: Test exception handler (not a real crash)", "Debug", JOptionPane.QUESTION_MESSAGE);
                         exceptionHandler(installerLogger, "Debug exception handler test (not a real crash)", new Exception("Debug exception (not a real exception)"));
+                    }
+
+                    if ((f3Pressed && hPressed) && !openDebug) {
+                        openDebug = true;
+                        final StringBuilder tempDirBuilder = new StringBuilder();
+
+                        for (final File tempDir : directories) {
+                            tempDirBuilder.append("\n" + tempDir);
+                        }
+
+                        final StringBuilder wrappableBuilder = new StringBuilder();
+
+                        for (final Object wrappable : model.toArray()) {
+                            wrappableBuilder.append("\n" + wrappable);
+                        }
+
+                        final StringBuilder selectedBuilder = new StringBuilder();
+
+                        for (final String selected : list.getSelectedValuesList()) {
+                            selectedBuilder.append("\n" + selected);
+                        }
+
+                        final String toShow = "\nWorking directory " + workingDirectory +
+                                              "\nDirectory " + directory +
+                                              "\nVersions folder " + versions +
+                                              "\nCurrently selected Minecraft versions in list " + selectedBuilder.toString() +
+                                              "\nWrappable versions of Minecraft in versions folder " + wrappableBuilder.toString() +
+                                              "\nAll verions of Minecraft in versions folder " + tempDirBuilder.toString();
+                        final JTextPane textPane = new JTextPane();
+                        textPane.setText("Debug F3 + H: Show variable info: " + toShow);
+                        textPane.setCaretPosition(0);
+                        final JScrollPane jsp = new JScrollPane(textPane);
+                        jsp.setPreferredSize(new Dimension(654, 420));
+                        JOptionPane.showMessageDialog(null, jsp, "Debug", JOptionPane.QUESTION_MESSAGE);
+                    }
+
+                    if ((f3Pressed && qPressed) && !openDebug) {
+                        openDebug = true;
+                        JOptionPane.showMessageDialog(null, "Debug F3 + Q: Show key combos. Combos:\nF3 + C: Test exception handler (not a real crash)\nF3 + H: Show variable info\nF3 + Q: Show key combos\nF3 + T: Reload folders", "Debug", JOptionPane.QUESTION_MESSAGE);
                     }
 
                     if ((f3Pressed && tPressed) && !openDebug) {

@@ -346,6 +346,8 @@ public final class Installer {
             final String context = "An Exception was thrown while running the RetroWrapper installer";
             installerLogger.log(Level.SEVERE, context, e);
             exceptionHandler(installerLogger, context, e);
+            // Swing doesn't want the JVM to exit and I can't figure out why :(
+            System.exit(1);
         }
     }
 

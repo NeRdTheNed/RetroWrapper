@@ -99,10 +99,15 @@ shadowJar {
 }
 
 version = project.version
+def versionWithMetadata = version
 
 task checkRelease {
     if (!(System.getenv("BUILD_RELEASE") == "true")) {
         version += ("-SNAPSHOT")
+        versionWithMetadata = version + "+" + 'git rev-parse --short HEAD'.execute().text.trim()
+        if (!System.getenv("CI")) {
+            versionWithMetadata += ".local"
+        }
     }
 }
 
@@ -138,9 +143,10 @@ dependencies {
 
 processResources {
     inputs.property "version", project.version // Redo this task when version value changes.
+    inputs.property "versionWithMetadata", versionWithMetadata
     filesMatching('com/zero/retrowrapper/retrowrapperVersion.txt') {
         // replace build variables
-        expand 'version': version
+        expand 'version': versionWithMetadata
     }
 }
 
@@ -191,6 +197,7 @@ task sourcesJar(type: Jar) {
 // This task creates a MultiMC instance with the current build of RetroWrapper.
 task createMultiMCInstance(dependsOn: proguard, type: Zip) {
     inputs.property "rrVersion", project.version
+    inputs.property "versionWithMetadata", versionWithMetadata
     archiveFileName = rootProject.name + "-" + project.version + "-MultiMC.zip"
     destinationDirectory = layout.buildDirectory.dir('libs')
 

@@ -5,8 +5,11 @@ import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -334,6 +337,84 @@ public final class Installer {
         }
 
         installerLogger = temp;
+        installerLogger.log(Level.INFO, "Logger initialized.");
+
+        try {
+            final KeyboardFocusManager keyboardFocusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+            keyboardFocusManager.addKeyEventDispatcher(new KeyEventDispatcher() {
+                boolean f3Pressed = false;
+                boolean cPressed = false;
+                boolean tPressed = false;
+                boolean openDebug = false;
+                @Override
+                public boolean dispatchKeyEvent(KeyEvent e) {
+                    switch (e.getID()) {
+                    case KeyEvent.KEY_PRESSED:
+                        switch (e.getKeyCode()) {
+                        case KeyEvent.VK_C:
+                            cPressed = true;
+                            break;
+
+                        case KeyEvent.VK_T:
+                            tPressed = true;
+                            break;
+
+                        case KeyEvent.VK_F3:
+                            f3Pressed = true;
+                            break;
+
+                        default:
+                            break;
+                        }
+
+                        break;
+
+                    case KeyEvent.KEY_RELEASED:
+                        switch (e.getKeyCode()) {
+                        case KeyEvent.VK_C:
+                            cPressed = false;
+                            openDebug = false;
+                            break;
+
+                        case KeyEvent.VK_T:
+                            tPressed = false;
+                            openDebug = false;
+                            break;
+
+                        case KeyEvent.VK_F3:
+                            f3Pressed = false;
+                            openDebug = false;
+                            break;
+
+                        default:
+                            break;
+                        }
+
+                        break;
+
+                    default:
+                        break;
+                    }
+
+                    if ((f3Pressed && cPressed) && !openDebug) {
+                        openDebug = true;
+                        JOptionPane.showMessageDialog(null, "Debug F3 + C: Test exception handler (not a real crash)", "Debug", JOptionPane.QUESTION_MESSAGE);
+                        exceptionHandler(installerLogger, "Debug exception handler test (not a real crash)", new Exception("Debug exception (not a real exception)"));
+                    }
+
+                    if ((f3Pressed && tPressed) && !openDebug) {
+                        openDebug = true;
+                        JOptionPane.showMessageDialog(null, "Debug F3 + T: Reloading folders", "Debug", JOptionPane.QUESTION_MESSAGE);
+                        refreshList(workingDirectory, installerLogger);
+                    }
+
+                    return false;
+                }
+            });
+        } catch (final Exception ignored) {
+            installerLogger.log(Level.WARNING, "Could not add KeyEventDispatcher, debug key combinations will not work", ignored);
+        }
+
         installerLogger.log(Level.INFO, "Starting RetroWrapper installer");
 
         try {

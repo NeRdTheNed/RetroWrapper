@@ -260,7 +260,7 @@ public final class Installer {
                         } catch (final IOException ee) {
                             ee.printStackTrace();
                         } catch (final URISyntaxException ee) {
-                        	ee.printStackTrace();
+                            ee.printStackTrace();
                         }
                     } catch (final IOException ee) {
                         ee.printStackTrace();
@@ -308,46 +308,42 @@ public final class Installer {
 
     @SuppressWarnings("deprecation")
     public static void main(String[] args) {
-    	try {
-    		new Installer();
-    	} catch (final Exception e) {
-    		e.printStackTrace();
+        try {
+            new Installer();
+        } catch (final Exception e) {
+            e.printStackTrace();
+            final String exeptText = ExceptionUtils.getStackTrace(e);
 
-    		final String exeptText = ExceptionUtils.getStackTrace(e);
-
-    		try {
-    			final JTextPane textPane = new JTextPane();
-    			textPane.setEditable(false);
-    			textPane.setBorder(null);
-    			textPane.setContentType("text/html");
-
-    			textPane.setText("<html><p>Error thrown when trying to launch RetroWrapper installer:</p>" +
-    					"<br><p>" + escapeHtml4(exeptText).replace("\n", "<br>") + "</p>" +
-    					"<p>Please report this issue on GitHub:</p>" +
-    					"<a href=\"https://github.com/NeRdTheNed/RetroWrapper/issues/new?title=" + URLEncoder.encode(e.getClass().getSimpleName() + " thrown when installing RetroWrapper (modify to add context)", StandardCharsets.UTF_8.name()) + "&body=" + URLEncoder.encode("Add some context about what you were doing when this error occurred.\n\nStacktrace (don't modify):\n```java\n" + exeptText + "```", StandardCharsets.UTF_8.name()) + "\">Create an issue on Github!</a>"
-    					);
-
-    			textPane.addHyperlinkListener(new HyperlinkListener() {
-    				@Override
-    				public void hyperlinkUpdate(HyperlinkEvent e) {
-    					if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-    						try {
-    							Desktop.getDesktop().browse(e.getURL().toURI());
-    						} catch (final Exception ignored) {
-    							ignored.printStackTrace();
-    							JOptionPane.showMessageDialog(null, "Your platform doesn't let Java open links.\nPlease browse to https://github.com/NeRdTheNed/RetroWrapper/issues/new to create an issue.\nI'd appriciate it if you'd copy paste the stack trace into the issue.\nThanks for putting up with this!", "Sorry", JOptionPane.INFORMATION_MESSAGE);
-    						}
-    					}
-    				}
-    			});
-
-    			final JScrollPane jsp = new JScrollPane(textPane);
-    			jsp.setBorder(null);
-    			JOptionPane.showMessageDialog(null, jsp, "Error", JOptionPane.ERROR_MESSAGE);
-    		} catch (final Exception ignored) {
-    			ignored.printStackTrace();
-    			JOptionPane.showMessageDialog(null, "Error thrown when trying to launch RetroWrapper installer:\n" + exeptText + "\nPlease report this issue on GitHub!\nhttps://github.com/NeRdTheNed/RetroWrapper/issues/new\nI'd appriciate it if you'd screenshot the stack trace for the issue.", "Error", JOptionPane.ERROR_MESSAGE);
-    		}
-    	}
+            try {
+                final JTextPane textPane = new JTextPane();
+                textPane.setEditable(false);
+                textPane.setBorder(null);
+                textPane.setContentType("text/html");
+                textPane.setText("<html><p>Error thrown when trying to launch RetroWrapper installer:</p>" +
+                                 "<br><p>" + escapeHtml4(exeptText).replace("\n", "<br>") + "</p>" +
+                                 "<p>Please report this issue on GitHub:</p>" +
+                                 "<a href=\"https://github.com/NeRdTheNed/RetroWrapper/issues/new?title=" + URLEncoder.encode(e.getClass().getSimpleName() + " thrown when installing RetroWrapper (modify to add context)", StandardCharsets.UTF_8.name()) + "&body=" + URLEncoder.encode("Add some context about what you were doing when this error occurred.\n\nStacktrace (don't modify):\n```java\n" + exeptText + "```", StandardCharsets.UTF_8.name()) + "\">Create an issue on Github!</a>"
+                                );
+                textPane.addHyperlinkListener(new HyperlinkListener() {
+                    @Override
+                    public void hyperlinkUpdate(HyperlinkEvent e) {
+                        if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                            try {
+                                Desktop.getDesktop().browse(e.getURL().toURI());
+                            } catch (final Exception ignored) {
+                                ignored.printStackTrace();
+                                JOptionPane.showMessageDialog(null, "Your platform doesn't let Java open links.\nPlease browse to https://github.com/NeRdTheNed/RetroWrapper/issues/new to create an issue.\nI'd appriciate it if you'd copy paste the stack trace into the issue.\nThanks for putting up with this!", "Sorry", JOptionPane.INFORMATION_MESSAGE);
+                            }
+                        }
+                    }
+                });
+                final JScrollPane jsp = new JScrollPane(textPane);
+                jsp.setBorder(null);
+                JOptionPane.showMessageDialog(null, jsp, "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (final Exception ignored) {
+                ignored.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Error thrown when trying to launch RetroWrapper installer:\n" + exeptText + "\nPlease report this issue on GitHub!\nhttps://github.com/NeRdTheNed/RetroWrapper/issues/new\nI'd appriciate it if you'd screenshot the stack trace for the issue.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 }

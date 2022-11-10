@@ -17,6 +17,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Cursor;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -25,6 +26,7 @@ import org.objectweb.asm.RetroTweakClassWriter;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
@@ -87,7 +89,18 @@ public final class RetroTweakInjector implements IClassTransformer {
 
                     for (final MethodInsnNode toPatch : foundMethodCalls) {
                         System.out.println("Patching call to setNativeCursor at class " + name);
-                        final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/RetroTweakInjector", "setNativeCursorPatch", "(Lorg/lwjgl/input/Cursor;)Lorg/lwjgl/input/Cursor;");
+                        // Check if the method deliberately loaded null. This implies the cursor should be shown.
+                        final int shouldHide;
+
+                        if (toPatch.getPrevious().getOpcode() == Opcodes.ACONST_NULL) {
+                            shouldHide = 0;
+                        } else {
+                            shouldHide = 1;
+                        }
+
+                        final LdcInsnNode loadShouldHide = new LdcInsnNode(Integer.valueOf(shouldHide));
+                        final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/RetroTweakInjector", "setNativeCursorPatch", "(Lorg/lwjgl/input/Cursor;Z)Lorg/lwjgl/input/Cursor;");
+                        methodNode.instructions.insertBefore(toPatch, loadShouldHide);
                         methodNode.instructions.insertBefore(toPatch, methodInsNode);
                         methodNode.instructions.remove(toPatch);
                     }
@@ -174,7 +187,14 @@ public final class RetroTweakInjector implements IClassTransformer {
         return Launch.minecraftHome;
     }
 
-    public static Cursor setNativeCursorPatch(Cursor cursor) throws LWJGLException {
+    public static Cursor setNativeCursorPatch(Cursor cursor, boolean shouldHide) throws LWJGLException {
+        try {
+            final int useCursor = shouldHide ? java.awt.Cursor.CROSSHAIR_CURSOR : java.awt.Cursor.DEFAULT_CURSOR;
+            Display.getParent().setCursor(java.awt.Cursor.getPredefinedCursor(useCursor));
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+
         try {
             return Mouse.setNativeCursor(cursor);
         } catch (final IllegalStateException e) {

@@ -2,6 +2,7 @@ package com.zero.retrowrapper.injector;
 
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
+import java.awt.Canvas;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
@@ -51,27 +52,77 @@ public final class MouseTweakInjector implements IClassTransformer {
 
             // Patch calls to setNativeCursor when running on MacOS. This prevents some versions of Minecraft from crashing,
             // because setNativeCursor throws an IllegalStateException, and Minecraft doesn't handle it.
-            // TODO Hide cursor when it should be hidden
+            // Also patch the entire input system so we can call setGrabbed without issues :/
             if (SystemUtils.IS_OS_MAC) {
                 for (final Object methodNodeO : classNode.methods) {
                     final MethodNode methodNode = (MethodNode) methodNodeO;
-                    final List<MethodInsnNode> foundMethodCalls = new ArrayList<MethodInsnNode>();
+                    final List<MethodInsnNode> foundNativeCursorMethodCalls = new ArrayList<MethodInsnNode>();
+                    final List<MethodInsnNode> foundMouseDXYMethodCalls = new ArrayList<MethodInsnNode>();
+                    final List<MethodInsnNode> foundMouseInfoMethodCalls = new ArrayList<MethodInsnNode>();
                     @SuppressWarnings("unchecked")
                     final ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 
                     while (iterator.hasNext()) {
                         final AbstractInsnNode instruction = iterator.next();
+                        final int opcode = instruction.getOpcode();
 
-                        if (instruction.getOpcode() == Opcodes.INVOKESTATIC) {
+                        if ((opcode <= Opcodes.INVOKEINTERFACE) && (opcode >= Opcodes.INVOKEVIRTUAL)) {
                             final MethodInsnNode methodInsNode = (MethodInsnNode) instruction;
+                            final String methodOwner = methodInsNode.owner;
+                            final String methodName = methodInsNode.name;
+                            final String methodDesc = methodInsNode.desc;
 
-                            if ("org/lwjgl/input/Mouse".equals(methodInsNode.owner) && "setNativeCursor".equals(methodInsNode.name) && "(Lorg/lwjgl/input/Cursor;)Lorg/lwjgl/input/Cursor;".equals(methodInsNode.desc)) {
-                                foundMethodCalls.add(methodInsNode);
+                            if (opcode == Opcodes.INVOKESTATIC) {
+                                if ("org/lwjgl/input/Mouse".equals(methodOwner) && "(Lorg/lwjgl/input/Cursor;)Lorg/lwjgl/input/Cursor;".equals(methodDesc) && "setNativeCursor".equals(methodName)) {
+                                    foundNativeCursorMethodCalls.add(methodInsNode);
+                                }
+
+                                if ("org/lwjgl/input/Mouse".equals(methodOwner) && "()I".equals(methodDesc) && ("getDX".equals(methodName) || "getDY".equals(methodName))) {
+                                    foundMouseDXYMethodCalls.add(methodInsNode);
+                                }
+                            }
+
+                            if ((opcode == Opcodes.INVOKEVIRTUAL) && "java/awt/PointerInfo".equals(methodOwner) && "()Ljava/awt/Point;".equals(methodDesc) && "getLocation".equals(methodName)) {
+                                foundMouseInfoMethodCalls.add(methodInsNode);
                             }
                         }
                     }
 
-                    for (final MethodInsnNode toPatch : foundMethodCalls) {
+                    for (final MethodInsnNode toPatch : foundMouseInfoMethodCalls) {
+                        final AbstractInsnNode prev = toPatch.getPrevious();
+
+                        if (prev.getOpcode() == Opcodes.INVOKESTATIC) {
+                            final MethodInsnNode prevCall = (MethodInsnNode) prev;
+
+                            // Patch the call to MouseInfo.getPointerInfo().getLocation().
+                            if ("java/awt/MouseInfo".equals(prevCall.owner) && "()Ljava/awt/PointerInfo;".equals(prevCall.desc) && "getPointerInfo".equals(prevCall.name)) {
+                                System.out.println("Patching call to getLocation at class " + name);
+                                final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/MouseTweakInjector", "getLocationPatch", "()Ljava/awt/Point;");
+                                methodNode.instructions.insertBefore(toPatch.getNext(), methodInsNode);
+                                methodNode.instructions.remove(prev);
+                                methodNode.instructions.remove(toPatch);
+                            } else {
+                                System.out.println("Warning: Something went wrong when trying to patch " + toPatch.name + " at class " + name);
+                            }
+                        } else {
+                            System.out.println("Warning: Something went wrong when trying to patch " + toPatch.name + " at class " + name);
+                        }
+                    }
+
+                    for (final MethodInsnNode toPatch : foundMouseDXYMethodCalls) {
+                        final AbstractInsnNode next = toPatch.getNext();
+
+                        // Patch calls to Mouse.getDX or Mouse.getDY that are discarded.
+                        if (next.getOpcode() == Opcodes.POP) {
+                            System.out.println("Patching call to " + toPatch.name + " at class " + name);
+                            methodNode.instructions.remove(next);
+                            methodNode.instructions.remove(toPatch);
+                        } else {
+                            //System.out.println("Warning: Return value of call to " + toPatch.name + " at class " + name + " was actually used, this should never happen!");
+                        }
+                    }
+
+                    for (final MethodInsnNode toPatch : foundNativeCursorMethodCalls) {
                         System.out.println("Patching call to setNativeCursor at class " + name);
                         // Check if the method deliberately loaded null. This implies the cursor should be shown.
                         final int shouldHide;
@@ -102,7 +153,15 @@ public final class MouseTweakInjector implements IClassTransformer {
         }
     }
 
+    public static Point getLocationPatch() {
+        final Canvas canvas = Display.getParent();
+        final Point location = canvas.getLocationOnScreen();
+        return new Point(Mouse.getDX() + location.x + (canvas.getWidth() / 2), -Mouse.getDY() + location.y + (canvas.getHeight() / 2));
+    }
+
     public static Cursor setNativeCursorPatch(Cursor cursor, boolean shouldHide) throws LWJGLException {
+        final Canvas canvas = Display.getParent();
+
         try {
             final java.awt.Cursor useCursor = shouldHide ? hiddenCursor : normalCursor;
             Display.getParent().setCursor(useCursor);
@@ -110,10 +169,26 @@ public final class MouseTweakInjector implements IClassTransformer {
             e.printStackTrace();
         }
 
+        if (!shouldHide) {
+            Mouse.setCursorPosition(canvas.getWidth() / 2, canvas.getHeight() / 2);
+        }
+
+        Mouse.setGrabbed(shouldHide);
+
+        if (shouldHide) {
+            Mouse.getDX();
+            Mouse.getDY();
+        }
+
         try {
             return Mouse.setNativeCursor(cursor);
         } catch (final IllegalStateException e) {
-            return cursor;
+            // Although this is pretty close to the expected behavior...
+            //throw new LWJGLException(e);
+            // ...it's super annoying for logging, because Minecraft prints a stacktrace every time this is thrown.
+            // I've opted to just return null.
+            // As the value isn't used and the cursor passed will always be null, it doesn't matter what's returned here.
+            return null;
         }
     }
 }

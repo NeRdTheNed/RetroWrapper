@@ -7,13 +7,20 @@ import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.TABLESWITCH;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ListIterator;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.lang3.SystemUtils;
+import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Cursor;
+import org.lwjgl.input.Mouse;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.RetroTweakClassWriter;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -51,10 +58,45 @@ public final class RetroTweakInjector implements IClassTransformer {
             // TODO The linter doesn't like this for some reason
             final ClassVisitor s = new ClassVisitor(ASM4, cw) {};
             cr.accept(s, 0);
-            final byte[] bytes = cw.toByteArray();
+            byte[] bytes = cw.toByteArray();
             final ClassReader classReader = new ClassReader(bytes);
             final ClassNode classNode = new ClassNode();
             classReader.accept(classNode, ClassReader.EXPAND_FRAMES);
+
+            // Patch calls to setNativeCursor when running on MacOS. This prevents some versions of Minecraft from crashing,
+            // because setNativeCursor throws an IllegalStateException, and Minecraft doesn't handle it.
+            // TODO Hide cursor when it should be hidden
+            if (SystemUtils.IS_OS_MAC) {
+                for (final Object methodNodeO : classNode.methods) {
+                    final MethodNode methodNode = (MethodNode) methodNodeO;
+                    final List<MethodInsnNode> foundMethodCalls = new ArrayList<MethodInsnNode>();
+                    @SuppressWarnings("unchecked")
+                    final ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
+
+                    while (iterator.hasNext()) {
+                        final AbstractInsnNode instruction = iterator.next();
+
+                        if (instruction.getOpcode() == Opcodes.INVOKESTATIC) {
+                            final MethodInsnNode methodInsNode = (MethodInsnNode) instruction;
+
+                            if ("org/lwjgl/input/Mouse".equals(methodInsNode.owner) && "setNativeCursor".equals(methodInsNode.name) && "(Lorg/lwjgl/input/Cursor;)Lorg/lwjgl/input/Cursor;".equals(methodInsNode.desc)) {
+                                foundMethodCalls.add(methodInsNode);
+                            }
+                        }
+                    }
+
+                    for (final MethodInsnNode toPatch : foundMethodCalls) {
+                        System.out.println("Patching call to setNativeCursor at class " + name);
+                        final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/RetroTweakInjector", "setNativeCursorPatch", "(Lorg/lwjgl/input/Cursor;)Lorg/lwjgl/input/Cursor;");
+                        methodNode.instructions.insertBefore(toPatch, methodInsNode);
+                        methodNode.instructions.remove(toPatch);
+                    }
+                }
+            }
+
+            ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+            classNode.accept(writer);
+            bytes = writer.toByteArray();
 
             if (!classNode.interfaces.contains("java/lang/Runnable")) {
                 return bytes;
@@ -113,7 +155,7 @@ public final class RetroTweakInjector implements IClassTransformer {
                 }
             }
 
-            final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+            writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
             classNode.accept(writer);
             return writer.toByteArray();
         } catch (final Exception e) {
@@ -130,5 +172,14 @@ public final class RetroTweakInjector implements IClassTransformer {
         SwingUtil.loadIconsOnFrames();
         System.out.println("Setting gameDir to: " + Launch.minecraftHome);
         return Launch.minecraftHome;
+    }
+
+    public static Cursor setNativeCursorPatch(Cursor cursor) throws LWJGLException {
+        try {
+            return Mouse.setNativeCursor(cursor);
+        } catch (final IllegalStateException e) {
+            //throw new LWJGLException(e);
+            return cursor;
+        }
     }
 }

@@ -77,13 +77,17 @@ public final class MouseTweakInjector implements IClassTransformer {
                                     foundNativeCursorMethodCalls.add(methodInsNode);
                                 }
 
-                                if ("org/lwjgl/input/Mouse".equals(methodOwner) && "()I".equals(methodDesc) && ("getDX".equals(methodName) || "getDY".equals(methodName))) {
-                                    foundMouseDXYMethodCalls.add(methodInsNode);
+                                if (System.getProperties().getProperty("retrowrapper.enableExperimentalPatches") != null) {
+                                    if ("org/lwjgl/input/Mouse".equals(methodOwner) && "()I".equals(methodDesc) && ("getDX".equals(methodName) || "getDY".equals(methodName))) {
+                                        foundMouseDXYMethodCalls.add(methodInsNode);
+                                    }
                                 }
                             }
 
-                            if ((opcode == Opcodes.INVOKEVIRTUAL) && "java/awt/PointerInfo".equals(methodOwner) && "()Ljava/awt/Point;".equals(methodDesc) && "getLocation".equals(methodName)) {
-                                foundMouseInfoMethodCalls.add(methodInsNode);
+                            if (System.getProperties().getProperty("retrowrapper.enableExperimentalPatches") != null) {
+                                if ((opcode == Opcodes.INVOKEVIRTUAL) && "java/awt/PointerInfo".equals(methodOwner) && "()Ljava/awt/Point;".equals(methodDesc) && "getLocation".equals(methodName)) {
+                                    foundMouseInfoMethodCalls.add(methodInsNode);
+                                }
                             }
                         }
                     }
@@ -160,8 +164,6 @@ public final class MouseTweakInjector implements IClassTransformer {
     }
 
     public static Cursor setNativeCursorPatch(Cursor cursor, boolean shouldHide) throws LWJGLException {
-        final Canvas canvas = Display.getParent();
-
         try {
             final java.awt.Cursor useCursor = shouldHide ? hiddenCursor : normalCursor;
             Display.getParent().setCursor(useCursor);
@@ -169,15 +171,19 @@ public final class MouseTweakInjector implements IClassTransformer {
             e.printStackTrace();
         }
 
-        if (!shouldHide) {
-            Mouse.setCursorPosition(canvas.getWidth() / 2, canvas.getHeight() / 2);
-        }
+        if (System.getProperties().getProperty("retrowrapper.enableExperimentalPatches") != null) {
+            final Canvas canvas = Display.getParent();
 
-        Mouse.setGrabbed(shouldHide);
+            if (!shouldHide) {
+                Mouse.setCursorPosition(canvas.getWidth() / 2, canvas.getHeight() / 2);
+            }
 
-        if (shouldHide) {
-            Mouse.getDX();
-            Mouse.getDY();
+            Mouse.setGrabbed(shouldHide);
+
+            if (shouldHide) {
+                Mouse.getDX();
+                Mouse.getDY();
+            }
         }
 
         try {

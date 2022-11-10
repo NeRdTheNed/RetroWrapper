@@ -6,6 +6,9 @@ import static org.objectweb.asm.Opcodes.GOTO;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.TABLESWITCH;
 
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +47,10 @@ public final class RetroTweakInjector implements IClassTransformer {
      *   ALL RIGHTS TO MOJANG
      *
      */
+
+    private static final BufferedImage hiddenCursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+    private static final java.awt.Cursor hiddenCursor = Toolkit.getDefaultToolkit().createCustomCursor(hiddenCursorImg, new Point(0, 0), "Hidden cursor");
+    private static final java.awt.Cursor normalCursor = java.awt.Cursor.getDefaultCursor();
 
     // TODO @Nullable?
     @Override
@@ -189,8 +196,8 @@ public final class RetroTweakInjector implements IClassTransformer {
 
     public static Cursor setNativeCursorPatch(Cursor cursor, boolean shouldHide) throws LWJGLException {
         try {
-            final int useCursor = shouldHide ? java.awt.Cursor.CROSSHAIR_CURSOR : java.awt.Cursor.DEFAULT_CURSOR;
-            Display.getParent().setCursor(java.awt.Cursor.getPredefinedCursor(useCursor));
+            final java.awt.Cursor useCursor = shouldHide ? hiddenCursor : normalCursor;
+            Display.getParent().setCursor(useCursor);
         } catch (final Exception e) {
             e.printStackTrace();
         }

@@ -17,6 +17,7 @@ public final class RetroTweaker implements ITweaker {
     @Override
     public void injectIntoClassLoader(LaunchClassLoader classLoader) {
         classLoader.registerTransformer("com.zero.retrowrapper.injector.RetroTweakInjector");
+        classLoader.registerTransformer("com.zero.retrowrapper.injector.MouseTweakInjector");
     }
 
     @Override

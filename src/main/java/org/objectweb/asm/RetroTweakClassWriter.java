@@ -82,7 +82,7 @@ public final class RetroTweakClassWriter extends ClassWriter {
                     if (isNet || isCom) {
                         System.out.println(foundUrlTextString + constant);
 
-                        if (EmulatorRegistry.getHandlerByUrl(constant) != null) {
+                        if (constant.contains("minecraft.net") || EmulatorRegistry.getHandlerByUrl(constant) != null) {
                             final String prepend = isCom ?
                                                    constant.contains("https://") || constant.contains("http://") ? "http://" : "" :
                                                    (constant.contains("https://") ? "https://" : "") + (constant.contains("http://") ? "http://" : "");

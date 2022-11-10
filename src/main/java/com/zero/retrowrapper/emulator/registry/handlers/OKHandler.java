@@ -5,13 +5,16 @@ import java.io.OutputStream;
 
 import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
 
-public final class GameHandler extends EmulatorHandler {
-    public GameHandler() {
-        super("/game/");
+public final class OKHandler extends EmulatorHandler {
+    private final String toWrite;
+
+    public OKHandler(String url, String toWrite) {
+        super(url);
+        this.toWrite = toWrite;
     }
 
     @Override
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
-        os.write("0".getBytes());
+        os.write(toWrite.getBytes());
     }
 }

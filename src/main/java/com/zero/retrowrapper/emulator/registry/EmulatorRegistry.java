@@ -3,9 +3,9 @@ package com.zero.retrowrapper.emulator.registry;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.zero.retrowrapper.emulator.registry.handlers.GameHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.ListmapsHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.LoadHandler;
+import com.zero.retrowrapper.emulator.registry.handlers.OKHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.ResourcesHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.ResourcesHandlerBeta;
 import com.zero.retrowrapper.emulator.registry.handlers.SaveHandler;
@@ -16,7 +16,10 @@ public final class EmulatorRegistry {
 
     static {
         handlers = new ArrayList<IHandler>();
-        handlers.add(new GameHandler());
+        handlers.add(new OKHandler("login/session.jsp", "ok"));
+        handlers.add(new OKHandler("session?name=", "ok"));
+        handlers.add(new OKHandler("/game/?n=", "0"));
+        handlers.add(new OKHandler("haspaid.jsp", "true"));
         handlers.add(new SaveHandler());
         handlers.add(new LoadHandler());
         handlers.add(new ListmapsHandler());

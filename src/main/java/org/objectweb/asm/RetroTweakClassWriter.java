@@ -82,13 +82,18 @@ public final class RetroTweakClassWriter extends ClassWriter {
                     if (isNet || isCom) {
                         System.out.println(foundUrlTextString + constant);
 
-                        if (constant.contains("minecraft.net") || EmulatorRegistry.getHandlerByUrl(constant) != null) {
+                        if (constant.contains("minecraft.net") || (EmulatorRegistry.getHandlerByUrl(constant) != null)) {
                             final String prepend = isCom ?
                                                    constant.contains("https://") || constant.contains("http://") ? "http://" : "" :
                                                    (constant.contains("https://") ? "https://" : "") + (constant.contains("http://") ? "http://" : "");
-                            final String postpend = isCom ?
-                                                    constant.replace(constant.split(".com")[0] + ".com", "") :
-                                                    constant.replace(constant.split(".net")[0] + ".net", "");
+                            String postpend = isCom ?
+                                              constant.replace(constant.split(".com")[0] + ".com", "") :
+                                              constant.replace(constant.split(".net")[0] + ".net", "");
+
+                            if (constant.contains("login.minecraft.net") && (EmulatorRegistry.getHandlerByUrl(constant) == null)) {
+                                postpend += "/login/session.jsp";
+                            }
+
                             transformed = prepend + "127.0.0.1:" + EmulatorConfig.getInstance().getPort() + postpend;
                             System.out.println(replacedWithTextString + transformed);
                         } else {

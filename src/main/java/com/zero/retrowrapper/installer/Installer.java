@@ -416,13 +416,13 @@ public final class Installer {
                         break;
                     }
 
-                    if ((f3Pressed && cPressed) && !openDebug) {
+                    if (f3Pressed && cPressed && !openDebug) {
                         openDebug = true;
                         JOptionPane.showMessageDialog(null, "Debug F3 + C: Test exception handler (not a real crash)", "Debug", JOptionPane.QUESTION_MESSAGE);
                         exceptionHandler(installerLogger, "Debug exception handler test (not a real crash)", new Exception("Debug exception (not a real exception)"));
                     }
 
-                    if ((f3Pressed && hPressed) && !openDebug) {
+                    if (f3Pressed && hPressed && !openDebug) {
                         openDebug = true;
                         final StringBuilder tempDirBuilder = new StringBuilder();
 
@@ -456,12 +456,12 @@ public final class Installer {
                         JOptionPane.showMessageDialog(null, jsp, "Debug", JOptionPane.QUESTION_MESSAGE);
                     }
 
-                    if ((f3Pressed && qPressed) && !openDebug) {
+                    if (f3Pressed && qPressed && !openDebug) {
                         openDebug = true;
                         JOptionPane.showMessageDialog(null, "Debug F3 + Q: Show key combos. Combos:\nF3 + C: Test exception handler (not a real crash)\nF3 + H: Show variable info\nF3 + Q: Show key combos\nF3 + T: Reload folders", "Debug", JOptionPane.QUESTION_MESSAGE);
                     }
 
-                    if ((f3Pressed && tPressed) && !openDebug) {
+                    if (f3Pressed && tPressed && !openDebug) {
                         openDebug = true;
                         JOptionPane.showMessageDialog(null, "Debug F3 + T: Reloading folders", "Debug", JOptionPane.QUESTION_MESSAGE);
                         refreshList(workingDirectory, installerLogger);

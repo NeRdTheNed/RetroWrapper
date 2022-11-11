@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.Scanner;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
@@ -52,7 +53,7 @@ public final class ResourcesHandler extends EmulatorHandler {
         try {
             downloadSoundData();
         } catch (final Exception e) {
-            e.printStackTrace();
+            System.out.println(ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -62,7 +63,15 @@ public final class ResourcesHandler extends EmulatorHandler {
             final JsonObject obj = json.asObject();
             jsonObjects = obj.get("objects").asObject();
         } catch (final Exception e) {
-            e.printStackTrace();
+            System.out.println("Exception downloading legacy.json: " + ExceptionUtils.getStackTrace(e));
+
+            try (Scanner sc = new Scanner(new File(Launch.minecraftHome + "/assets/indexes/legacy.json")).useDelimiter("\\A")) {
+                final JsonValue json = Json.parse(sc.next());
+                final JsonObject obj = json.asObject();
+                jsonObjects = obj.get("objects").asObject();
+            } catch (final Exception ee) {
+                System.out.println("Exception loading local legacy.json: " + ExceptionUtils.getStackTrace(ee));
+            }
         }
     }
 
@@ -81,7 +90,7 @@ public final class ResourcesHandler extends EmulatorHandler {
                 e.printStackTrace();
             }
         } else {
-            final String name = get.replace("/resources/", "");
+            final String name = get.replace("/resources/", "").replace("/MinecraftResources/", "");
             final byte[] bytes = getResourceByName(name);
 
             if ((bytes != null) && (bytes.length > smallestSize)) {
@@ -107,6 +116,10 @@ public final class ResourcesHandler extends EmulatorHandler {
         }
 
         try {
+            if (jsonObjects == null) {
+                throw new IllegalStateException("Could not download or find legacy.json!");
+            }
+
             if (jsonObjects.get(res) == null) {
                 throw new IllegalStateException("No hash for resource " + res + " in legacy.json!");
             }
@@ -129,7 +142,7 @@ public final class ResourcesHandler extends EmulatorHandler {
 
             throw new IllegalStateException("The resource server for URL " + toDownload + " might be down");
         } catch (final Exception e) {
-            System.out.println("Resource " + res + " not downloaded due to exception");
+            System.out.println("Resource " + res + " not downloaded due to exception: " + ExceptionUtils.getStackTrace(e));
             e.printStackTrace();
             final File backupFile = FileUtil.tryFindFirstFile(new File(Launch.minecraftHome + "/resources/", res), new File(Launch.minecraftHome + "/assets/virtual/legacy/", res));
 

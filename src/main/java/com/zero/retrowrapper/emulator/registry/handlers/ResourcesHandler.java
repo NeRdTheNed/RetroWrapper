@@ -16,9 +16,12 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
+import com.zero.retrowrapper.util.FileUtil;
+
+import net.minecraft.launchwrapper.Launch;
 
 public final class ResourcesHandler extends EmulatorHandler {
-    private static final byte[] SOUNDS_LIST =
+    private static final byte[] OLD_SOUNDS_LIST =
         ("\nsound/step/wood4.ogg,0,1245702004000\n"
          + "sound/step/gravel3.ogg,0,1245702004000\n"
          + "sound/step/wood2.ogg,0,1245702004000\n"
@@ -39,11 +42,18 @@ public final class ResourcesHandler extends EmulatorHandler {
          + "music/calm3.ogg,0,1245702004000\n"
          + "music/calm1.ogg,0,1245702004000\n").getBytes();
 
+    private static final int smallestSize = 16;
+
     private JsonObject jsonObjects;
 
-    public ResourcesHandler() {
-        super("/resources/");
-        downloadSoundData();
+    public ResourcesHandler(String handle) {
+        super(handle);
+
+        try {
+            downloadSoundData();
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void downloadSoundData() {
@@ -59,46 +69,80 @@ public final class ResourcesHandler extends EmulatorHandler {
     @Override
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
         if ("/resources/".equals(get)) {
-            os.write(SOUNDS_LIST);
+            os.write(OLD_SOUNDS_LIST);
+        } else if ("/MinecraftResources/".equals(get)) {
+            // This URL still exists!
+            try {
+                final URL resourceURL = new URL("http://s3.amazonaws.com" + get);
+                final InputStream is = resourceURL.openStream();
+                final byte[] asBytes = IOUtils.toByteArray(is);
+                os.write(asBytes);
+            } catch (final Exception e) {
+                e.printStackTrace();
+            }
         } else {
             final String name = get.replace("/resources/", "");
             final byte[] bytes = getResourceByName(name);
 
-            if (bytes != null) {
+            if ((bytes != null) && (bytes.length > smallestSize)) {
                 os.write(bytes);
                 System.out.println("Succesfully installed resource! " + name + " (" + bytes.length + ")");
+            } else {
+                System.out.println("Error installing resource " + name);
             }
         }
     }
 
     // TODO @Nullable?
     private byte[] getResourceByName(String res) throws IOException {
+        RetroEmulator.getInstance().getCacheDirectory().mkdir();
         final File resourceCache = new File(RetroEmulator.getInstance().getCacheDirectory(), res);
 
         if (resourceCache.exists()) {
             try (FileInputStream fis = new FileInputStream(resourceCache)) {
                 return IOUtils.toByteArray(fis);
+            } catch (final Exception e) {
+                e.printStackTrace();
             }
         }
 
         try {
             if (jsonObjects.get(res) == null) {
-                return null;
+                throw new IllegalStateException("No hash for resource " + res + " in legacy.json!");
             }
 
             final String hash = jsonObjects.get(res).asObject().get("hash").asString();
-            System.out.println(hash);
-            final InputStream is = new URL("http://resources.download.minecraft.net/" + hash.substring(0, 2) + "/" + hash).openStream();
+            System.out.println(res + " " + hash);
+            final URL toDownload = new URL("http://resources.download.minecraft.net/" + hash.substring(0, 2) + "/" + hash);
+            final InputStream is = toDownload.openStream();
             final byte[] resourceBytes = IOUtils.toByteArray(is);
-            new File(resourceCache.getParent()).mkdirs();
 
-            try (FileOutputStream fos = new FileOutputStream(resourceCache)) {
-                fos.write(resourceBytes);
+            if (resourceBytes.length > smallestSize) {
+                new File(resourceCache.getParent()).mkdirs();
+
+                try (FileOutputStream fos = new FileOutputStream(resourceCache)) {
+                    fos.write(resourceBytes);
+                }
+
+                return resourceBytes;
             }
 
-            return resourceBytes;
+            throw new IllegalStateException("The resource server for URL " + toDownload + " might be down");
         } catch (final Exception e) {
+            System.out.println("Resource " + res + " not downloaded due to exception");
             e.printStackTrace();
+            final File backupFile = FileUtil.tryFindFirstFile(new File(Launch.minecraftHome + "/resources/", res), new File(Launch.minecraftHome + "/assets/virtual/legacy/", res));
+
+            if (backupFile != null) {
+                try (FileInputStream fis = new FileInputStream(backupFile)) {
+                    System.out.println("Using " + backupFile);
+                    return IOUtils.toByteArray(fis);
+                } catch (final Exception ee) {
+                    ee.printStackTrace();
+                }
+            }
+
+            System.out.println("No backup location found for resource " + res);
             return null;
         }
     }

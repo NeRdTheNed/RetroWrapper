@@ -26,9 +26,9 @@ public final class EmulatorRegistry {
         final String toPrint;
 
         if (ext != null) {
-            StringBuilder builder = new StringBuilder();
+            final StringBuilder builder = new StringBuilder();
 
-            for (String s : ext) {
+            for (final String s : ext) {
                 builder.append(" " + s);
             }
 
@@ -44,7 +44,7 @@ public final class EmulatorRegistry {
             for (final File file : FileUtils.listFiles(directory, ext, true)) {
                 try {
                     if (Files.size(file.toPath()) < smallestSize) {
-                        final String baseFile = directory.getParent() + "/_invalidFiles/" + (file.getAbsolutePath().replace(directory.getAbsolutePath(), ""));
+                        final String baseFile = directory.getParent() + "/_invalidFiles/" + file.getAbsolutePath().replace(directory.getAbsolutePath(), "");
                         File newDir = new File(baseFile);
 
                         for (int count = 0; newDir.exists(); count++) {

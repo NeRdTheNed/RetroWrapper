@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.hack.HackThread;
+import com.zero.retrowrapper.util.MetadataUtil;
 import com.zero.retrowrapper.util.SwingUtil;
 
 import net.minecraft.launchwrapper.IClassTransformer;
@@ -43,6 +44,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
         System.out.println("*     old mojang servers     *");
         System.out.println("*       emulator by 000      *");
         System.out.println("******************************");
+        System.out.println("RetroWrapper version " + MetadataUtil.VERSION);
         new RetroEmulator().start();
 
         try {

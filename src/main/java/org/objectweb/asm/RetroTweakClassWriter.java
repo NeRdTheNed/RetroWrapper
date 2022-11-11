@@ -75,6 +75,10 @@ public final class RetroTweakClassWriter extends ClassWriter {
                     System.out.println(foundUrlTextString + constant);
                     transformed = "127.0.0.1";
                     System.out.println(replacedWithTextString + transformed);
+                } else if (constant.contains("joinserver.jsp") || constant.contains("checkserver.jsp")) {
+                    System.out.println(foundUrlTextString + constant);
+                    transformed = constant.replace("www.minecraft.net", "session.minecraft.net");
+                    System.out.println(replacedWithTextString + transformed);
                 } else {
                     final boolean isNet = constant.contains(".net");
                     final boolean isCom = constant.contains(".com");

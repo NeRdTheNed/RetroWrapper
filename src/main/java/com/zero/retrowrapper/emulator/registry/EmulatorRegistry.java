@@ -11,9 +11,9 @@ import org.apache.commons.io.FileUtils;
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.emulator.registry.handlers.ListmapsHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.LoadHandler;
-import com.zero.retrowrapper.emulator.registry.handlers.OKHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.ResourcesHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.SaveHandler;
+import com.zero.retrowrapper.emulator.registry.handlers.SingleResponseHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.SkinOrCapeHandler;
 
 import net.minecraft.launchwrapper.Launch;
@@ -67,10 +67,10 @@ public final class EmulatorRegistry {
         moveInvalidFiles(new File(Launch.minecraftHome, "resources"), new String[] { "ogg" });
         moveInvalidFiles(new File(Launch.minecraftHome + "/assets/virtual/legacy/"), new String[] { "ogg" });
         handlers = new ArrayList<IHandler>();
-        handlers.add(new OKHandler("login/session.jsp", "ok"));
-        handlers.add(new OKHandler("session?name=", "ok"));
-        handlers.add(new OKHandler("/game/?n=", "0"));
-        handlers.add(new OKHandler("haspaid.jsp", "true"));
+        handlers.add(new SingleResponseHandler("login/session.jsp", "ok"));
+        handlers.add(new SingleResponseHandler("session?name=", "ok"));
+        handlers.add(new SingleResponseHandler("/game/?n=", "0"));
+        handlers.add(new SingleResponseHandler("haspaid.jsp", "true"));
         handlers.add(new SaveHandler());
         handlers.add(new LoadHandler());
         handlers.add(new ListmapsHandler());

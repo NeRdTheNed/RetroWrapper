@@ -5,10 +5,10 @@ import java.io.OutputStream;
 
 import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
 
-public final class OKHandler extends EmulatorHandler {
+public final class SingleResponseHandler extends EmulatorHandler {
     private final String toWrite;
 
-    public OKHandler(String url, String toWrite) {
+    public SingleResponseHandler(String url, String toWrite) {
         super(url);
         this.toWrite = toWrite;
     }

@@ -19,6 +19,10 @@ import com.zero.retrowrapper.emulator.registry.handlers.SkinOrCapeHandler;
 import net.minecraft.launchwrapper.Launch;
 
 public final class EmulatorRegistry {
+    private EmulatorRegistry() {
+        // Empty private constructor to hide default constructor
+    }
+
     private static final List<IHandler> handlers;
     private static final int smallestSize = 16;
 

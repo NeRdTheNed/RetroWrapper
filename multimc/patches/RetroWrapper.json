@@ -12,7 +12,7 @@
       "name": "org.multimc:retrowrapper:@rrVersion@"
     },
     {
-      "name": "net.minecraft:launchwrapper:1.6"
+      "name": "net.minecraft:launchwrapper:1.5"
     },
     {
       "name": "net.sf.jopt-simple:jopt-simple:4.5"

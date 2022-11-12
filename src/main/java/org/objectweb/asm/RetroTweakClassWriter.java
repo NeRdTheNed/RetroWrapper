@@ -71,7 +71,9 @@ public final class RetroTweakClassWriter extends ClassWriter {
 
                 final String transformed;
 
-                if ("minecraft.net".equals(constant)) {
+                // 79.136.77.240 is a hardcoded URL for early multiplayer tests.
+                // TODO Allow patching 79.136.77.240 to be anything the user wants, along with the hardcoded port (5565)
+                if ("79.136.77.240".equals(constant) || "minecraft.net".equals(constant)) {
                     System.out.println(foundUrlTextString + constant);
                     transformed = "127.0.0.1";
                     System.out.println(replacedWithTextString + transformed);

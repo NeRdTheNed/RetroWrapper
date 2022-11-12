@@ -19,6 +19,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -59,6 +60,7 @@ public final class MouseTweakInjector implements IClassTransformer {
                 final List<MethodInsnNode> foundNativeCursorMethodCalls = new ArrayList<MethodInsnNode>();
                 final List<MethodInsnNode> foundMouseDXYMethodCalls = new ArrayList<MethodInsnNode>();
                 final List<MethodInsnNode> foundMouseInfoMethodCalls = new ArrayList<MethodInsnNode>();
+                final List<MethodInsnNode> foundMouseMoveMethodCalls = new ArrayList<MethodInsnNode>();
                 @SuppressWarnings("unchecked")
                 final ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 
@@ -84,12 +86,25 @@ public final class MouseTweakInjector implements IClassTransformer {
                             }
                         }
 
-                        if (System.getProperties().getProperty("retrowrapper.enableExperimentalPatches") != null) {
-                            if ((opcode == Opcodes.INVOKEVIRTUAL) && "java/awt/PointerInfo".equals(methodOwner) && "()Ljava/awt/Point;".equals(methodDesc) && "getLocation".equals(methodName)) {
+                        if ((opcode == Opcodes.INVOKEVIRTUAL) && (System.getProperties().getProperty("retrowrapper.enableExperimentalPatches") != null)) {
+                            if ("java/awt/PointerInfo".equals(methodOwner) && "()Ljava/awt/Point;".equals(methodDesc) && "getLocation".equals(methodName)) {
                                 foundMouseInfoMethodCalls.add(methodInsNode);
+                            }
+
+                            if ("java/awt/Robot".equals(methodOwner) && "(II)V".equals(methodDesc) && "mouseMove".equals(methodName)) {
+                                foundMouseMoveMethodCalls.add(methodInsNode);
                             }
                         }
                     }
+                }
+
+                for (final MethodInsnNode toPatch : foundMouseMoveMethodCalls) {
+                    System.out.println("Patching call to mouseMove at class " + name);
+                    final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/MouseTweakInjector", "mouseMovePatch", "(II)V");
+                    final InsnNode pop = new InsnNode(Opcodes.POP);
+                    methodNode.instructions.insertBefore(toPatch, methodInsNode);
+                    methodNode.instructions.insertBefore(toPatch, pop);
+                    methodNode.instructions.remove(toPatch);
                 }
 
                 for (final MethodInsnNode toPatch : foundMouseInfoMethodCalls) {
@@ -159,6 +174,11 @@ public final class MouseTweakInjector implements IClassTransformer {
             System.out.println(e);
             return bytesOld;
         }
+    }
+
+    public static void mouseMovePatch(int x, int y) {
+        final Point location = Display.getParent().getLocationOnScreen();
+        Mouse.setCursorPosition(x - location.x, y - location.y);
     }
 
     public static Point getLocationPatch() {

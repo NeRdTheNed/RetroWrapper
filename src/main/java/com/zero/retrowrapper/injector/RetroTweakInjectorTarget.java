@@ -53,9 +53,13 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
 
             try {
                 clazz = getaClass("net.minecraft.client.MinecraftApplet");
-            } catch (final ClassNotFoundException ex) {
-                veryOld = true;
-                clazz = getaClass("com.mojang.minecraft.MinecraftApplet");
+            } catch (final ClassNotFoundException e) {
+                try {
+                    veryOld = true;
+                    clazz = getaClass("com.mojang.minecraft.MinecraftApplet");
+                } catch (final ClassNotFoundException ex) {
+                    throw new ClassNotFoundException("Could not find MinecraftApplet!", ex);
+                }
             }
 
             final Map<String, String> params = new HashMap<String, String>();

@@ -1,0 +1,71 @@
+{
+  "+traits": [
+    "noapplet"
+  ],
+  "+tweakers": [
+    "com.zero.retrowrapper.RetroTweaker"
+  ],
+  "formatVersion": 1,
+  "libraries": [
+    {
+      "MMC-hint": "local",
+      "name": "org.multimc:retrowrapper:@rrVersion@"
+    },
+    {
+      "MMC-absoluteUrl": "https://github.com/LightWayUp/LegacyLauncher/releases/download/v1.13-java-9-and-above/launchwrapper-1.13-java-9-and-above.jar",
+      "name": "net.minecraft:launchwrapper:1.13-java-9-and-above"
+    },
+    {
+      "name": "net.sf.jopt-simple:jopt-simple:5.0.4"
+    },
+    {
+      "url": "https://mvnrepository.com/artifact/",
+      "MMC-absoluteUrl": "https://repo1.maven.org/maven2/org/ow2/asm/asm/5.2/asm-5.2.jar",
+      "name": "org.ow2.asm:asm:5.2"
+    },
+    {
+      "url": "https://mvnrepository.com/artifact/",
+      "MMC-absoluteUrl": "https://repo1.maven.org/maven2/org/ow2/asm/asm-commons/5.2/asm-commons-5.2.jar",
+      "name": "org.ow2.asm:asm-commons:5.2"
+    },
+    {
+      "url": "https://mvnrepository.com/artifact/",
+      "MMC-absoluteUrl": "https://repo1.maven.org/maven2/org/ow2/asm/asm-util/5.2/asm-util-5.2.jar",
+      "name": "org.ow2.asm:asm-util:5.2"
+    },
+    {
+      "url": "https://mvnrepository.com/artifact/",
+      "MMC-absoluteUrl": "https://repo1.maven.org/maven2/org/ow2/asm/asm-tree/5.2/asm-tree-5.2.jar",
+      "name": "org.ow2.asm:asm-tree:5.2"
+    },
+    {
+      "url": "https://mvnrepository.com/artifact/",
+      "MMC-absoluteUrl": "https://repo1.maven.org/maven2/org/ow2/asm/asm-analysis/5.2/asm-analysis-5.2.jar",
+      "name": "org.ow2.asm:asm-analysis:5.2"
+    },
+    {
+      "name": "net.java.jinput:jinput:2.0.5"
+    },
+    {
+      "name": "net.java.jutils:jutils:1.0.0"
+    },
+    {
+      "url": "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.17.1/",
+      "name": "org.apache.logging.log4j:log4j-api:2.17.1"
+    },
+    {
+      "url": "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.17.1/",
+      "name": "org.apache.logging.log4j:log4j-core:2.17.1"
+    }
+  ],
+  "mainClass": "net.minecraft.launchwrapper.Launch",
+  "name": "retrowrapper",
+  "requires": [
+    {
+      "uid": "net.minecraft"
+    }
+  ],
+  "uid": "RetroWrapper",
+  "version": "@rrVersion@",
+  "minecraftArguments": "${auth_player_name} ${auth_session} --gameDir ${game_directory} --assetsDir ${game_assets}"
+}

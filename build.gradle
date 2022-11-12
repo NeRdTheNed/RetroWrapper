@@ -194,17 +194,20 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
-// This task creates a MultiMC instance with the current build of RetroWrapper.
+// This task creates a Java 7 - 8 compatible MultiMC instance with the current build of RetroWrapper.
+// This instance is intended to have parity with the standard launcher.
 task createMultiMCInstance(dependsOn: proguard, type: Zip) {
     inputs.property "rrVersion", project.version
     inputs.property "versionWithMetadata", versionWithMetadata
-    archiveFileName = rootProject.name + "-" + project.version + "-MultiMC.zip"
+    archiveFileName = rootProject.name + "-" + project.version + "-MultiMC.J7.zip"
     destinationDirectory = layout.buildDirectory.dir('libs')
 
     from('multimc') {
-        filesMatching(["mmc-pack.json", "patches/RetroWrapper.json"]) {
+        exclude 'patches/RetroWrapper-J9.json'
+        filesMatching(["mmc-pack.json", "patches/RetroWrapper-J7.json"]) {
             filter(ReplaceTokens, tokens: [rrVersion: project.version])
         }
+        rename ('RetroWrapper-J7.json', 'RetroWrapper.json')
     }
 
     from(proguard.outputs.files.singleFile) {
@@ -212,7 +215,28 @@ task createMultiMCInstance(dependsOn: proguard, type: Zip) {
     }
 }
 
-build.finalizedBy(createMultiMCInstance)
+// This task creates a Java 9+ compatible MultiMC instance with the current build of RetroWrapper.
+// This instance uses newer libraries than the standard launcher so LaunchWrapper can run on Java 9+.
+task createJ9MultiMCInstance(dependsOn: proguard, type: Zip) {
+    inputs.property "rrVersion", project.version
+    inputs.property "versionWithMetadata", versionWithMetadata
+    archiveFileName = rootProject.name + "-" + project.version + "-MultiMC.J9+.zip"
+    destinationDirectory = layout.buildDirectory.dir('libs')
+
+    from('multimc') {
+        exclude 'patches/RetroWrapper-J7.json'
+        filesMatching(["mmc-pack.json", "patches/RetroWrapper-J9.json"]) {
+            filter(ReplaceTokens, tokens: [rrVersion: project.version])
+        }
+        rename ('RetroWrapper-J9.json', 'RetroWrapper.json')
+    }
+
+    from(proguard.outputs.files.singleFile) {
+        into 'libraries/'
+    }
+}
+
+build.finalizedBy(createMultiMCInstance, createJ9MultiMCInstance)
 
 artifacts {
     archives sourcesJar

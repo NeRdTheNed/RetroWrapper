@@ -115,11 +115,16 @@ public final class MouseTweakInjector implements IClassTransformer {
 
                 for (final MethodInsnNode toPatch : foundMouseDXYMethodCalls) {
                     final AbstractInsnNode next = toPatch.getNext();
+                    final AbstractInsnNode next2 = next.getNext();
 
                     // Patch calls to Mouse.getDX or Mouse.getDY that are discarded.
                     if (next.getOpcode() == Opcodes.POP) {
                         System.out.println("Patching call to " + toPatch.name + " at class " + name);
                         methodNode.instructions.remove(next);
+                        methodNode.instructions.remove(toPatch);
+                    } else if ((next.getOpcode() == Opcodes.ICONST_0) && (next2.getOpcode() == Opcodes.IMUL)) {
+                        System.out.println("Patching call to " + toPatch.name + " at class " + name);
+                        methodNode.instructions.remove(next2);
                         methodNode.instructions.remove(toPatch);
                     } else {
                         //System.out.println("Warning: Return value of call to " + toPatch.name + " at class " + name + " was actually used, this should never happen!");

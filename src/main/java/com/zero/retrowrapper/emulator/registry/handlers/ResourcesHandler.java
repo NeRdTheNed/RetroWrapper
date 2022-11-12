@@ -69,8 +69,9 @@ public final class ResourcesHandler extends EmulatorHandler {
                 final JsonValue json = Json.parse(sc.next());
                 final JsonObject obj = json.asObject();
                 jsonObjects = obj.get("objects").asObject();
+                System.out.println("Using local legacy.json.");
             } catch (final Exception ee) {
-                System.out.println("Exception loading local legacy.json: " + ExceptionUtils.getStackTrace(ee));
+                System.out.println("Exception loading local legacy.json: " + ExceptionUtils.getStackTrace(ee) + "\nThe sound fix probably won't work.");
             }
         }
     }

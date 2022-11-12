@@ -16,6 +16,9 @@ import java.util.Map;
 
 import javax.swing.JPanel;
 
+import org.apache.commons.lang3.SystemUtils;
+import org.lwjgl.Sys;
+
 import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.hack.HackThread;
@@ -45,6 +48,48 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
         System.out.println("*       emulator by 000      *");
         System.out.println("******************************");
         System.out.println("RetroWrapper version " + MetadataUtil.VERSION);
+
+        try {
+            final String lwjglVersion = Sys.getVersion();
+            System.out.println("LWJGL version " + lwjglVersion);
+            final String[] versionSplit = lwjglVersion.split("\\.");
+            int majorVersion = 0;
+            int minorVersion = 0;
+            int patchVersion = 0;
+
+            if ((versionSplit != null) && (versionSplit.length > 0)) {
+                try {
+                    majorVersion = Integer.parseInt(versionSplit[0]);
+                } catch (final NumberFormatException e) {
+                    e.printStackTrace();
+                }
+
+                if (versionSplit.length > 1) {
+                    try {
+                        minorVersion = Integer.parseInt(versionSplit[1]);
+                    } catch (final NumberFormatException e) {
+                        e.printStackTrace();
+                    }
+
+                    if (versionSplit.length > 2) {
+                        try {
+                            patchVersion = Integer.parseInt(versionSplit[2]);
+                        } catch (final NumberFormatException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+
+            if (majorVersion > 2) {
+                System.out.println("Somehow, you're using LWJGL " + majorVersion + " despite this method calling a LWJGL 2 method. Consider me impressed.");
+            } else if ((SystemUtils.IS_OS_MAC) && (majorVersion == 2) && ((minorVersion < 9) || ((minorVersion == 9) && (patchVersion < 3)))) {
+                System.out.println("Warning: LWJGL 2.9.3 or higher is recommended on newer versions of MacOS.");
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+
         new RetroEmulator().start();
 
         try {

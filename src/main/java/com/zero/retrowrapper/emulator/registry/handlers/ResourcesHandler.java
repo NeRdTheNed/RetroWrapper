@@ -9,7 +9,10 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.Scanner;
 
+import javax.net.ssl.SSLHandshakeException;
+
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.eclipsesource.json.Json;
@@ -64,6 +67,12 @@ public final class ResourcesHandler extends EmulatorHandler {
             jsonObjects = obj.get("objects").asObject();
         } catch (final Exception e) {
             System.out.println("Exception downloading legacy.json: " + ExceptionUtils.getStackTrace(e));
+
+            if (e instanceof SSLHandshakeException) {
+                System.out.println("The Java installation that Minecraft is running on " +
+                                   "(" + SystemUtils.JAVA_VERSION + " (" + SystemUtils.JAVA_VENDOR + " " + SystemUtils.JAVA_VM_VERSION + ") located at " + SystemUtils.JAVA_HOME + ")" +
+                                   " may not support modern versions of TLS/SSL (e.g. TLSv1.3). Consider using a newer Java installation to fix this.");
+            }
 
             try (Scanner sc = new Scanner(new File(Launch.minecraftHome + "/assets/indexes/legacy.json")).useDelimiter("\\A")) {
                 final JsonValue json = Json.parse(sc.next());

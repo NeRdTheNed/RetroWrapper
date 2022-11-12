@@ -104,8 +104,6 @@ public final class RetroTweakInjector implements IClassTransformer {
                         }
 
                         instruction = iterator.next();
-                        // TODO Figure out which version of ASM RetroWrapper should target
-                        @SuppressWarnings("deprecation")
                         final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/RetroTweakInjector", "inject", "()Ljava/io/File;");
                         runMethod.instructions.insertBefore(instruction, methodInsNode);
                         runMethod.instructions.insertBefore(instruction, new VarInsnNode(ASTORE, 2));

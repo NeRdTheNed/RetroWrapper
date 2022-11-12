@@ -3,6 +3,8 @@ package com.zero.retrowrapper;
 import java.io.File;
 import java.util.List;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 
@@ -17,7 +19,10 @@ public final class RetroTweaker implements ITweaker {
     @Override
     public void injectIntoClassLoader(LaunchClassLoader classLoader) {
         classLoader.registerTransformer("com.zero.retrowrapper.injector.RetroTweakInjector");
-        classLoader.registerTransformer("com.zero.retrowrapper.injector.MouseTweakInjector");
+
+        if (SystemUtils.IS_OS_MAC) {
+            classLoader.registerTransformer("com.zero.retrowrapper.injector.MouseTweakInjector");
+        }
     }
 
     @Override

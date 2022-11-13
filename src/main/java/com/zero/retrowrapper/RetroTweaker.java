@@ -18,8 +18,12 @@ public final class RetroTweaker implements ITweaker {
 
     @Override
     public void injectIntoClassLoader(LaunchClassLoader classLoader) {
+        // URL replacements
         classLoader.registerTransformer("com.zero.retrowrapper.injector.RetroTweakInjector");
+        // Patches to use a 24 bit depth buffer when creating displays
+        classLoader.registerTransformer("com.zero.retrowrapper.injector.DisplayTweakInjector");
 
+        // Patches to fix crash bugs on MacOS related to mouse movement + some tweaks to display the cursor correctly
         if (SystemUtils.IS_OS_MAC) {
             classLoader.registerTransformer("com.zero.retrowrapper.injector.MouseTweakInjector");
         }

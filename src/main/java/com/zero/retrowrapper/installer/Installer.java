@@ -169,13 +169,13 @@ public final class Installer {
 
         model = new DefaultListModel<String>();
         list = new JList<String>(model);
-        frame = new JFrame("Retrowrapper - NeRd Fork");
+        frame = new JFrame("RetroWrapper - NeRd Fork");
         frame.setPreferredSize(new Dimension(654, 420));
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setResizable(true);
         // Installer label
-        final JLabel installerLabel = new JLabel("Retrowrapper Installer");
+        final JLabel installerLabel = new JLabel("RetroWrapper Installer");
         installerLabel.setFont(installerLabel.getFont().deriveFont(20F).deriveFont(Font.BOLD));
         SwingUtil.addJLabelCentered(frame, installerLabel);
         // Version label
@@ -342,7 +342,10 @@ public final class Installer {
         installerLogger.log(Level.INFO, "Logger initialized.");
 
         try {
-            System.setProperty("apple.awt.application.name", "Retrowrapper Installer");
+            System.setProperty("apple.awt.application.name", "RetroWrapper Installer");
+            // TODO Backport to Java 6
+            System.setProperty("com.apple.mrj.application.apple.menu.about.name", "RetroWrapper Installer");
+            System.setProperty("apple.laf.useScreenMenuBar", "true");
 
             // TODO Proper dark mode
             if (System.getProperty("apple.awt.application.appearance") == null) {

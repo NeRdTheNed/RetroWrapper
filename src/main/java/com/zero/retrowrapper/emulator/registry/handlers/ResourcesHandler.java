@@ -74,13 +74,22 @@ public final class ResourcesHandler extends EmulatorHandler {
                                    " may not support modern versions of TLS/SSL (e.g. TLSv1.3). Consider using a newer Java installation to fix this.");
             }
 
-            try (Scanner sc = new Scanner(new File(Launch.minecraftHome + "/assets/indexes/legacy.json")).useDelimiter("\\A")) {
-                final JsonValue json = Json.parse(sc.next());
-                final JsonObject obj = json.asObject();
-                jsonObjects = obj.get("objects").asObject();
-                System.out.println("Using local legacy.json.");
-            } catch (final Exception ee) {
-                System.out.println("Exception loading local legacy.json: " + ExceptionUtils.getStackTrace(ee) + "\nThe sound fix probably won't work.");
+            final File backupFile = FileUtil.tryFindFirstFile(
+                                        new File(Launch.minecraftHome + "/assets/indexes/legacy.json"), new File(Launch.minecraftHome + "/assets/indexes/pre-1.6.json"),
+                                        new File(FileUtil.defaultMinecraftDirectory() + "/assets/indexes/legacy.json"), new File(FileUtil.defaultMinecraftDirectory() + "/assets/indexes/pre-1.6.json")
+                                    );
+
+            if (backupFile != null) {
+                try (Scanner sc = new Scanner(backupFile).useDelimiter("\\A")) {
+                    final JsonValue json = Json.parse(sc.next());
+                    final JsonObject obj = json.asObject();
+                    jsonObjects = obj.get("objects").asObject();
+                    System.out.println("Using local legacy.json.");
+                } catch (final Exception ee) {
+                    System.out.println("Exception loading local legacy.json: " + ExceptionUtils.getStackTrace(ee) + "\nThe sound fix probably won't work.");
+                }
+            } else {
+                System.out.println("Could not find local legacy.json.\nThe sound fix probably won't work.");
             }
         }
     }
@@ -154,7 +163,7 @@ public final class ResourcesHandler extends EmulatorHandler {
         } catch (final Exception e) {
             System.out.println("Resource " + res + " not downloaded due to exception: " + ExceptionUtils.getStackTrace(e));
             e.printStackTrace();
-            final File backupFile = FileUtil.tryFindFirstFile(new File(Launch.minecraftHome + "/resources/", res), new File(Launch.minecraftHome + "/assets/virtual/legacy/", res));
+            final File backupFile = FileUtil.tryFindResourceFile(res);
 
             if (backupFile != null) {
                 try (FileInputStream fis = new FileInputStream(backupFile)) {

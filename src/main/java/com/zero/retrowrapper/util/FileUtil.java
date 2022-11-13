@@ -55,9 +55,13 @@ public class FileUtil {
     // TODO @Nullable?
     public static File tryFindResourceFile(String file) {
         final File oldLocation = new File(Launch.assetsDir, file);
-        final File virtualPreAssets = new File(Launch.minecraftHome, "assets/virtual/pre-1.6/" + file);
+        final File resLocation = new File(Launch.minecraftHome, "resources/" + file);
         final File virtualLegacyAssets = new File(Launch.minecraftHome, "assets/virtual/legacy/" + file);
-        return tryFindFirstFile(oldLocation, virtualPreAssets, virtualLegacyAssets);
+        final File virtualPreAssets = new File(Launch.minecraftHome, "assets/virtual/pre-1.6/" + file);
+        final File defResLocation = new File(defaultMinecraftDirectory(), "resources/" + file);
+        final File defVirtualLegacyAssets = new File(defaultMinecraftDirectory(), "assets/virtual/legacy/" + file);
+        final File defVirtualPreAssets = new File(defaultMinecraftDirectory(), "assets/virtual/pre-1.6/" + file);
+        return tryFindFirstFile(oldLocation, resLocation, virtualLegacyAssets, virtualPreAssets, defResLocation, defVirtualLegacyAssets, defVirtualPreAssets);
     }
 
     private FileUtil() {

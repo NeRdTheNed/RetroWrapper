@@ -331,11 +331,8 @@ public final class Installer {
 
         installerLogger = temp;
         installerLogger.log(Level.INFO, "Logger initialized.");
-
         SwingUtil.setupMacOSProperties(installerLogger);
-
         setupDebugKeyCombos(installerLogger);
-
         installerLogger.log(Level.INFO, "Starting RetroWrapper installer");
 
         try {
@@ -486,7 +483,7 @@ public final class Installer {
                 }
             });
         } catch (final Exception ignored) {
-        	logger.log(Level.WARNING, "Could not add KeyEventDispatcher, debug key combinations will not work", ignored);
+            logger.log(Level.WARNING, "Could not add KeyEventDispatcher, debug key combinations will not work", ignored);
         }
     }
 

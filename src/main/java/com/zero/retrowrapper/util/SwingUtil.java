@@ -119,7 +119,7 @@ public class SwingUtil {
                 System.setProperty("apple.awt.application.appearance", "system");
             }
         } catch (final Exception ignored) {
-        	logger.log(Level.WARNING, "An Exception was thrown while trying to set system properties", ignored);
+            logger.log(Level.WARNING, "An Exception was thrown while trying to set system properties", ignored);
         }
     }
 

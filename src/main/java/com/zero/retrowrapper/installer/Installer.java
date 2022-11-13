@@ -67,8 +67,8 @@ public final class Installer {
     private static JButton install;
     private static JButton uninstall;
 
-    private static DefaultListModel<String> model = new DefaultListModel<String>();
-    private static JList<String> list = new JList<String>(model);
+    private static DefaultListModel<String> model;
+    private static JList<String> list;
 
     private static JFrame frame;
 
@@ -167,6 +167,8 @@ public final class Installer {
             installerLogger.log(Level.WARNING, "setLookAndFeel failed", e);
         }
 
+        model = new DefaultListModel<String>();
+        list = new JList<String>(model);
         frame = new JFrame("Retrowrapper - NeRd Fork");
         frame.setPreferredSize(new Dimension(654, 420));
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
@@ -338,6 +340,17 @@ public final class Installer {
 
         installerLogger = temp;
         installerLogger.log(Level.INFO, "Logger initialized.");
+
+        try {
+            System.setProperty("apple.awt.application.name", "Retrowrapper Installer");
+
+            // TODO Proper dark mode
+            if (System.getProperty("apple.awt.application.appearance") == null) {
+                System.setProperty("apple.awt.application.appearance", "system");
+            }
+        } catch (final Exception ignored) {
+            temp.log(Level.WARNING, "An Exception was thrown while trying to set system properties", ignored);
+        }
 
         try {
             final KeyboardFocusManager keyboardFocusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();

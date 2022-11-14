@@ -107,11 +107,11 @@ public class SwingUtil {
         }
     }
 
-    public static void setupMacOSProperties(Logger logger) {
+    public static void setupMacOSProperties(Logger logger, String title) {
         try {
-            System.setProperty("apple.awt.application.name", "RetroWrapper Installer");
+            System.setProperty("apple.awt.application.name", title);
             // TODO Backport to Java 6
-            System.setProperty("com.apple.mrj.application.apple.menu.about.name", "RetroWrapper Installer");
+            System.setProperty("com.apple.mrj.application.apple.menu.about.name", title);
             System.setProperty("apple.laf.useScreenMenuBar", "true");
 
             // TODO Proper dark mode
@@ -123,11 +123,11 @@ public class SwingUtil {
         }
     }
 
-    public static void showExceptionHandler(final Logger installerLogger, final String context, final Exception toShow) {
+    public static void showExceptionHandler(final Logger logger, final String context, final Exception toShow) {
         final String exeptText = ExceptionUtils.getStackTrace(toShow);
-        installerLogger.log(Level.FINE, "Displaying exception handler with context \"{0}\" and stacktrace \"{1}\"", new Object[] { context, exeptText });
+        logger.log(Level.FINE, "Displaying exception handler with context \"{0}\" and stacktrace \"{1}\"", new Object[] { context, exeptText });
         final String dialogTitle = "RetroWrapper error report: " + context;
-        final String issueTitle = toShow.getClass().getSimpleName() + " thrown when installing RetroWrapper " + MetadataUtil.VERSION;
+        final String issueTitle = toShow.getClass().getSimpleName() + " thrown when running RetroWrapper " + MetadataUtil.VERSION;
         final String githubIssueTitle = issueTitle + " (modify to add context)";
         final String baseIssueBody = "RetroWrapper version: " + MetadataUtil.VERSION + "\nOS: " + SystemUtils.OS_NAME + "\nJava version: " + SystemUtils.JAVA_VERSION + "\nInternal reason: " + context;
         final String displayIssueBody = baseIssueBody + "\nStacktrace:\n" + exeptText;
@@ -156,7 +156,7 @@ public class SwingUtil {
                         try {
                             Desktop.getDesktop().browse(event.getURL().toURI());
                         } catch (final Exception ignored) {
-                            installerLogger.log(Level.WARNING, "Could not open link from hyperlinkUpdate", ignored);
+                            logger.log(Level.WARNING, "Could not open link from hyperlinkUpdate", ignored);
                             JOptionPane.showMessageDialog(textPane, "Your platform doesn't let Java open links.\nPlease browse to https://github.com/NeRdTheNed/RetroWrapper/issues/new to create an issue.\nPlease copy-paste the error report into the issue.\nThanks for putting up with this!", "Sorry", JOptionPane.INFORMATION_MESSAGE);
                         }
                     }
@@ -168,7 +168,7 @@ public class SwingUtil {
             jsp.setBorder(null);
             JOptionPane.showMessageDialog(errorFrame, jsp, dialogTitle, JOptionPane.ERROR_MESSAGE);
         } catch (final Exception ignored) {
-            installerLogger.log(Level.WARNING, "An Exception was thrown while trying to display the exception handler", ignored);
+            logger.log(Level.WARNING, "An Exception was thrown while trying to display the exception handler", ignored);
             JOptionPane.showMessageDialog(errorFrame, "Please report this issue on GitHub!\nhttps://github.com/NeRdTheNed/RetroWrapper/issues/new\nPlease take a screenshot of this message for the issue.\n" + dialogTitle + "\n" + issueTitle + "\n" + displayIssueBody, "(Backup handler) " + dialogTitle, JOptionPane.ERROR_MESSAGE);
         }
 

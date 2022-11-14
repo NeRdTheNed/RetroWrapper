@@ -331,7 +331,7 @@ public final class Installer {
 
         installerLogger = temp;
         installerLogger.log(Level.INFO, "Logger initialized.");
-        SwingUtil.setupMacOSProperties(installerLogger);
+        SwingUtil.setupMacOSProperties(installerLogger, "RetroWrapper Installer");
         setupDebugKeyCombos(installerLogger);
         installerLogger.log(Level.INFO, "Starting RetroWrapper installer");
 

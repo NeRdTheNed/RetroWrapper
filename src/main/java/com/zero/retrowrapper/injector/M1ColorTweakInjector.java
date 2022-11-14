@@ -3,8 +3,6 @@ package com.zero.retrowrapper.injector;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -24,8 +22,6 @@ import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
-
-import com.zero.retrowrapper.emulator.RetroEmulator;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 
@@ -334,14 +330,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
 
             final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
             classNode.accept(writer);
-            final byte[] bytes = writer.toByteArray();
-            final File imageCache = new File(RetroEmulator.getInstance().getCacheDirectory(), name + ".class");
-
-            try (FileOutputStream fos = new FileOutputStream(imageCache)) {
-                fos.write(bytes);
-            }
-
-            return bytes;
+            return writer.toByteArray();
         } catch (final Exception e) {
             System.out.println("Exception while transforming class " + name);
             e.printStackTrace();

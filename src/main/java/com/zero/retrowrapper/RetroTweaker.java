@@ -26,6 +26,11 @@ public final class RetroTweaker implements ITweaker {
         // Patches to fix crash bugs on MacOS related to mouse movement + some tweaks to display the cursor correctly
         if (SystemUtils.IS_OS_MAC) {
             classLoader.registerTransformer("com.zero.retrowrapper.injector.MouseTweakInjector");
+
+            // TODO
+            if ("aarch64".equals(SystemUtils.OS_ARCH) && (System.getProperties().getProperty("retrowrapper.enableExperimentalPatches") != null)) {
+                classLoader.registerTransformer("com.zero.retrowrapper.injector.M1ColorTweakInjector");
+            }
         }
     }
 

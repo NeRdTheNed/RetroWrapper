@@ -79,14 +79,14 @@ public final class MouseTweakInjector implements IClassTransformer {
                                 foundNativeCursorMethodCalls.add(methodInsNode);
                             }
 
-                            if (System.getProperties().getProperty("retrowrapper.enableExperimentalPatches") != null) {
+                            if (System.getProperties().getProperty("retrowrapper.disableMouseReplacementPatches") == null) {
                                 if ("org/lwjgl/input/Mouse".equals(methodOwner) && "()I".equals(methodDesc) && ("getDX".equals(methodName) || "getDY".equals(methodName))) {
                                     foundMouseDXYMethodCalls.add(methodInsNode);
                                 }
                             }
                         }
 
-                        if ((opcode == Opcodes.INVOKEVIRTUAL) && (System.getProperties().getProperty("retrowrapper.enableExperimentalPatches") != null)) {
+                        if ((opcode == Opcodes.INVOKEVIRTUAL) && (System.getProperties().getProperty("retrowrapper.disableMouseReplacementPatches") == null)) {
                             if ("java/awt/PointerInfo".equals(methodOwner) && "()Ljava/awt/Point;".equals(methodDesc) && "getLocation".equals(methodName)) {
                                 foundMouseInfoMethodCalls.add(methodInsNode);
                             }
@@ -195,7 +195,7 @@ public final class MouseTweakInjector implements IClassTransformer {
             e.printStackTrace();
         }
 
-        if (System.getProperties().getProperty("retrowrapper.enableExperimentalPatches") != null) {
+        if (System.getProperties().getProperty("retrowrapper.disableMouseReplacementPatches") == null) {
             final Canvas canvas = Display.getParent();
 
             if (!shouldHide) {

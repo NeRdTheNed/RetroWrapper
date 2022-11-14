@@ -295,7 +295,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final LabelNode target = new LabelNode();
                     final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
                     final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
-                    // RGB
+                    // RGBA
                     final VarInsnNode storeA = new VarInsnNode(Opcodes.DSTORE, index);
                     // RGB
                     final InsnNode dup2_x2 = new InsnNode(Opcodes.DUP2_X2);
@@ -362,9 +362,8 @@ public final class M1ColorTweakInjector implements IClassTransformer {
             for (int i = 0; i < adaptedFormat.length; i++) {
                 final int color = adaptedFormat[i];
                 adaptedFormat[i] =
-                    (color & 0xFF000000)   |
+                    (color & 0xFF00FF00)   |
                     ((color >> 16) & 0xFF) |
-                    (color & 0xFF00)       |
                     ((color & 0xFF) << 16) ;
             }
         }

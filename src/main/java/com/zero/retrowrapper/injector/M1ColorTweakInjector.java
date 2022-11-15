@@ -148,16 +148,6 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     methodNode.instructions.remove(toPatch);
                 }
 
-                /*
-                for (final MethodInsnNode toPatch : foundSwap3Calls) {
-                    System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
-                    // RGB to RBG: Swap last stack values.
-                    // Non-double version, doubles require special handling.
-                    final InsnNode swap = new InsnNode(Opcodes.SWAP);
-                    methodNode.instructions.insertBefore(toPatch, swap);
-                }
-                */
-
                 for (final MethodInsnNode toPatch : foundSwap3Calls) {
                     System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                     // RGB to BGR
@@ -179,18 +169,6 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     methodNode.instructions.insertBefore(toPatch, swap);
                     methodNode.instructions.insertBefore(toPatch, target);
                 }
-
-                /*
-                for (final MethodInsnNode toPatch : foundSwap3DoubleCalls) {
-                    System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
-                    // RGB to RBG: Swap last stack values.
-                    // Double version, doubles require special handling.
-                    final InsnNode dup2_x2 = new InsnNode(Opcodes.DUP2_X2);
-                    final InsnNode pop2 = new InsnNode(Opcodes.POP2);
-                    methodNode.instructions.insertBefore(toPatch, dup2_x2);
-                    methodNode.instructions.insertBefore(toPatch, pop2);
-                }
-                */
 
                 for (final MethodInsnNode toPatch : foundSwap3DoubleCalls) {
                     System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
@@ -230,28 +208,6 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     methodNode.instructions.insertBefore(toPatch, pop2_3);
                     methodNode.instructions.insertBefore(toPatch, target);
                 }
-
-                /*for (final MethodInsnNode toPatch : foundSwap4Calls) {
-                    System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
-                    // RGBA to RBGA: Swap stack variable order from (1, 2, 3, 4) to (1, 3, 2, 4).
-                    // Non-double version, doubles require special handling.
-                    // 1, 2, 3, 4
-                    final InsnNode dup_x2 = new InsnNode(Opcodes.DUP_X2);
-                    // 1, 4, 2, 3, 4
-                    final InsnNode pop = new InsnNode(Opcodes.POP);
-                    // 1, 4, 2, 3
-                    final InsnNode swap = new InsnNode(Opcodes.SWAP);
-                    // 1, 4, 3, 2
-                    final InsnNode dup2_x1 = new InsnNode(Opcodes.DUP2_X1);
-                    // 1, 3, 2, 4, 3, 2
-                    final InsnNode pop2 = new InsnNode(Opcodes.POP2);
-                    // 1, 3, 2, 4
-                    methodNode.instructions.insertBefore(toPatch, dup_x2);
-                    methodNode.instructions.insertBefore(toPatch, pop);
-                    methodNode.instructions.insertBefore(toPatch, swap);
-                    methodNode.instructions.insertBefore(toPatch, dup2_x1);
-                    methodNode.instructions.insertBefore(toPatch, pop2);
-                }*/
 
                 for (final MethodInsnNode toPatch : foundSwap4Calls) {
                     System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);

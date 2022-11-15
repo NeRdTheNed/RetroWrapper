@@ -96,39 +96,50 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 boolean hasPercents = false;
                 boolean hasBlur = false;
                 boolean hasClamp = false;
+                boolean callsImageIO = false;
 
                 while (iterator.hasNext()) {
                     final AbstractInsnNode instruction = iterator.next();
                     final int opcode = instruction.getOpcode();
 
-                    if ("()V".equals(methodNode.desc) && ((methodNode.access & Opcodes.ACC_PUBLIC) != 0) && (opcode == Opcodes.LDC)) {
-                        final LdcInsnNode ldc = (LdcInsnNode)instruction;
+                    if ("()V".equals(methodNode.desc) && ((methodNode.access & Opcodes.ACC_PUBLIC) != 0)) {
+                        if (opcode == Opcodes.LDC) {
+                            final LdcInsnNode ldc = (LdcInsnNode)instruction;
 
-                        if (ldc.cst instanceof String) {
-                            final String string = (String)ldc.cst;
+                            if (ldc.cst instanceof String) {
+                                final String string = (String)ldc.cst;
 
-                            switch (string) {
-                            case "##":
-                                hasHashes = true;
-                                break;
+                                switch (string) {
+                                case "##":
+                                    hasHashes = true;
+                                    break;
 
-                            case "%%":
-                                hasPercents = true;
-                                break;
+                                case "%%":
+                                    hasPercents = true;
+                                    break;
 
-                            case "%clamp%":
-                                hasClamp = true;
-                                break;
+                                case "%clamp%":
+                                    hasClamp = true;
+                                    break;
 
-                            case "%blur%":
-                                hasBlur = true;
-                                break;
+                                case "%blur%":
+                                    hasBlur = true;
+                                    break;
 
-                            default:
-                                break;
+                                default:
+                                    break;
+                                }
+                            }
+                        } else if (opcode == Opcodes.INVOKESTATIC) {
+                            final MethodInsnNode methodInsNode = (MethodInsnNode) instruction;
+
+                            if ("javax/imageio/ImageIO".equals(methodInsNode.owner) && "read".equals(methodInsNode.name)) {
+                                callsImageIO = true;
                             }
                         }
-                    } else if ((opcode <= Opcodes.INVOKEINTERFACE) && (opcode >= Opcodes.INVOKEVIRTUAL)) {
+                    }
+
+                    if ((opcode <= Opcodes.INVOKEINTERFACE) && (opcode >= Opcodes.INVOKEVIRTUAL)) {
                         final MethodInsnNode methodInsNode = (MethodInsnNode) instruction;
                         final String methodOwner = methodInsNode.owner;
                         final String methodName = methodInsNode.name;
@@ -176,7 +187,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     }
                 }
 
-                if (hasHashes && (hasPercents || (hasClamp && hasBlur))) {
+                if (hasHashes && (hasPercents || (hasClamp && hasBlur) || callsImageIO)) {
                     System.out.println("Found texture reload method at class " + name);
                     reloadTexturesClassName = name;
                     reloadTexturesMethodName = methodNode.name;

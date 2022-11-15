@@ -3,6 +3,8 @@ package com.zero.retrowrapper.injector;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -19,9 +21,12 @@ import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
+
+import com.zero.retrowrapper.emulator.EmulatorConfig;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 
@@ -56,6 +61,12 @@ public final class M1ColorTweakInjector implements IClassTransformer {
 
     public static boolean isMinecraftFullscreen = true;
 
+    private static String reloadTexturesMethodName = null;
+    private static String reloadTexturesClassName = null;
+
+    private static Object reloadTexturesInstance = null;
+    private static Method reloadTexturesMethod = null;
+
     /**
      * TODO WIP patches
      * TODO @Nullable?
@@ -81,12 +92,43 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 final List<MethodInsnNode> foundSwap4DoubleCalls = new ArrayList<MethodInsnNode>();
                 @SuppressWarnings("unchecked")
                 final ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
+                boolean hasHashes = false;
+                boolean hasPercents = false;
+                boolean hasBlur = false;
+                boolean hasClamp = false;
 
                 while (iterator.hasNext()) {
                     final AbstractInsnNode instruction = iterator.next();
                     final int opcode = instruction.getOpcode();
 
-                    if ((opcode <= Opcodes.INVOKEINTERFACE) && (opcode >= Opcodes.INVOKEVIRTUAL)) {
+                    if ("()V".equals(methodNode.desc) && ((methodNode.access & Opcodes.ACC_PUBLIC) != 0) && (opcode == Opcodes.LDC)) {
+                        final LdcInsnNode ldc = (LdcInsnNode)instruction;
+
+                        if (ldc.cst instanceof String) {
+                            final String string = (String)ldc.cst;
+
+                            switch (string) {
+                            case "##":
+                                hasHashes = true;
+                                break;
+
+                            case "%%":
+                                hasPercents = true;
+                                break;
+
+                            case "%clamp%":
+                                hasClamp = true;
+                                break;
+
+                            case "%blur%":
+                                hasBlur = true;
+                                break;
+
+                            default:
+                                break;
+                            }
+                        }
+                    } else if ((opcode <= Opcodes.INVOKEINTERFACE) && (opcode >= Opcodes.INVOKEVIRTUAL)) {
                         final MethodInsnNode methodInsNode = (MethodInsnNode) instruction;
                         final String methodOwner = methodInsNode.owner;
                         final String methodName = methodInsNode.name;
@@ -132,6 +174,12 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                             }
                         }
                     }
+                }
+
+                if (hasHashes && (hasPercents || (hasClamp && hasBlur))) {
+                    System.out.println("Found texture reload method at class " + name);
+                    reloadTexturesClassName = name;
+                    reloadTexturesMethodName = methodNode.name;
                 }
 
                 for (final MethodInsnNode toPatch : foundSetFullscreenCalls) {
@@ -298,6 +346,62 @@ public final class M1ColorTweakInjector implements IClassTransformer {
     public static void setFullscreenWrapper(boolean fullscreen) throws LWJGLException {
         Display.setFullscreen(fullscreen);
         isMinecraftFullscreen = fullscreen;
+
+        if (((reloadTexturesInstance == null) || (reloadTexturesMethod == null)) && (reloadTexturesMethodName != null) && (reloadTexturesClassName != null)) {
+            try {
+                final Class<?> classWithReloadTextureMethod = RetroTweakInjectorTarget.getaClass(reloadTexturesClassName);
+                reloadTexturesMethod = classWithReloadTextureMethod.getMethod(reloadTexturesMethodName);
+                //System.out.println(classWithReloadTextureMethod);
+                //System.out.println(reloadTexturesMethod);
+                final EmulatorConfig config = EmulatorConfig.getInstance();
+                config.minecraftField.setAccessible(true);
+                final Object minecraft = config.minecraftField.get(config.applet);
+                final Class<?> mcClass = getMostSuper(minecraft.getClass());
+
+                for (final Field field : mcClass.getDeclaredFields()) {
+                    if (classWithReloadTextureMethod.isAssignableFrom(field.getType()) || field.getType().equals(classWithReloadTextureMethod)) {
+                        reloadTexturesInstance = field.get(minecraft);
+                        break;
+                    }
+                }
+
+                /*
+                if (reloadTexturesInstance != null) {
+                    System.out.println("reloadTexturesInstance " + reloadTexturesInstance);
+                } else {
+                    System.out.println("no reloadTexturesInstance found");
+                }
+                */
+            } catch (final Exception e) {
+                System.out.println("Exception while trying to get reload textures method");
+                e.printStackTrace();
+                System.out.println(e);
+            }
+        }
+
+        if ((reloadTexturesInstance != null) && (reloadTexturesMethod != null)) {
+            try {
+                reloadTexturesMethod.invoke(reloadTexturesInstance);
+            } catch (final Exception e) {
+                System.out.println("Exception while trying to invoke reload textures method");
+                e.printStackTrace();
+                System.out.println(e);
+            }
+        } else {
+            System.out.println("Could not find reload textures method");
+        }
+    }
+
+    private static Class<?> getMostSuper(Class<?> toGet) {
+        while (true) {
+            if (toGet.getSuperclass().equals(Object.class)) {
+                break;
+            }
+
+            toGet = toGet.getSuperclass();
+        }
+
+        return toGet;
     }
 
     public static int[] buffImageTweaker(BufferedImage image, int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize) {

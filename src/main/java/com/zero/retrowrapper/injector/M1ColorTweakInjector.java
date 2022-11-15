@@ -86,6 +86,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 final MethodNode methodNode = (MethodNode) methodNodeO;
                 final List<MethodInsnNode> foundSetFullscreenCalls = new ArrayList<MethodInsnNode>();
                 final List<MethodInsnNode> foundGetRGBCalls = new ArrayList<MethodInsnNode>();
+                final List<MethodInsnNode> foundFogFloatBufCalls = new ArrayList<MethodInsnNode>();
                 final List<MethodInsnNode> foundSwap3Calls = new ArrayList<MethodInsnNode>();
                 final List<MethodInsnNode> foundSwap3DoubleCalls = new ArrayList<MethodInsnNode>();
                 final List<MethodInsnNode> foundSwap4Calls = new ArrayList<MethodInsnNode>();
@@ -182,6 +183,10 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                                         break;
                                     }
                                 }
+
+                                if ("glFog".equals(methodName) && "(ILjava/nio/FloatBuffer;)V".equals(methodDesc)) {
+                                    foundFogFloatBufCalls.add(methodInsNode);
+                                }
                             }
                         }
                     }
@@ -205,6 +210,94 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "buffImageTweaker", "(Ljava/awt/image/BufferedImage;IIII[III)[I");
                     methodNode.instructions.insertBefore(toPatch, methodInsNode);
                     methodNode.instructions.remove(toPatch);
+                }
+
+                for (final MethodInsnNode toPatch : foundFogFloatBufCalls) {
+                    System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
+                    // RGBA to BRGA
+                    final LabelNode target = new LabelNode();
+                    final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
+                    final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
+                    // Load float values from buffer
+                    final InsnNode dup_0 = new InsnNode(Opcodes.DUP);
+                    final MethodInsnNode get_1 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "get", "()F");
+                    final InsnNode swap_1 = new InsnNode(Opcodes.SWAP);
+                    final InsnNode dup_1 = new InsnNode(Opcodes.DUP);
+                    final MethodInsnNode get_2 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "get", "()F");
+                    final InsnNode swap_2 = new InsnNode(Opcodes.SWAP);
+                    final InsnNode dup_2 = new InsnNode(Opcodes.DUP);
+                    final MethodInsnNode get_3 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "get", "()F");
+                    final InsnNode swap_3 = new InsnNode(Opcodes.SWAP);
+                    final InsnNode dup_3 = new InsnNode(Opcodes.DUP);
+                    final MethodInsnNode get_4 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "get", "()F");
+                    final InsnNode swap_4 = new InsnNode(Opcodes.SWAP);
+                    // Store reference to buffer
+                    methodNode.maxLocals++;
+                    final int indexR = methodNode.maxLocals;
+                    final VarInsnNode storeR = new VarInsnNode(Opcodes.ASTORE, indexR);
+                    // RGBA -> ARGB because values get consumed in reverse order when putting float values in buffer
+                    final InsnNode swap = new InsnNode(Opcodes.SWAP);
+                    methodNode.maxLocals++;
+                    final int indexB = methodNode.maxLocals;
+                    final VarInsnNode storeB = new VarInsnNode(Opcodes.FSTORE, indexB);
+                    final InsnNode dup_x2 = new InsnNode(Opcodes.DUP_X2);
+                    final InsnNode pop = new InsnNode(Opcodes.POP);
+                    final VarInsnNode loadB = new VarInsnNode(Opcodes.FLOAD, indexB);
+                    // Load reference to buffer
+                    final VarInsnNode loadR = new VarInsnNode(Opcodes.ALOAD, indexR);
+                    final InsnNode dup = new InsnNode(Opcodes.DUP);
+                    // Clear buffer
+                    final MethodInsnNode clear = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "clear", "()Ljava/nio/Buffer;");
+                    final InsnNode popC = new InsnNode(Opcodes.POP);
+                    // Put float values back in buffer
+                    final InsnNode swap_5 = new InsnNode(Opcodes.SWAP);
+                    final MethodInsnNode put1 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "put", "(F)Ljava/nio/FloatBuffer;");
+                    final InsnNode swap_6 = new InsnNode(Opcodes.SWAP);
+                    final MethodInsnNode put2 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "put", "(F)Ljava/nio/FloatBuffer;");
+                    final InsnNode swap_7 = new InsnNode(Opcodes.SWAP);
+                    final MethodInsnNode put3 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "put", "(F)Ljava/nio/FloatBuffer;");
+                    final InsnNode swap_8 = new InsnNode(Opcodes.SWAP);
+                    final MethodInsnNode put4 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "put", "(F)Ljava/nio/FloatBuffer;");
+                    // Flip buffer
+                    final MethodInsnNode flip = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "flip", "()Ljava/nio/Buffer;");
+                    final InsnNode popE = new InsnNode(Opcodes.POP);
+                    final VarInsnNode loadRa = new VarInsnNode(Opcodes.ALOAD, indexR);
+                    methodNode.instructions.insertBefore(toPatch, getFullscreen);
+                    methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+                    methodNode.instructions.insertBefore(toPatch, dup_0);
+                    methodNode.instructions.insertBefore(toPatch, get_1);
+                    methodNode.instructions.insertBefore(toPatch, swap_1);
+                    methodNode.instructions.insertBefore(toPatch, dup_1);
+                    methodNode.instructions.insertBefore(toPatch, get_2);
+                    methodNode.instructions.insertBefore(toPatch, swap_2);
+                    methodNode.instructions.insertBefore(toPatch, dup_2);
+                    methodNode.instructions.insertBefore(toPatch, get_3);
+                    methodNode.instructions.insertBefore(toPatch, swap_3);
+                    methodNode.instructions.insertBefore(toPatch, dup_3);
+                    methodNode.instructions.insertBefore(toPatch, get_4);
+                    methodNode.instructions.insertBefore(toPatch, swap_4);
+                    methodNode.instructions.insertBefore(toPatch, storeR);
+                    methodNode.instructions.insertBefore(toPatch, swap);
+                    methodNode.instructions.insertBefore(toPatch, storeB);
+                    methodNode.instructions.insertBefore(toPatch, dup_x2);
+                    methodNode.instructions.insertBefore(toPatch, pop);
+                    methodNode.instructions.insertBefore(toPatch, loadB);
+                    methodNode.instructions.insertBefore(toPatch, loadR);
+                    methodNode.instructions.insertBefore(toPatch, dup);
+                    methodNode.instructions.insertBefore(toPatch, clear);
+                    methodNode.instructions.insertBefore(toPatch, popC);
+                    methodNode.instructions.insertBefore(toPatch, swap_5);
+                    methodNode.instructions.insertBefore(toPatch, put1);
+                    methodNode.instructions.insertBefore(toPatch, swap_6);
+                    methodNode.instructions.insertBefore(toPatch, put2);
+                    methodNode.instructions.insertBefore(toPatch, swap_7);
+                    methodNode.instructions.insertBefore(toPatch, put3);
+                    methodNode.instructions.insertBefore(toPatch, swap_8);
+                    methodNode.instructions.insertBefore(toPatch, put4);
+                    methodNode.instructions.insertBefore(toPatch, flip);
+                    methodNode.instructions.insertBefore(toPatch, popE);
+                    methodNode.instructions.insertBefore(toPatch, loadRa);
+                    methodNode.instructions.insertBefore(toPatch, target);
                 }
 
                 for (final MethodInsnNode toPatch : foundSwap3Calls) {

@@ -232,13 +232,13 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final MethodInsnNode get_4 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "get", "()F");
                     final InsnNode swap_4 = new InsnNode(Opcodes.SWAP);
                     // Store reference to buffer
-                    methodNode.maxLocals++;
                     final int indexR = methodNode.maxLocals;
+                    methodNode.maxLocals++;
                     final VarInsnNode storeBuffer = new VarInsnNode(Opcodes.ASTORE, indexR);
                     // RGBA -> ARGB because values get consumed in reverse order when putting float values in buffer
                     final InsnNode swap = new InsnNode(Opcodes.SWAP);
-                    methodNode.maxLocals++;
                     final int indexB = methodNode.maxLocals;
+                    methodNode.maxLocals++;
                     final VarInsnNode storeBlue = new VarInsnNode(Opcodes.FSTORE, indexB);
                     final InsnNode dup_x2 = new InsnNode(Opcodes.DUP_X2);
                     final InsnNode pop = new InsnNode(Opcodes.POP);
@@ -329,8 +329,8 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final LabelNode target = new LabelNode();
                     final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
                     final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
-                    methodNode.maxLocals += 2;
                     final int index = methodNode.maxLocals;
+                    methodNode.maxLocals += 2;
                     // RGB
                     final InsnNode dup2_x2 = new InsnNode(Opcodes.DUP2_X2);
                     // RBGB
@@ -366,8 +366,8 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     // RGBA to BRGA
                     // Non-double version, doubles require special handling.
                     final Type storeType = Type.getArgumentTypes(toPatch.desc)[0];
-                    methodNode.maxLocals++;
                     final int index = methodNode.maxLocals;
+                    methodNode.maxLocals++;
                     final LabelNode target = new LabelNode();
                     final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
                     final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
@@ -392,10 +392,10 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     // Never used anyways.
                     // TODO Test
                     // Double version, doubles require special handling.
-                    methodNode.maxLocals += 2;
                     final int index = methodNode.maxLocals;
                     methodNode.maxLocals += 2;
                     final int index2 = methodNode.maxLocals;
+                    methodNode.maxLocals += 2;
                     final LabelNode target = new LabelNode();
                     final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
                     final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);

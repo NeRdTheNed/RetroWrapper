@@ -305,86 +305,151 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                     // RGB to BGR
                     // Non-double version, doubles require special handling.
-                    final LabelNode target = new LabelNode();
-                    final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
-                    final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
-                    // RGB
-                    final InsnNode dup_x2 = new InsnNode(Opcodes.DUP_X2);
-                    // BRGB
-                    final InsnNode pop = new InsnNode(Opcodes.POP);
-                    // BRG
-                    final InsnNode swap = new InsnNode(Opcodes.SWAP);
-                    // BGR
-                    methodNode.instructions.insertBefore(toPatch, getFullscreen);
-                    methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
-                    methodNode.instructions.insertBefore(toPatch, dup_x2);
-                    methodNode.instructions.insertBefore(toPatch, pop);
-                    methodNode.instructions.insertBefore(toPatch, swap);
-                    methodNode.instructions.insertBefore(toPatch, target);
+                    final AbstractInsnNode _p1 = toPatch.getPrevious();
+                    final AbstractInsnNode _p2 = _p1.getPrevious();
+                    final AbstractInsnNode _p3 = _p2.getPrevious();
+                    final AbstractInsnNode[] reorderLoadIns = convLoadIns3OrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
+
+                    if (reorderLoadIns != null) {
+                        final LabelNode normalLoad = new LabelNode();
+                        final LabelNode callMethod = new LabelNode();
+                        final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
+                        final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, normalLoad);
+                        final JumpInsnNode jumpToCallMethod = new JumpInsnNode(Opcodes.GOTO, callMethod);
+                        methodNode.instructions.insertBefore(_p3, getFullscreen);
+                        methodNode.instructions.insertBefore(_p3, skipIfFullscreen);
+                        methodNode.instructions.insertBefore(_p3, reorderLoadIns[0]);
+                        methodNode.instructions.insertBefore(_p3, reorderLoadIns[1]);
+                        methodNode.instructions.insertBefore(_p3, reorderLoadIns[2]);
+                        methodNode.instructions.insertBefore(_p3, jumpToCallMethod);
+                        methodNode.instructions.insertBefore(_p3, normalLoad);
+                        methodNode.instructions.insertBefore(toPatch, callMethod);
+                    } else {
+                        final LabelNode target = new LabelNode();
+                        final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
+                        final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
+                        // RGB
+                        final InsnNode dup_x2 = new InsnNode(Opcodes.DUP_X2);
+                        // BRGB
+                        final InsnNode pop = new InsnNode(Opcodes.POP);
+                        // BRG
+                        final InsnNode swap = new InsnNode(Opcodes.SWAP);
+                        // BGR
+                        methodNode.instructions.insertBefore(toPatch, getFullscreen);
+                        methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+                        methodNode.instructions.insertBefore(toPatch, dup_x2);
+                        methodNode.instructions.insertBefore(toPatch, pop);
+                        methodNode.instructions.insertBefore(toPatch, swap);
+                        methodNode.instructions.insertBefore(toPatch, target);
+                    }
                 }
 
                 for (final MethodInsnNode toPatch : foundSwap3DoubleCalls) {
                     System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                     // RGB to BGR
                     // Double version, doubles require special handling.
-                    final LabelNode target = new LabelNode();
-                    final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
-                    final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
-                    final int index = methodNode.maxLocals;
-                    methodNode.maxLocals += 2;
-                    // RGB
-                    final InsnNode dup2_x2 = new InsnNode(Opcodes.DUP2_X2);
-                    // RBGB
-                    final InsnNode pop2 = new InsnNode(Opcodes.POP2);
-                    // RBG
-                    final VarInsnNode storeG = new VarInsnNode(Opcodes.DSTORE, index);
-                    // RB
-                    final InsnNode dup2_x2_2 = new InsnNode(Opcodes.DUP2_X2);
-                    // BRB
-                    final InsnNode pop2_2 = new InsnNode(Opcodes.POP2);
-                    // BR
-                    final VarInsnNode loadG = new VarInsnNode(Opcodes.DLOAD, index);
-                    // BRG
-                    final InsnNode dup2_x2_3 = new InsnNode(Opcodes.DUP2_X2);
-                    // BGRG
-                    final InsnNode pop2_3 = new InsnNode(Opcodes.POP2);
-                    // BGR
-                    methodNode.instructions.insertBefore(toPatch, getFullscreen);
-                    methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
-                    methodNode.instructions.insertBefore(toPatch, dup2_x2);
-                    methodNode.instructions.insertBefore(toPatch, pop2);
-                    methodNode.instructions.insertBefore(toPatch, storeG);
-                    methodNode.instructions.insertBefore(toPatch, dup2_x2_2);
-                    methodNode.instructions.insertBefore(toPatch, pop2_2);
-                    methodNode.instructions.insertBefore(toPatch, loadG);
-                    methodNode.instructions.insertBefore(toPatch, dup2_x2_3);
-                    methodNode.instructions.insertBefore(toPatch, pop2_3);
-                    methodNode.instructions.insertBefore(toPatch, target);
+                    final AbstractInsnNode _p1 = toPatch.getPrevious();
+                    final AbstractInsnNode _p2 = _p1.getPrevious();
+                    final AbstractInsnNode _p3 = _p2.getPrevious();
+                    final AbstractInsnNode[] reorderLoadIns = convLoadIns3OrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
+
+                    if (reorderLoadIns != null) {
+                        final LabelNode normalLoad = new LabelNode();
+                        final LabelNode callMethod = new LabelNode();
+                        final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
+                        final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, normalLoad);
+                        final JumpInsnNode jumpToCallMethod = new JumpInsnNode(Opcodes.GOTO, callMethod);
+                        methodNode.instructions.insertBefore(_p3, getFullscreen);
+                        methodNode.instructions.insertBefore(_p3, skipIfFullscreen);
+                        methodNode.instructions.insertBefore(_p3, reorderLoadIns[0]);
+                        methodNode.instructions.insertBefore(_p3, reorderLoadIns[1]);
+                        methodNode.instructions.insertBefore(_p3, reorderLoadIns[2]);
+                        methodNode.instructions.insertBefore(_p3, jumpToCallMethod);
+                        methodNode.instructions.insertBefore(_p3, normalLoad);
+                        methodNode.instructions.insertBefore(toPatch, callMethod);
+                    } else {
+                        final LabelNode target = new LabelNode();
+                        final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
+                        final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
+                        final int index = methodNode.maxLocals;
+                        methodNode.maxLocals += 2;
+                        // RGB
+                        final InsnNode dup2_x2 = new InsnNode(Opcodes.DUP2_X2);
+                        // RBGB
+                        final InsnNode pop2 = new InsnNode(Opcodes.POP2);
+                        // RBG
+                        final VarInsnNode storeG = new VarInsnNode(Opcodes.DSTORE, index);
+                        // RB
+                        final InsnNode dup2_x2_2 = new InsnNode(Opcodes.DUP2_X2);
+                        // BRB
+                        final InsnNode pop2_2 = new InsnNode(Opcodes.POP2);
+                        // BR
+                        final VarInsnNode loadG = new VarInsnNode(Opcodes.DLOAD, index);
+                        // BRG
+                        final InsnNode dup2_x2_3 = new InsnNode(Opcodes.DUP2_X2);
+                        // BGRG
+                        final InsnNode pop2_3 = new InsnNode(Opcodes.POP2);
+                        // BGR
+                        methodNode.instructions.insertBefore(toPatch, getFullscreen);
+                        methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+                        methodNode.instructions.insertBefore(toPatch, dup2_x2);
+                        methodNode.instructions.insertBefore(toPatch, pop2);
+                        methodNode.instructions.insertBefore(toPatch, storeG);
+                        methodNode.instructions.insertBefore(toPatch, dup2_x2_2);
+                        methodNode.instructions.insertBefore(toPatch, pop2_2);
+                        methodNode.instructions.insertBefore(toPatch, loadG);
+                        methodNode.instructions.insertBefore(toPatch, dup2_x2_3);
+                        methodNode.instructions.insertBefore(toPatch, pop2_3);
+                        methodNode.instructions.insertBefore(toPatch, target);
+                    }
                 }
 
                 for (final MethodInsnNode toPatch : foundSwap4Calls) {
                     System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                     // RGBA to BRGA
                     // Non-double version, doubles require special handling.
-                    final Type storeType = Type.getArgumentTypes(toPatch.desc)[0];
-                    final int index = methodNode.maxLocals;
-                    methodNode.maxLocals++;
-                    final LabelNode target = new LabelNode();
-                    final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
-                    final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
-                    final VarInsnNode storeA = new VarInsnNode(storeType.getOpcode(Opcodes.ISTORE), index);
-                    final InsnNode dup_x2 = new InsnNode(Opcodes.DUP_X2);
-                    final InsnNode pop = new InsnNode(Opcodes.POP);
-                    final InsnNode swap = new InsnNode(Opcodes.SWAP);
-                    final VarInsnNode loadA = new VarInsnNode(storeType.getOpcode(Opcodes.ILOAD), index);
-                    methodNode.instructions.insertBefore(toPatch, getFullscreen);
-                    methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
-                    methodNode.instructions.insertBefore(toPatch, storeA);
-                    methodNode.instructions.insertBefore(toPatch, dup_x2);
-                    methodNode.instructions.insertBefore(toPatch, pop);
-                    methodNode.instructions.insertBefore(toPatch, swap);
-                    methodNode.instructions.insertBefore(toPatch, loadA);
-                    methodNode.instructions.insertBefore(toPatch, target);
+                    final AbstractInsnNode _p1 = toPatch.getPrevious();
+                    final AbstractInsnNode _p2 = _p1.getPrevious();
+                    final AbstractInsnNode _p3 = _p2.getPrevious();
+                    final AbstractInsnNode _p4 = _p3.getPrevious();
+                    final AbstractInsnNode[] reorderLoadIns = convLoadIns4OrNull(new AbstractInsnNode[] {_p4, _p3, _p2, _p1});
+
+                    if (reorderLoadIns != null) {
+                        final LabelNode normalLoad = new LabelNode();
+                        final LabelNode callMethod = new LabelNode();
+                        final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
+                        final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, normalLoad);
+                        final JumpInsnNode jumpToCallMethod = new JumpInsnNode(Opcodes.GOTO, callMethod);
+                        methodNode.instructions.insertBefore(_p4, getFullscreen);
+                        methodNode.instructions.insertBefore(_p4, skipIfFullscreen);
+                        methodNode.instructions.insertBefore(_p4, reorderLoadIns[0]);
+                        methodNode.instructions.insertBefore(_p4, reorderLoadIns[1]);
+                        methodNode.instructions.insertBefore(_p4, reorderLoadIns[2]);
+                        methodNode.instructions.insertBefore(_p4, reorderLoadIns[3]);
+                        methodNode.instructions.insertBefore(_p4, jumpToCallMethod);
+                        methodNode.instructions.insertBefore(_p4, normalLoad);
+                        methodNode.instructions.insertBefore(toPatch, callMethod);
+                    } else {
+                        final Type storeType = Type.getArgumentTypes(toPatch.desc)[0];
+                        final int index = methodNode.maxLocals;
+                        methodNode.maxLocals++;
+                        final LabelNode target = new LabelNode();
+                        final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
+                        final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
+                        final VarInsnNode storeA = new VarInsnNode(storeType.getOpcode(Opcodes.ISTORE), index);
+                        final InsnNode dup_x2 = new InsnNode(Opcodes.DUP_X2);
+                        final InsnNode pop = new InsnNode(Opcodes.POP);
+                        final InsnNode swap = new InsnNode(Opcodes.SWAP);
+                        final VarInsnNode loadA = new VarInsnNode(storeType.getOpcode(Opcodes.ILOAD), index);
+                        methodNode.instructions.insertBefore(toPatch, getFullscreen);
+                        methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+                        methodNode.instructions.insertBefore(toPatch, storeA);
+                        methodNode.instructions.insertBefore(toPatch, dup_x2);
+                        methodNode.instructions.insertBefore(toPatch, pop);
+                        methodNode.instructions.insertBefore(toPatch, swap);
+                        methodNode.instructions.insertBefore(toPatch, loadA);
+                        methodNode.instructions.insertBefore(toPatch, target);
+                    }
                 }
 
                 for (final MethodInsnNode toPatch : foundSwap4DoubleCalls) {
@@ -393,47 +458,70 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     // Never used anyways.
                     // TODO Test
                     // Double version, doubles require special handling.
-                    final int index = methodNode.maxLocals;
-                    methodNode.maxLocals += 2;
-                    final int index2 = methodNode.maxLocals;
-                    methodNode.maxLocals += 2;
-                    final LabelNode target = new LabelNode();
-                    final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
-                    final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
-                    // RGBA
-                    final VarInsnNode storeA = new VarInsnNode(Opcodes.DSTORE, index);
-                    // RGB
-                    final InsnNode dup2_x2 = new InsnNode(Opcodes.DUP2_X2);
-                    // RBGB
-                    final InsnNode pop2 = new InsnNode(Opcodes.POP2);
-                    // RBG
-                    final VarInsnNode storeG = new VarInsnNode(Opcodes.DSTORE, index2);
-                    // RB
-                    final InsnNode dup2_x2_2 = new InsnNode(Opcodes.DUP2_X2);
-                    // BRB
-                    final InsnNode pop2_2 = new InsnNode(Opcodes.POP2);
-                    // BR
-                    final VarInsnNode loadG = new VarInsnNode(Opcodes.DLOAD, index2);
-                    // BRG
-                    final InsnNode dup2_x2_3 = new InsnNode(Opcodes.DUP2_X2);
-                    // BGRG
-                    final InsnNode pop2_3 = new InsnNode(Opcodes.POP2);
-                    // BGR
-                    final VarInsnNode loadA = new VarInsnNode(Opcodes.DLOAD, index);
-                    // BGRA
-                    methodNode.instructions.insertBefore(toPatch, getFullscreen);
-                    methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
-                    methodNode.instructions.insertBefore(toPatch, storeA);
-                    methodNode.instructions.insertBefore(toPatch, dup2_x2);
-                    methodNode.instructions.insertBefore(toPatch, pop2);
-                    methodNode.instructions.insertBefore(toPatch, storeG);
-                    methodNode.instructions.insertBefore(toPatch, dup2_x2_2);
-                    methodNode.instructions.insertBefore(toPatch, pop2_2);
-                    methodNode.instructions.insertBefore(toPatch, loadG);
-                    methodNode.instructions.insertBefore(toPatch, dup2_x2_3);
-                    methodNode.instructions.insertBefore(toPatch, pop2_3);
-                    methodNode.instructions.insertBefore(toPatch, loadA);
-                    methodNode.instructions.insertBefore(toPatch, target);
+                    final AbstractInsnNode _p1 = toPatch.getPrevious();
+                    final AbstractInsnNode _p2 = _p1.getPrevious();
+                    final AbstractInsnNode _p3 = _p2.getPrevious();
+                    final AbstractInsnNode _p4 = _p3.getPrevious();
+                    final AbstractInsnNode[] reorderLoadIns = convLoadIns4OrNull(new AbstractInsnNode[] {_p4, _p3, _p2, _p1});
+
+                    if (reorderLoadIns != null) {
+                        final LabelNode normalLoad = new LabelNode();
+                        final LabelNode callMethod = new LabelNode();
+                        final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
+                        final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, normalLoad);
+                        final JumpInsnNode jumpToCallMethod = new JumpInsnNode(Opcodes.GOTO, callMethod);
+                        methodNode.instructions.insertBefore(_p4, getFullscreen);
+                        methodNode.instructions.insertBefore(_p4, skipIfFullscreen);
+                        methodNode.instructions.insertBefore(_p4, reorderLoadIns[0]);
+                        methodNode.instructions.insertBefore(_p4, reorderLoadIns[1]);
+                        methodNode.instructions.insertBefore(_p4, reorderLoadIns[2]);
+                        methodNode.instructions.insertBefore(_p4, reorderLoadIns[3]);
+                        methodNode.instructions.insertBefore(_p4, jumpToCallMethod);
+                        methodNode.instructions.insertBefore(_p4, normalLoad);
+                        methodNode.instructions.insertBefore(toPatch, callMethod);
+                    } else {
+                        final int index = methodNode.maxLocals;
+                        methodNode.maxLocals += 2;
+                        final int index2 = methodNode.maxLocals;
+                        methodNode.maxLocals += 2;
+                        final LabelNode target = new LabelNode();
+                        final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
+                        final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
+                        // RGBA
+                        final VarInsnNode storeA = new VarInsnNode(Opcodes.DSTORE, index);
+                        // RGB
+                        final InsnNode dup2_x2 = new InsnNode(Opcodes.DUP2_X2);
+                        // RBGB
+                        final InsnNode pop2 = new InsnNode(Opcodes.POP2);
+                        // RBG
+                        final VarInsnNode storeG = new VarInsnNode(Opcodes.DSTORE, index2);
+                        // RB
+                        final InsnNode dup2_x2_2 = new InsnNode(Opcodes.DUP2_X2);
+                        // BRB
+                        final InsnNode pop2_2 = new InsnNode(Opcodes.POP2);
+                        // BR
+                        final VarInsnNode loadG = new VarInsnNode(Opcodes.DLOAD, index2);
+                        // BRG
+                        final InsnNode dup2_x2_3 = new InsnNode(Opcodes.DUP2_X2);
+                        // BGRG
+                        final InsnNode pop2_3 = new InsnNode(Opcodes.POP2);
+                        // BGR
+                        final VarInsnNode loadA = new VarInsnNode(Opcodes.DLOAD, index);
+                        // BGRA
+                        methodNode.instructions.insertBefore(toPatch, getFullscreen);
+                        methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+                        methodNode.instructions.insertBefore(toPatch, storeA);
+                        methodNode.instructions.insertBefore(toPatch, dup2_x2);
+                        methodNode.instructions.insertBefore(toPatch, pop2);
+                        methodNode.instructions.insertBefore(toPatch, storeG);
+                        methodNode.instructions.insertBefore(toPatch, dup2_x2_2);
+                        methodNode.instructions.insertBefore(toPatch, pop2_2);
+                        methodNode.instructions.insertBefore(toPatch, loadG);
+                        methodNode.instructions.insertBefore(toPatch, dup2_x2_3);
+                        methodNode.instructions.insertBefore(toPatch, pop2_3);
+                        methodNode.instructions.insertBefore(toPatch, loadA);
+                        methodNode.instructions.insertBefore(toPatch, target);
+                    }
                 }
             }
 
@@ -495,6 +583,56 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         } else {
             System.out.println("Could not find reload textures method");
         }
+    }
+
+    private static AbstractInsnNode[] convLoadIns3OrNull(AbstractInsnNode[] from) {
+        if (from.length != 3) {
+            System.out.println("from.length was not 3!");
+            return null;
+        }
+
+        final AbstractInsnNode l1 = JavaUtil.cloneLoadInsOrNull(from[0]);
+
+        if (l1 != null) {
+            final AbstractInsnNode l2 = JavaUtil.cloneLoadInsOrNull(from[1]);
+
+            if (l2 != null) {
+                final AbstractInsnNode l3 = JavaUtil.cloneLoadInsOrNull(from[2]);
+
+                if (l3 != null) {
+                    return new AbstractInsnNode[] { l3, l2, l1 };
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static AbstractInsnNode[] convLoadIns4OrNull(AbstractInsnNode[] from) {
+        if (from.length != 4) {
+            System.out.println("from.length was not 4!");
+            return null;
+        }
+
+        final AbstractInsnNode l1 = JavaUtil.cloneLoadInsOrNull(from[0]);
+
+        if (l1 != null) {
+            final AbstractInsnNode l2 = JavaUtil.cloneLoadInsOrNull(from[1]);
+
+            if (l2 != null) {
+                final AbstractInsnNode l3 = JavaUtil.cloneLoadInsOrNull(from[2]);
+
+                if (l3 != null) {
+                    final AbstractInsnNode l4 = JavaUtil.cloneLoadInsOrNull(from[3]);
+
+                    if (l4 != null) {
+                        return new AbstractInsnNode[] { l3, l2, l1, l4 };
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     public static int[] buffImageTweaker(BufferedImage image, int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize) {

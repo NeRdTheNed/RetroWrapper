@@ -310,7 +310,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
 
                     if (!JavaUtil.doLoadInsMatch(_p1, _p3)) {
                         System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
-                        final AbstractInsnNode[] reorderLoadIns = convLoadIns3OrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
+                        final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
 
                         if (reorderLoadIns != null) {
                             final LabelNode normalLoad = new LabelNode();
@@ -356,7 +356,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
 
                     if (!JavaUtil.doLoadInsMatch(_p1, _p3)) {
                         System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
-                        final AbstractInsnNode[] reorderLoadIns = convLoadIns3OrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
+                        final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
 
                         if (reorderLoadIns != null) {
                             final LabelNode normalLoad = new LabelNode();
@@ -420,7 +420,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
 
                     if (!JavaUtil.doLoadInsMatch(_p2, _p4)) {
                         System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
-                        final AbstractInsnNode[] reorderLoadIns = convLoadIns4OrNull(new AbstractInsnNode[] {_p4, _p3, _p2, _p1});
+                        final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p4, _p3, _p2});
 
                         if (reorderLoadIns != null) {
                             final LabelNode normalLoad = new LabelNode();
@@ -433,10 +433,9 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                             methodNode.instructions.insertBefore(_p4, reorderLoadIns[0]);
                             methodNode.instructions.insertBefore(_p4, reorderLoadIns[1]);
                             methodNode.instructions.insertBefore(_p4, reorderLoadIns[2]);
-                            methodNode.instructions.insertBefore(_p4, reorderLoadIns[3]);
                             methodNode.instructions.insertBefore(_p4, jumpToCallMethod);
                             methodNode.instructions.insertBefore(_p4, normalLoad);
-                            methodNode.instructions.insertBefore(toPatch, callMethod);
+                            methodNode.instructions.insertBefore(_p1, callMethod);
                         } else {
                             final Type storeType = Type.getArgumentTypes(toPatch.desc)[0];
                             final int index = methodNode.maxLocals;
@@ -473,7 +472,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
 
                     if (!JavaUtil.doLoadInsMatch(_p2, _p4)) {
                         System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
-                        final AbstractInsnNode[] reorderLoadIns = convLoadIns4OrNull(new AbstractInsnNode[] {_p4, _p3, _p2, _p1});
+                        final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p4, _p3, _p2});
 
                         if (reorderLoadIns != null) {
                             final LabelNode normalLoad = new LabelNode();
@@ -486,10 +485,9 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                             methodNode.instructions.insertBefore(_p4, reorderLoadIns[0]);
                             methodNode.instructions.insertBefore(_p4, reorderLoadIns[1]);
                             methodNode.instructions.insertBefore(_p4, reorderLoadIns[2]);
-                            methodNode.instructions.insertBefore(_p4, reorderLoadIns[3]);
                             methodNode.instructions.insertBefore(_p4, jumpToCallMethod);
                             methodNode.instructions.insertBefore(_p4, normalLoad);
-                            methodNode.instructions.insertBefore(toPatch, callMethod);
+                            methodNode.instructions.insertBefore(_p1, callMethod);
                         } else {
                             final int index = methodNode.maxLocals;
                             methodNode.maxLocals += 2;
@@ -597,7 +595,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         }
     }
 
-    private static AbstractInsnNode[] convLoadIns3OrNull(AbstractInsnNode[] from) {
+    private static AbstractInsnNode[] convLoadInsOrNull(AbstractInsnNode[] from) {
         if (from.length != 3) {
             System.out.println("from.length was not 3!");
             return null;
@@ -613,33 +611,6 @@ public final class M1ColorTweakInjector implements IClassTransformer {
 
                 if (l3 != null) {
                     return new AbstractInsnNode[] { l3, l2, l1 };
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private static AbstractInsnNode[] convLoadIns4OrNull(AbstractInsnNode[] from) {
-        if (from.length != 4) {
-            System.out.println("from.length was not 4!");
-            return null;
-        }
-
-        final AbstractInsnNode l1 = JavaUtil.cloneLoadInsOrNull(from[0]);
-
-        if (l1 != null) {
-            final AbstractInsnNode l2 = JavaUtil.cloneLoadInsOrNull(from[1]);
-
-            if (l2 != null) {
-                final AbstractInsnNode l3 = JavaUtil.cloneLoadInsOrNull(from[2]);
-
-                if (l3 != null) {
-                    final AbstractInsnNode l4 = JavaUtil.cloneLoadInsOrNull(from[3]);
-
-                    if (l4 != null) {
-                        return new AbstractInsnNode[] { l3, l2, l1, l4 };
-                    }
                 }
             }
         }

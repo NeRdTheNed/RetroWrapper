@@ -20,7 +20,7 @@ public final class JavaUtil {
     public static AbstractInsnNode cloneLoadInsOrNull(AbstractInsnNode ins) {
         final int opcode = ins.getOpcode();
 
-        if ((opcode >= Opcodes.ACONST_NULL) && (opcode <= Opcodes.SALOAD)) {
+        if ((opcode >= Opcodes.ACONST_NULL) && (opcode <= Opcodes.ALOAD)) {
             return ins.clone(null);
         }
 

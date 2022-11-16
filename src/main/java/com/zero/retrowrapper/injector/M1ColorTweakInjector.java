@@ -41,24 +41,24 @@ public final class M1ColorTweakInjector implements IClassTransformer {
      *
      */
 
-    String[] toPatch3 = {
+    private static final String[] toPatch3 = {
         "glColor3b",
         "glColor3f",
         "glColor3ub"
     };
 
-    String[] toPatch3Double = {
+    private static final String[] toPatch3Double = {
         "glColor3d"
     };
 
-    String[] toPatch4 = {
+    private static final String[] toPatch4 = {
         "glColor4b",
         "glColor4f",
         "glColor4ub",
         "glClearColor"
     };
 
-    String[] toPatch4Double = {
+    private static final String[] toPatch4Double = {
         "glColor4d"
     };
 

@@ -26,6 +26,8 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import com.zero.retrowrapper.RetroTweaker;
+import com.zero.retrowrapper.RetroTweaker.M1PatchMode;
 import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.util.JavaUtil;
 
@@ -263,8 +265,12 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final MethodInsnNode flip = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "flip", "()Ljava/nio/Buffer;");
                     final InsnNode pop_return_2 = new InsnNode(Opcodes.POP);
                     final VarInsnNode loadBuffer2 = new VarInsnNode(Opcodes.ALOAD, indexR);
-                    methodNode.instructions.insertBefore(toPatch, getFullscreen);
-                    methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+
+                    if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                        methodNode.instructions.insertBefore(toPatch, getFullscreen);
+                        methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+                    }
+
                     methodNode.instructions.insertBefore(toPatch, dup_0);
                     methodNode.instructions.insertBefore(toPatch, get_1);
                     methodNode.instructions.insertBefore(toPatch, swap_1);
@@ -298,7 +304,10 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     methodNode.instructions.insertBefore(toPatch, flip);
                     methodNode.instructions.insertBefore(toPatch, pop_return_2);
                     methodNode.instructions.insertBefore(toPatch, loadBuffer2);
-                    methodNode.instructions.insertBefore(toPatch, target);
+
+                    if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                        methodNode.instructions.insertBefore(toPatch, target);
+                    }
                 }
 
                 for (final MethodInsnNode toPatch : foundSwap3Calls) {
@@ -318,13 +327,21 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                             final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
                             final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, normalLoad);
                             final JumpInsnNode jumpToCallMethod = new JumpInsnNode(Opcodes.GOTO, callMethod);
-                            methodNode.instructions.insertBefore(_p3, getFullscreen);
-                            methodNode.instructions.insertBefore(_p3, skipIfFullscreen);
+
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(_p3, getFullscreen);
+                                methodNode.instructions.insertBefore(_p3, skipIfFullscreen);
+                            }
+
                             methodNode.instructions.insertBefore(_p3, reorderLoadIns[0]);
                             methodNode.instructions.insertBefore(_p3, reorderLoadIns[1]);
                             methodNode.instructions.insertBefore(_p3, reorderLoadIns[2]);
                             methodNode.instructions.insertBefore(_p3, jumpToCallMethod);
-                            methodNode.instructions.insertBefore(_p3, normalLoad);
+
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(_p3, normalLoad);
+                            }
+
                             methodNode.instructions.insertBefore(toPatch, callMethod);
                         } else {
                             final LabelNode target = new LabelNode();
@@ -336,13 +353,20 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                             final InsnNode pop = new InsnNode(Opcodes.POP);
                             // BRG
                             final InsnNode swap = new InsnNode(Opcodes.SWAP);
+
                             // BGR
-                            methodNode.instructions.insertBefore(toPatch, getFullscreen);
-                            methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(toPatch, getFullscreen);
+                                methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+                            }
+
                             methodNode.instructions.insertBefore(toPatch, dup_x2);
                             methodNode.instructions.insertBefore(toPatch, pop);
                             methodNode.instructions.insertBefore(toPatch, swap);
-                            methodNode.instructions.insertBefore(toPatch, target);
+
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(toPatch, target);
+                            }
                         }
                     }
                 }
@@ -364,13 +388,21 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                             final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
                             final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, normalLoad);
                             final JumpInsnNode jumpToCallMethod = new JumpInsnNode(Opcodes.GOTO, callMethod);
-                            methodNode.instructions.insertBefore(_p3, getFullscreen);
-                            methodNode.instructions.insertBefore(_p3, skipIfFullscreen);
+
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(_p3, getFullscreen);
+                                methodNode.instructions.insertBefore(_p3, skipIfFullscreen);
+                            }
+
                             methodNode.instructions.insertBefore(_p3, reorderLoadIns[0]);
                             methodNode.instructions.insertBefore(_p3, reorderLoadIns[1]);
                             methodNode.instructions.insertBefore(_p3, reorderLoadIns[2]);
                             methodNode.instructions.insertBefore(_p3, jumpToCallMethod);
-                            methodNode.instructions.insertBefore(_p3, normalLoad);
+
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(_p3, normalLoad);
+                            }
+
                             methodNode.instructions.insertBefore(toPatch, callMethod);
                         } else {
                             final LabelNode target = new LabelNode();
@@ -394,9 +426,13 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                             final InsnNode dup2_x2_3 = new InsnNode(Opcodes.DUP2_X2);
                             // BGRG
                             final InsnNode pop2_3 = new InsnNode(Opcodes.POP2);
+
                             // BGR
-                            methodNode.instructions.insertBefore(toPatch, getFullscreen);
-                            methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(toPatch, getFullscreen);
+                                methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+                            }
+
                             methodNode.instructions.insertBefore(toPatch, dup2_x2);
                             methodNode.instructions.insertBefore(toPatch, pop2);
                             methodNode.instructions.insertBefore(toPatch, storeG);
@@ -405,7 +441,10 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                             methodNode.instructions.insertBefore(toPatch, loadG);
                             methodNode.instructions.insertBefore(toPatch, dup2_x2_3);
                             methodNode.instructions.insertBefore(toPatch, pop2_3);
-                            methodNode.instructions.insertBefore(toPatch, target);
+
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(toPatch, target);
+                            }
                         }
                     }
                 }
@@ -428,13 +467,21 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                             final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
                             final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, normalLoad);
                             final JumpInsnNode jumpToCallMethod = new JumpInsnNode(Opcodes.GOTO, callMethod);
-                            methodNode.instructions.insertBefore(_p4, getFullscreen);
-                            methodNode.instructions.insertBefore(_p4, skipIfFullscreen);
+
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(_p4, getFullscreen);
+                                methodNode.instructions.insertBefore(_p4, skipIfFullscreen);
+                            }
+
                             methodNode.instructions.insertBefore(_p4, reorderLoadIns[0]);
                             methodNode.instructions.insertBefore(_p4, reorderLoadIns[1]);
                             methodNode.instructions.insertBefore(_p4, reorderLoadIns[2]);
                             methodNode.instructions.insertBefore(_p4, jumpToCallMethod);
-                            methodNode.instructions.insertBefore(_p4, normalLoad);
+
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(_p4, normalLoad);
+                            }
+
                             methodNode.instructions.insertBefore(_p1, callMethod);
                         } else {
                             final Type storeType = Type.getArgumentTypes(toPatch.desc)[0];
@@ -448,14 +495,21 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                             final InsnNode pop = new InsnNode(Opcodes.POP);
                             final InsnNode swap = new InsnNode(Opcodes.SWAP);
                             final VarInsnNode loadA = new VarInsnNode(storeType.getOpcode(Opcodes.ILOAD), index);
-                            methodNode.instructions.insertBefore(toPatch, getFullscreen);
-                            methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(toPatch, getFullscreen);
+                                methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+                            }
+
                             methodNode.instructions.insertBefore(toPatch, storeA);
                             methodNode.instructions.insertBefore(toPatch, dup_x2);
                             methodNode.instructions.insertBefore(toPatch, pop);
                             methodNode.instructions.insertBefore(toPatch, swap);
                             methodNode.instructions.insertBefore(toPatch, loadA);
-                            methodNode.instructions.insertBefore(toPatch, target);
+
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(toPatch, target);
+                            }
                         }
                     }
                 }
@@ -480,13 +534,21 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                             final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
                             final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, normalLoad);
                             final JumpInsnNode jumpToCallMethod = new JumpInsnNode(Opcodes.GOTO, callMethod);
-                            methodNode.instructions.insertBefore(_p4, getFullscreen);
-                            methodNode.instructions.insertBefore(_p4, skipIfFullscreen);
+
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(_p4, getFullscreen);
+                                methodNode.instructions.insertBefore(_p4, skipIfFullscreen);
+                            }
+
                             methodNode.instructions.insertBefore(_p4, reorderLoadIns[0]);
                             methodNode.instructions.insertBefore(_p4, reorderLoadIns[1]);
                             methodNode.instructions.insertBefore(_p4, reorderLoadIns[2]);
                             methodNode.instructions.insertBefore(_p4, jumpToCallMethod);
-                            methodNode.instructions.insertBefore(_p4, normalLoad);
+
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(_p4, normalLoad);
+                            }
+
                             methodNode.instructions.insertBefore(_p1, callMethod);
                         } else {
                             final int index = methodNode.maxLocals;
@@ -516,9 +578,13 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                             final InsnNode pop2_3 = new InsnNode(Opcodes.POP2);
                             // BGR
                             final VarInsnNode loadA = new VarInsnNode(Opcodes.DLOAD, index);
+
                             // BGRA
-                            methodNode.instructions.insertBefore(toPatch, getFullscreen);
-                            methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(toPatch, getFullscreen);
+                                methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+                            }
+
                             methodNode.instructions.insertBefore(toPatch, storeA);
                             methodNode.instructions.insertBefore(toPatch, dup2_x2);
                             methodNode.instructions.insertBefore(toPatch, pop2);
@@ -529,7 +595,10 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                             methodNode.instructions.insertBefore(toPatch, dup2_x2_3);
                             methodNode.instructions.insertBefore(toPatch, pop2_3);
                             methodNode.instructions.insertBefore(toPatch, loadA);
-                            methodNode.instructions.insertBefore(toPatch, target);
+
+                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+                                methodNode.instructions.insertBefore(toPatch, target);
+                            }
                         }
                     }
                 }
@@ -548,7 +617,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
 
     public static void setFullscreenWrapper(boolean fullscreen) throws LWJGLException {
         Display.setFullscreen(fullscreen);
-        isMinecraftFullscreen = fullscreen;
+        isMinecraftFullscreen = (RetroTweaker.m1PatchMode == M1PatchMode.EnableWindowedInverted) ^ fullscreen;
 
         if (((reloadTexturesInstance == null) || (reloadTexturesMethod == null)) && (reloadTexturesMethodName != null) && (reloadTexturesClassName != null)) {
             try {
@@ -621,7 +690,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
     public static int[] buffImageTweaker(BufferedImage image, int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize) {
         final int[] adaptedFormat = image.getRGB(startX, startY, w, h, rgbArray, offset, scansize);
 
-        if (!isMinecraftFullscreen) {
+        if (!isMinecraftFullscreen || (RetroTweaker.m1PatchMode == M1PatchMode.ForceEnable)) {
             for (int i = 0; i < adaptedFormat.length; i++) {
                 final int color = adaptedFormat[i];
                 adaptedFormat[i] =

@@ -39,27 +39,28 @@ public final class RetroTweaker implements ITweaker {
         // Patches to fix crash bugs on MacOS related to mouse movement + some tweaks to display the cursor correctly
         if (SystemUtils.IS_OS_MAC) {
             classLoader.registerTransformer("com.zero.retrowrapper.injector.MouseTweakInjector");
-            // TODO
-            boolean experimental = false;
+        }
 
-            try {
-                experimental = System.getProperties().getProperty("retrowrapper.enableExperimentalPatches") != null;
-                final String patchMode = System.getProperties().getProperty("retrowrapper.forceM1PatchToValue");
+        // TODO
+        boolean experimental = false;
 
-                if (patchMode != null) {
-                    m1PatchMode = M1PatchMode.valueOf(patchMode);
-                }
-            } catch (final Exception e) {
-                e.printStackTrace();
+        try {
+            experimental = System.getProperties().getProperty("retrowrapper.enableExperimentalPatches") != null;
+            final String patchMode = System.getProperties().getProperty("retrowrapper.forceM1PatchToValue");
+
+            if (patchMode != null) {
+                m1PatchMode = M1PatchMode.valueOf(patchMode);
             }
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
 
-            if (RetroTweaker.m1PatchMode == M1PatchMode.ForceEnable) {
-                M1ColorTweakInjector.isMinecraftFullscreen = false;
-            }
+        if (RetroTweaker.m1PatchMode == M1PatchMode.ForceEnable) {
+            M1ColorTweakInjector.isMinecraftFullscreen = false;
+        }
 
-            if ((RetroTweaker.m1PatchMode == M1PatchMode.ForceEnable) || (("aarch64".equals(SystemUtils.OS_ARCH) || (m1PatchMode == M1PatchMode.EnableWindowed) || (m1PatchMode == M1PatchMode.EnableWindowedInverted)) && experimental && (RetroTweaker.m1PatchMode != M1PatchMode.ForceDisable))) {
-                classLoader.registerTransformer("com.zero.retrowrapper.injector.M1ColorTweakInjector");
-            }
+        if ((RetroTweaker.m1PatchMode == M1PatchMode.ForceEnable) || ((("aarch64".equals(SystemUtils.OS_ARCH) && SystemUtils.IS_OS_MAC) || (m1PatchMode == M1PatchMode.EnableWindowed) || (m1PatchMode == M1PatchMode.EnableWindowedInverted)) && experimental && (RetroTweaker.m1PatchMode != M1PatchMode.ForceDisable))) {
+            classLoader.registerTransformer("com.zero.retrowrapper.injector.M1ColorTweakInjector");
         }
     }
 

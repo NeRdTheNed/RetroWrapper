@@ -27,6 +27,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import com.zero.retrowrapper.emulator.EmulatorConfig;
+import com.zero.retrowrapper.util.JavaUtil;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 
@@ -460,7 +461,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 final EmulatorConfig config = EmulatorConfig.getInstance();
                 config.minecraftField.setAccessible(true);
                 final Object minecraft = config.minecraftField.get(config.applet);
-                final Class<?> mcClass = getMostSuper(minecraft.getClass());
+                final Class<?> mcClass = JavaUtil.getMostSuper(minecraft.getClass());
 
                 for (final Field field : mcClass.getDeclaredFields()) {
                     if (classWithReloadTextureMethod.isAssignableFrom(field.getType()) || field.getType().equals(classWithReloadTextureMethod)) {
@@ -494,18 +495,6 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         } else {
             System.out.println("Could not find reload textures method");
         }
-    }
-
-    private static Class<?> getMostSuper(Class<?> toGet) {
-        while (true) {
-            if (toGet.getSuperclass().equals(Object.class)) {
-                break;
-            }
-
-            toGet = toGet.getSuperclass();
-        }
-
-        return toGet;
     }
 
     public static int[] buffImageTweaker(BufferedImage image, int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize) {

@@ -16,6 +16,7 @@ import javax.swing.WindowConstants;
 
 import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.injector.RetroTweakInjectorTarget;
+import com.zero.retrowrapper.util.JavaUtil;
 
 public final class HackThread extends Thread {
     // TODO Refactor
@@ -97,7 +98,7 @@ public final class HackThread extends Thread {
             final EmulatorConfig config = EmulatorConfig.getInstance();
             config.minecraftField.setAccessible(true);
             player.minecraft = config.minecraftField.get(config.applet);
-            final Class<?> mcClass = getMostSuper(player.minecraft.getClass());
+            final Class<?> mcClass = JavaUtil.getMostSuper(player.minecraft.getClass());
             System.out.println("Minecraft class: " + mcClass.getName());
             System.out.println("Mob class: " + config.mobClass);
             player.playerObj = null;
@@ -116,7 +117,7 @@ public final class HackThread extends Thread {
             }
 
             System.out.println("Player class: " + player.playerObj.getClass().getName());
-            player.entityClass = getMostSuper(mobClass);
+            player.entityClass = JavaUtil.getMostSuper(mobClass);
             System.out.println("Entity class: " + player.entityClass.getName());
             player.setAABB();
 
@@ -129,18 +130,6 @@ public final class HackThread extends Thread {
         } catch (final Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private static Class<?> getMostSuper(Class<?> mobClass) {
-        while (true) {
-            if (mobClass.getSuperclass().equals(Object.class)) {
-                break;
-            }
-
-            mobClass = mobClass.getSuperclass();
-        }
-
-        return mobClass;
     }
 
     void setLabelText(final String text) {

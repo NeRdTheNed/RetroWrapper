@@ -33,7 +33,7 @@ public final class JavaUtil {
     public static boolean doLoadInsMatch(AbstractInsnNode load1, AbstractInsnNode load2) {
         final int opcode = load1.getOpcode();
 
-        if ((opcode == load2.getOpcode()) && ((opcode >= Opcodes.ACONST_NULL) && (opcode <= Opcodes.ALOAD))) {
+        if ((opcode == load2.getOpcode()) && (opcode >= Opcodes.ACONST_NULL) && (opcode <= Opcodes.ALOAD)) {
             if (opcode == Opcodes.LDC) {
                 final LdcInsnNode ldc1 = (LdcInsnNode)load1;
                 final LdcInsnNode ldc2 = (LdcInsnNode)load2;

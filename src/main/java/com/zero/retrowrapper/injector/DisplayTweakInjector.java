@@ -57,7 +57,7 @@ public final class DisplayTweakInjector implements IClassTransformer {
                         final String methodName = methodInsNode.name;
                         final String methodDesc = methodInsNode.desc;
 
-                        if ((opcode == Opcodes.INVOKESTATIC) && ("org/lwjgl/opengl/Display".equals(methodOwner) && "()V".equals(methodDesc) && "create".equals(methodName))) {
+                        if ((opcode == Opcodes.INVOKESTATIC) && "org/lwjgl/opengl/Display".equals(methodOwner) && "()V".equals(methodDesc) && "create".equals(methodName)) {
                             foundDisplayCreateCalls.add(methodInsNode);
                         }
                     }

@@ -302,15 +302,16 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 }
 
                 for (final MethodInsnNode toPatch : foundSwap3Calls) {
-                    System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                     // RGB to BGR
                     // Non-double version, doubles require special handling.
                     final AbstractInsnNode _p1 = toPatch.getPrevious();
                     final AbstractInsnNode _p2 = _p1.getPrevious();
                     final AbstractInsnNode _p3 = _p2.getPrevious();
-                    final AbstractInsnNode[] reorderLoadIns = convLoadIns3OrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
 
                     if (!JavaUtil.doLoadInsMatch(_p1, _p3)) {
+                        System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
+                        final AbstractInsnNode[] reorderLoadIns = convLoadIns3OrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
+
                         if (reorderLoadIns != null) {
                             final LabelNode normalLoad = new LabelNode();
                             final LabelNode callMethod = new LabelNode();
@@ -347,15 +348,16 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 }
 
                 for (final MethodInsnNode toPatch : foundSwap3DoubleCalls) {
-                    System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                     // RGB to BGR
                     // Double version, doubles require special handling.
                     final AbstractInsnNode _p1 = toPatch.getPrevious();
                     final AbstractInsnNode _p2 = _p1.getPrevious();
                     final AbstractInsnNode _p3 = _p2.getPrevious();
-                    final AbstractInsnNode[] reorderLoadIns = convLoadIns3OrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
 
                     if (!JavaUtil.doLoadInsMatch(_p1, _p3)) {
+                        System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
+                        final AbstractInsnNode[] reorderLoadIns = convLoadIns3OrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
+
                         if (reorderLoadIns != null) {
                             final LabelNode normalLoad = new LabelNode();
                             final LabelNode callMethod = new LabelNode();
@@ -409,16 +411,17 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 }
 
                 for (final MethodInsnNode toPatch : foundSwap4Calls) {
-                    System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                     // RGBA to BRGA
                     // Non-double version, doubles require special handling.
                     final AbstractInsnNode _p1 = toPatch.getPrevious();
                     final AbstractInsnNode _p2 = _p1.getPrevious();
                     final AbstractInsnNode _p3 = _p2.getPrevious();
                     final AbstractInsnNode _p4 = _p3.getPrevious();
-                    final AbstractInsnNode[] reorderLoadIns = convLoadIns4OrNull(new AbstractInsnNode[] {_p4, _p3, _p2, _p1});
 
                     if (!JavaUtil.doLoadInsMatch(_p2, _p4)) {
+                        System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
+                        final AbstractInsnNode[] reorderLoadIns = convLoadIns4OrNull(new AbstractInsnNode[] {_p4, _p3, _p2, _p1});
+
                         if (reorderLoadIns != null) {
                             final LabelNode normalLoad = new LabelNode();
                             final LabelNode callMethod = new LabelNode();
@@ -459,7 +462,6 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 }
 
                 for (final MethodInsnNode toPatch : foundSwap4DoubleCalls) {
-                    System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                     // RGBA to BGRA
                     // Never used anyways.
                     // TODO Test
@@ -468,9 +470,11 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final AbstractInsnNode _p2 = _p1.getPrevious();
                     final AbstractInsnNode _p3 = _p2.getPrevious();
                     final AbstractInsnNode _p4 = _p3.getPrevious();
-                    final AbstractInsnNode[] reorderLoadIns = convLoadIns4OrNull(new AbstractInsnNode[] {_p4, _p3, _p2, _p1});
 
                     if (!JavaUtil.doLoadInsMatch(_p2, _p4)) {
+                        System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
+                        final AbstractInsnNode[] reorderLoadIns = convLoadIns4OrNull(new AbstractInsnNode[] {_p4, _p3, _p2, _p1});
+
                         if (reorderLoadIns != null) {
                             final LabelNode normalLoad = new LabelNode();
                             final LabelNode callMethod = new LabelNode();

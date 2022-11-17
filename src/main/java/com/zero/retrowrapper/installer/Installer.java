@@ -65,7 +65,7 @@ public final class Installer {
         int wrappedVersionCount = 0;
         model.removeAllElements();
 
-        if (!givenDirectory.isEmpty()) {
+        if (givenDirectory.length() != 0) {
             directory = new File(givenDirectory);
             directory.mkdirs();
             directories = null;
@@ -118,7 +118,7 @@ public final class Installer {
 
         // button visibility
 
-        if (givenDirectory.isEmpty()) {
+        if (givenDirectory.length() == 0) {
             install.setEnabled(false);
             uninstall.setEnabled(false);
             JOptionPane.showMessageDialog(null, "No directory / minecraft directory detected!\n", "Error", JOptionPane.INFORMATION_MESSAGE);

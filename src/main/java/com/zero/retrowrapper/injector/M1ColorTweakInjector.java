@@ -215,6 +215,11 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     methodNode.instructions.remove(toPatch);
                 }
 
+                int index1 = -1;
+                int index2 = -1;
+                int index3 = -1;
+                int index4 = -1;
+
                 for (final MethodInsnNode toPatch : foundFogFloatBufCalls) {
                     System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                     // RGBA to BRGA
@@ -234,20 +239,28 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final InsnNode dup_3 = new InsnNode(Opcodes.DUP);
                     final MethodInsnNode get_4 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "get", "()F");
                     final InsnNode swap_4 = new InsnNode(Opcodes.SWAP);
+
+                    if (index1 == -1) {
+                        index1 = methodNode.maxLocals;
+                        methodNode.maxLocals++;
+                    }
+
                     // Store reference to buffer
-                    final int indexR = methodNode.maxLocals;
-                    methodNode.maxLocals++;
-                    final VarInsnNode storeBuffer = new VarInsnNode(Opcodes.ASTORE, indexR);
+                    final VarInsnNode storeBuffer = new VarInsnNode(Opcodes.ASTORE, index1);
                     // RGBA -> ARGB because values get consumed in reverse order when putting float values in buffer
                     final InsnNode swap = new InsnNode(Opcodes.SWAP);
-                    final int indexB = methodNode.maxLocals;
-                    methodNode.maxLocals++;
-                    final VarInsnNode storeBlue = new VarInsnNode(Opcodes.FSTORE, indexB);
+
+                    if (index2 == -1) {
+                        index2 = methodNode.maxLocals;
+                        methodNode.maxLocals++;
+                    }
+
+                    final VarInsnNode storeBlue = new VarInsnNode(Opcodes.FSTORE, index2);
                     final InsnNode dup_x2 = new InsnNode(Opcodes.DUP_X2);
                     final InsnNode pop = new InsnNode(Opcodes.POP);
-                    final VarInsnNode loadBlue = new VarInsnNode(Opcodes.FLOAD, indexB);
+                    final VarInsnNode loadBlue = new VarInsnNode(Opcodes.FLOAD, index2);
                     // Load reference to buffer
-                    final VarInsnNode loadBuffer = new VarInsnNode(Opcodes.ALOAD, indexR);
+                    final VarInsnNode loadBuffer = new VarInsnNode(Opcodes.ALOAD, index1);
                     final InsnNode dup = new InsnNode(Opcodes.DUP);
                     // Clear buffer
                     final MethodInsnNode clear = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "clear", "()Ljava/nio/Buffer;");
@@ -264,7 +277,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     // Flip buffer
                     final MethodInsnNode flip = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "flip", "()Ljava/nio/Buffer;");
                     final InsnNode pop_return_2 = new InsnNode(Opcodes.POP);
-                    final VarInsnNode loadBuffer2 = new VarInsnNode(Opcodes.ALOAD, indexR);
+                    final VarInsnNode loadBuffer2 = new VarInsnNode(Opcodes.ALOAD, index1);
 
                     if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
                         methodNode.instructions.insertBefore(toPatch, getFullscreen);
@@ -343,7 +356,17 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                         if (reorderLoadIns != null) {
                             reorder3LoadIns(methodNode, reorderLoadIns, toPatch, _p1, _p2, _p3);
                         } else {
-                            swap3Type2(methodNode, toPatch);
+                            if (index1 == -1) {
+                                index1 = methodNode.maxLocals;
+                                methodNode.maxLocals++;
+                            }
+
+                            if (index2 == -1) {
+                                index2 = methodNode.maxLocals;
+                                methodNode.maxLocals++;
+                            }
+
+                            swap3Type2(methodNode, toPatch, index1);
                         }
                     }
                 }
@@ -366,8 +389,13 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                         } else if (isP1Load) {
                             swap3Type1(methodNode, _p1);
                         } else {
+                            if (index1 == -1) {
+                                index1 = methodNode.maxLocals;
+                                methodNode.maxLocals++;
+                            }
+
                             final Type storeType = Type.getArgumentTypes(toPatch.desc)[0];
-                            swap4Type1(methodNode, toPatch, storeType);
+                            swap4Type1(methodNode, toPatch, storeType, index1);
                         }
                     }
                 }
@@ -390,9 +418,39 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                         if (isP1Load && (reorderLoadIns != null)) {
                             reorder3LoadIns(methodNode, reorderLoadIns, _p1, _p2, _p3, _p4);
                         } else if (isP1Load) {
-                            swap3Type2(methodNode, _p1);
+                            if (index1 == -1) {
+                                index1 = methodNode.maxLocals;
+                                methodNode.maxLocals++;
+                            }
+
+                            if (index2 == -1) {
+                                index2 = methodNode.maxLocals;
+                                methodNode.maxLocals++;
+                            }
+
+                            swap3Type2(methodNode, _p1, index1);
                         } else {
-                            swap4Type2(methodNode, toPatch);
+                            if (index1 == -1) {
+                                index1 = methodNode.maxLocals;
+                                methodNode.maxLocals++;
+                            }
+
+                            if (index2 == -1) {
+                                index2 = methodNode.maxLocals;
+                                methodNode.maxLocals++;
+                            }
+
+                            if (index3 == -1) {
+                                index3 = methodNode.maxLocals;
+                                methodNode.maxLocals++;
+                            }
+
+                            if (index4 == -1) {
+                                index4 = methodNode.maxLocals;
+                                methodNode.maxLocals++;
+                            }
+
+                            swap4Type2(methodNode, toPatch, index1, index3);
                         }
                     }
                 }
@@ -484,12 +542,10 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         }
     }
 
-    private static void swap3Type2(MethodNode methodNode, AbstractInsnNode toPatch) {
+    private static void swap3Type2(MethodNode methodNode, AbstractInsnNode toPatch, int index) {
         final LabelNode target = new LabelNode();
         final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
         final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
-        final int index = methodNode.maxLocals;
-        methodNode.maxLocals += 2;
         // RGB
         final InsnNode dup2_x2 = new InsnNode(Opcodes.DUP2_X2);
         // RBGB
@@ -527,9 +583,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         }
     }
 
-    private static void swap4Type1(MethodNode methodNode, AbstractInsnNode toPatch, Type storeType) {
-        final int index = methodNode.maxLocals;
-        methodNode.maxLocals++;
+    private static void swap4Type1(MethodNode methodNode, AbstractInsnNode toPatch, Type storeType, int index) {
         final LabelNode target = new LabelNode();
         final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
         final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
@@ -555,11 +609,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         }
     }
 
-    private static void swap4Type2(MethodNode methodNode, AbstractInsnNode toPatch) {
-        final int index = methodNode.maxLocals;
-        methodNode.maxLocals += 2;
-        final int index2 = methodNode.maxLocals;
-        methodNode.maxLocals += 2;
+    private static void swap4Type2(MethodNode methodNode, AbstractInsnNode toPatch, int index, int index2) {
         final LabelNode target = new LabelNode();
         final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
         final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);

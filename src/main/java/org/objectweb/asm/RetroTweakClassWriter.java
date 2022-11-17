@@ -32,7 +32,6 @@ public final class RetroTweakClassWriter extends ClassWriter {
         this.className = className;
     }
 
-    @Override
     public byte[] toByteArray() {
         final ClassWriter writer = new ClassWriter(0);
         final byte[] bytes = super.toByteArray();

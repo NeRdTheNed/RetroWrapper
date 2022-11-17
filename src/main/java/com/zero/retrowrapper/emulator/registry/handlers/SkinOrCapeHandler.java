@@ -36,7 +36,6 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
         this.isCape = isCape;
     }
 
-    @Override
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
         final String username = get.replace(url, "").replace(".png", "");
         final String cacheName;

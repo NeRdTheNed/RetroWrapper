@@ -36,7 +36,6 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
      *
      */
 
-    @Override
     public byte[] transform(final String name, final String transformedName, final byte[] bytes) {
         return bytes;
     }
@@ -180,7 +179,6 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
         launcherFrameFake.setLocationRelativeTo(null);
         launcherFrameFake.setVisible(true);
         launcherFrameFake.addWindowListener(new WindowAdapter() {
-            @Override
             public void windowClosing(WindowEvent e) {
                 System.exit(0);
             }
@@ -194,7 +192,6 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
         launcherFrameFake.validate();
         applet.start();
         Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
             public void run() {
                 applet.stop();
             }

@@ -13,7 +13,6 @@ public final class SingleResponseHandler extends EmulatorHandler {
         this.toWrite = toWrite;
     }
 
-    @Override
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
         os.write(toWrite.getBytes());
     }

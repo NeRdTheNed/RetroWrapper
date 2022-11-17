@@ -18,28 +18,23 @@ public final class LauncherFake extends Applet implements AppletStub {
         this.params = params;
     }
 
-    @Override
     public void appletResize(int width, int height) {
         // This space left intentionally blank
     }
 
-    @Override
     public void setSize(int width, int height) {
         super.setSize(width, height);
         validate();
     }
 
-    @Override
     public boolean isActive() {
         return true;
     }
 
-    @Override
     public URL getDocumentBase() {
         return getBase();
     }
 
-    @Override
     public URL getCodeBase() {
         return getBase();
     }
@@ -54,7 +49,6 @@ public final class LauncherFake extends Applet implements AppletStub {
         return null;
     }
 
-    @Override
     public String getParameter(String paramName) {
         if (params.containsKey(paramName)) {
             return params.get(paramName);

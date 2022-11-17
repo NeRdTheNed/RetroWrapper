@@ -1,7 +1,6 @@
 package com.zero.retrowrapper.util;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +12,7 @@ public final class MetadataUtil {
 
     private static List<String> getSplashes() {
         try {
-            return IOUtils.readLines(ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperInstallerSplashes.txt"), Charset.defaultCharset());
+            return IOUtils.readLines(ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperInstallerSplashes.txt"), "UTF-8");
         } catch (final IOException e) {
             final ArrayList<String> missingno = new ArrayList<String>();
             missingno.add("missingno");
@@ -23,7 +22,7 @@ public final class MetadataUtil {
 
     private static String getVersion() {
         try {
-            return IOUtils.toString(ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperVersion.txt"), Charset.defaultCharset());
+            return IOUtils.toString(ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperVersion.txt"), "UTF-8");
         } catch (final IOException e) {
             return "0.0.0-SNAPSHOT+missingno";
         }

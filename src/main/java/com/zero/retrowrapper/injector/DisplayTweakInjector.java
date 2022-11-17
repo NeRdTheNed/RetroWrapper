@@ -30,7 +30,6 @@ public final class DisplayTweakInjector implements IClassTransformer {
      * This fixes clouds looking strange on AMD video cards.
      * TODO @Nullable?
      */
-    @Override
     public byte[] transform(final String name, final String transformedName, final byte[] bytesOld) {
         try {
             if (bytesOld == null) {

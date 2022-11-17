@@ -13,7 +13,6 @@ public final class ListmapsHandler extends EmulatorHandler {
         super("/listmaps.jsp");
     }
 
-    @Override
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
         for (int i = 0; i < 5; i++) {
             final File file = new File(RetroEmulator.getInstance().getMapsDirectory(), "map" + i + ".txt");

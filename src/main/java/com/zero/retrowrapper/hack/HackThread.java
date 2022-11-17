@@ -62,7 +62,6 @@ public final class HackThread extends Thread {
         final JButton b = new JButton("Teleport");
         b.setBounds(50, 202, 200, 40);
         b.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 try {
                     final float dx = Float.parseFloat(x.getText().replace(",", "").replace(" ", ""));
@@ -78,13 +77,11 @@ public final class HackThread extends Thread {
         frame.setVisible(true);
     }
 
-    @Override
     public void run() {
         player = new RetroPlayer(this);
 
         try {
             SwingUtilities.invokeAndWait(new Runnable() {
-                @Override
                 public void run() {
                     setupSwingGUI();
                 }
@@ -135,7 +132,6 @@ public final class HackThread extends Thread {
     void setLabelText(final String text) {
         try {
             SwingUtilities.invokeLater(new Runnable() {
-                @Override
                 public void run() {
                     label.setText(text);
                 }

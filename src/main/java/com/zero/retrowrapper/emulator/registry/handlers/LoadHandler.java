@@ -16,7 +16,6 @@ public final class LoadHandler extends EmulatorHandler {
         super("/level/load.html?id=");
     }
 
-    @Override
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
         final String id = get.replace("/level/load.html?id=", "").split("&")[0];
         FileInputStream fis = null;

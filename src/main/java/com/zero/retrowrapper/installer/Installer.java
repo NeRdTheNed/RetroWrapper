@@ -182,7 +182,6 @@ public final class Installer {
         workDir.setMaximumSize(new Dimension(300, 20));
         // TODO Refactor
         workDir.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 final String workDirPath = ((JTextField)e.getSource()).getText();
                 final File minecraftDir = new File(workDirPath);
@@ -207,7 +206,6 @@ public final class Installer {
         install = new JButton("Install"); //installation code
         // TODO Refactor
         install.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 final Object[] versionListO = list.getSelectedValues();
                 final String[] versionList = new String[versionListO.length];
@@ -323,7 +321,6 @@ public final class Installer {
         uninstall = new JButton("Uninstall ALL versions"); //uninstaller code
         // TODO Refactor
         uninstall.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 for (final File f : directories) {
                     if (f.isDirectory() && f.getName().contains("-wrapped")) {
@@ -394,7 +391,6 @@ public final class Installer {
                 boolean qPressed = false;
                 boolean tPressed = false;
                 boolean openDebug = false;
-                @Override
                 public boolean dispatchKeyEvent(KeyEvent e) {
                     switch (e.getID()) {
                     case KeyEvent.KEY_PRESSED:

@@ -149,7 +149,6 @@ public class SwingUtil {
                              "<br><p>" + escapeHtml4(displayIssueBody).replace("\n", "<br>") + "</p><br>" +
                              "</html>");
             textPane.addHyperlinkListener(new HyperlinkListener() {
-                @Override
                 public void hyperlinkUpdate(HyperlinkEvent event) {
                     if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                         try {

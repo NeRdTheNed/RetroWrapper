@@ -14,7 +14,6 @@ public final class RetroEmulator extends Thread {
     private File mapsDirectory;
     private File cacheDirectory;
 
-    @Override
     public void run() {
         // TODO Is this threadsafe, and does it need to be?
         instance = this;

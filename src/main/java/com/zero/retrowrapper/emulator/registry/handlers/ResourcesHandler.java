@@ -108,7 +108,6 @@ public final class ResourcesHandler extends EmulatorHandler {
         }
     }
 
-    @Override
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
         if ("/resources/".equals(get)) {
             os.write(OLD_SOUNDS_LIST);

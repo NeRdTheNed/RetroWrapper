@@ -16,7 +16,6 @@ public final class SaveHandler extends EmulatorHandler {
         super("/level/save.html");
     }
 
-    @Override
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
         final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
         ByteUtil.readString(dis);

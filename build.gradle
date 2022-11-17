@@ -46,8 +46,8 @@ checkstyle {
     config = resources.text.fromArchiveEntry(configurations.checkstyleConfig, 'google_checks.xml')
 } */
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.5
+targetCompatibility = 1.5
 
 def compiler = javaToolchains.compilerFor {
     languageVersion = JavaLanguageVersion.of(7)
@@ -63,8 +63,8 @@ java {
 // Tells Gradle to always compile with the previously defined Java 7 compatible JDK.
 tasks.withType(JavaCompile).configureEach {
     javaCompiler = compiler
-    sourceCompatibility = 1.6
-    targetCompatibility = 1.6
+    sourceCompatibility = 1.5
+    targetCompatibility = 1.5
 }
 
 repositories {

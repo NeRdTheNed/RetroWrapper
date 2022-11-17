@@ -44,7 +44,6 @@ public final class MouseTweakInjector implements IClassTransformer {
      * Also patch the entire input system so we can call setGrabbed without issues :/
      * TODO @Nullable?
      */
-    @Override
     public byte[] transform(final String name, final String transformedName, final byte[] bytesOld) {
         try {
             if (bytesOld == null) {

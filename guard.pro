@@ -8,7 +8,7 @@
 
 # We're a bit oldschool
 
--target 1.7
+-target 1.6
 
 # Not needed right now
 #-adaptclassstrings

@@ -77,13 +77,17 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
         }
 
         final File imageCache = new File(RetroEmulator.getInstance().getCacheDirectory(), username + fileNameEnd);
+        InputStreamReader reader = null;
 
-        try (InputStreamReader reader = new InputStreamReader(new URL("https://api.mojang.com/users/profiles/minecraft/" + username + "?at=" + System.currentTimeMillis()).openStream())) {
+        try {
+            reader = new InputStreamReader(new URL("https://api.mojang.com/users/profiles/minecraft/" + username + "?at=" + System.currentTimeMillis()).openStream());
             final JsonObject profile1 = (JsonObject) Json.parse(reader);
             final String uuid = profile1.get("id").asString();
             System.out.println(uuid);
+            InputStreamReader reader2 = null;
 
-            try (InputStreamReader reader2 = new InputStreamReader(new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid).openStream())) {
+            try {
+                reader2 = new InputStreamReader(new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid).openStream());
                 final JsonObject profile2 = (JsonObject) Json.parse(reader2);
                 final JsonArray properties = (JsonArray) profile2.get("properties");
                 String base64 = "";
@@ -120,23 +124,64 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                 System.out.println(imageURL);
                 final InputStream is = new URL(imageURL).openStream();
                 final byte[] imageBytes = IOUtils.toByteArray(is);
+                FileOutputStream fos = null;
 
-                try (FileOutputStream fos = new FileOutputStream(imageCache)) {
+                try {
+                    fos = new FileOutputStream(imageCache);
                     fos.write(imageBytes);
+                } finally {
+                    if (fos != null) {
+                        try {
+                            fos.close();
+                        } catch (final IOException ee) {
+                            // TODO Better error handling
+                            ee.printStackTrace();
+                        }
+                    }
                 }
 
                 return imageBytes;
+            } finally {
+                if (reader2 != null) {
+                    try {
+                        reader2.close();
+                    } catch (final IOException ee) {
+                        // TODO Better error handling
+                        ee.printStackTrace();
+                    }
+                }
             }
         } catch (final Exception e) {
             e.printStackTrace();
 
             if (imageCache.exists()) {
-                try (FileInputStream fis = new FileInputStream(imageCache)) {
+                FileInputStream fis = null;
+
+                try {
+                    fis = new FileInputStream(imageCache);
                     return IOUtils.toByteArray(fis);
+                } finally {
+                    if (fis != null) {
+                        try {
+                            fis.close();
+                        } catch (final IOException ee) {
+                            // TODO Better error handling
+                            ee.printStackTrace();
+                        }
+                    }
                 }
             }
 
             return null;
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (final IOException ee) {
+                    // TODO Better error handling
+                    ee.printStackTrace();
+                }
+            }
         }
     }
 }

@@ -87,7 +87,10 @@ public final class Installer {
                         final File jar = new File(f, f.getName() + ".jar");
 
                         if (json.exists() && jar.exists() && !f.getName().contains("-wrapped")) {
-                            try (Scanner s = new Scanner(json).useDelimiter("\\A")) {
+                            Scanner s = null;
+
+                            try {
+                                s = new Scanner(json).useDelimiter("\\A");
                                 final String content = s.next();
 
                                 if (content.contains("old_") && !content.contains("retrowrapper")) {
@@ -102,6 +105,10 @@ public final class Installer {
                             } catch (final FileNotFoundException e) {
                                 // TODO Better logging
                                 installerLogger.log(Level.SEVERE, "A FileNotFoundException was thrown while trying to refresh the list of versions", e);
+                            } finally {
+                                if (s != null) {
+                                    s.close();
+                                }
                             }
                         }
                     }
@@ -225,7 +232,10 @@ public final class Installer {
                         FileUtils.deleteQuietly(new File(directory, "versions" + File.separator + version + "-wrapped"));
                     }
 
-                    try (Reader s = new FileReader(new File(versions, version + File.separator + version + ".json"))) {
+                    Reader s = null;
+
+                    try {
+                        s = new FileReader(new File(versions, version + File.separator + version + ".json"));
                         finalVersions.append(version).append("\n");
                         final JsonObject versionJson = Json.parse(s).asObject();
                         final String versionWrapped = version + "-wrapped";
@@ -256,8 +266,10 @@ public final class Installer {
                         wrapDir.mkdirs();
                         final File libDir = new File(directory, "libraries" + File.separator + "com" + File.separator + "zero" + File.separator + "retrowrapper" + File.separator + "installer");
                         libDir.mkdirs();
+                        FileOutputStream fos = null;
 
-                        try (FileOutputStream fos = new FileOutputStream(new File(wrapDir, versionWrapped + ".json"))) {
+                        try {
+                            fos = new FileOutputStream(new File(wrapDir, versionWrapped + ".json"));
                             FileUtils.copyFile(new File(versions, version + File.separator + version + ".jar"), new File(wrapDir, versionWrapped + ".jar"));
                             fos.write(versionJson.toString().getBytes());
                             final File jar = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation().toURI());
@@ -274,6 +286,15 @@ public final class Installer {
                             logRecord.setParameters(new Object[] { version });
                             logRecord.setThrown(ee);
                             installerLogger.log(logRecord);
+                        } finally {
+                            if (fos != null) {
+                                try {
+                                    fos.close();
+                                } catch (final IOException ee) {
+                                    // TODO Better error handling
+                                    ee.printStackTrace();
+                                }
+                            }
                         }
                     } catch (final IOException ee) {
                         // TODO better logging
@@ -281,6 +302,15 @@ public final class Installer {
                         logRecord.setParameters(new Object[] { version });
                         logRecord.setThrown(ee);
                         installerLogger.log(logRecord);
+                    } finally {
+                        if (s != null) {
+                            try {
+                                s.close();
+                            } catch (final IOException ee) {
+                                // TODO Better error handling
+                                ee.printStackTrace();
+                            }
+                        }
                     }
                 }
 

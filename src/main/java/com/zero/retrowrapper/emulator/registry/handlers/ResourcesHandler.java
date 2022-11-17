@@ -61,7 +61,10 @@ public final class ResourcesHandler extends EmulatorHandler {
     }
 
     private void downloadSoundData() {
-        try (Scanner sc = new Scanner(new URL("https://launchermeta.mojang.com/mc/assets/legacy/c0fd82e8ce9fbc93119e40d96d5a4e62cfa3f729/legacy.json").openStream()).useDelimiter("\\A")) {
+        Scanner sc = null;
+
+        try {
+            sc = new Scanner(new URL("https://launchermeta.mojang.com/mc/assets/legacy/c0fd82e8ce9fbc93119e40d96d5a4e62cfa3f729/legacy.json").openStream()).useDelimiter("\\A");
             final JsonValue json = Json.parse(sc.next());
             final JsonObject obj = json.asObject();
             jsonObjects = obj.get("objects").asObject();
@@ -80,16 +83,27 @@ public final class ResourcesHandler extends EmulatorHandler {
                                     );
 
             if (backupFile != null) {
-                try (Scanner sc = new Scanner(backupFile).useDelimiter("\\A")) {
-                    final JsonValue json = Json.parse(sc.next());
+                Scanner sc2 = null;
+
+                try {
+                    sc2 = new Scanner(backupFile).useDelimiter("\\A");
+                    final JsonValue json = Json.parse(sc2.next());
                     final JsonObject obj = json.asObject();
                     jsonObjects = obj.get("objects").asObject();
                     System.out.println("Using local legacy.json.");
                 } catch (final Exception ee) {
                     System.out.println("Exception loading local legacy.json: " + ExceptionUtils.getStackTrace(ee) + "\nThe sound fix probably won't work.");
+                } finally {
+                    if (sc2 != null) {
+                        sc2.close();
+                    }
                 }
             } else {
                 System.out.println("Could not find local legacy.json.\nThe sound fix probably won't work.");
+            }
+        } finally {
+            if (sc != null) {
+                sc.close();
             }
         }
     }
@@ -127,10 +141,22 @@ public final class ResourcesHandler extends EmulatorHandler {
         final File resourceCache = new File(RetroEmulator.getInstance().getCacheDirectory(), res);
 
         if (resourceCache.exists()) {
-            try (FileInputStream fis = new FileInputStream(resourceCache)) {
+            FileInputStream fis = null;
+
+            try {
+                fis = new FileInputStream(resourceCache);
                 return IOUtils.toByteArray(fis);
             } catch (final Exception e) {
                 e.printStackTrace();
+            } finally {
+                if (fis != null) {
+                    try {
+                        fis.close();
+                    } catch (final IOException ee) {
+                        // TODO Better error handling
+                        ee.printStackTrace();
+                    }
+                }
             }
         }
 
@@ -151,9 +177,20 @@ public final class ResourcesHandler extends EmulatorHandler {
 
             if (resourceBytes.length > smallestSize) {
                 new File(resourceCache.getParent()).mkdirs();
+                FileOutputStream fos = null;
 
-                try (FileOutputStream fos = new FileOutputStream(resourceCache)) {
+                try {
+                    fos = new FileOutputStream(resourceCache);
                     fos.write(resourceBytes);
+                } finally {
+                    if (fos != null) {
+                        try {
+                            fos.close();
+                        } catch (final IOException ee) {
+                            // TODO Better error handling
+                            ee.printStackTrace();
+                        }
+                    }
                 }
 
                 return resourceBytes;
@@ -166,11 +203,23 @@ public final class ResourcesHandler extends EmulatorHandler {
             final File backupFile = FileUtil.tryFindResourceFile(res);
 
             if (backupFile != null) {
-                try (FileInputStream fis = new FileInputStream(backupFile)) {
+                FileInputStream fis = null;
+
+                try {
+                    fis = new FileInputStream(backupFile);
                     System.out.println("Using " + backupFile);
                     return IOUtils.toByteArray(fis);
                 } catch (final Exception ee) {
                     ee.printStackTrace();
+                } finally {
+                    if (fis != null) {
+                        try {
+                            fis.close();
+                        } catch (final IOException ee) {
+                            // TODO Better error handling
+                            ee.printStackTrace();
+                        }
+                    }
                 }
             }
 

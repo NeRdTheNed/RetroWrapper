@@ -46,6 +46,9 @@ checkstyle {
     config = resources.text.fromArchiveEntry(configurations.checkstyleConfig, 'google_checks.xml')
 } */
 
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
 def compiler = javaToolchains.compilerFor {
     languageVersion = JavaLanguageVersion.of(7)
 }
@@ -60,6 +63,8 @@ java {
 // Tells Gradle to always compile with the previously defined Java 7 compatible JDK.
 tasks.withType(JavaCompile).configureEach {
     javaCompiler = compiler
+    sourceCompatibility = 1.6
+    targetCompatibility = 1.6
 }
 
 repositories {
@@ -194,20 +199,20 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
-// This task creates a Java 7 - 8 compatible MultiMC instance with the current build of RetroWrapper.
+// This task creates a Java 6 - 8 compatible MultiMC instance with the current build of RetroWrapper.
 // This instance is intended to have parity with the standard launcher.
 task createMultiMCInstance(dependsOn: proguard, type: Zip) {
     inputs.property "rrVersion", project.version
     inputs.property "versionWithMetadata", versionWithMetadata
-    archiveFileName = rootProject.name + "-" + project.version + "-MultiMC.J7.zip"
+    archiveFileName = rootProject.name + "-" + project.version + "-MultiMC.J6.zip"
     destinationDirectory = layout.buildDirectory.dir('libs')
 
     from('multimc') {
         exclude 'patches/RetroWrapper-J9.json'
-        filesMatching(["mmc-pack.json", "patches/RetroWrapper-J7.json"]) {
+        filesMatching(["mmc-pack.json", "patches/RetroWrapper-J6.json"]) {
             filter(ReplaceTokens, tokens: [rrVersion: project.version])
         }
-        rename ('RetroWrapper-J7.json', 'RetroWrapper.json')
+        rename ('RetroWrapper-J6.json', 'RetroWrapper.json')
     }
 
     from(proguard.outputs.files.singleFile) {
@@ -224,7 +229,7 @@ task createJ9MultiMCInstance(dependsOn: proguard, type: Zip) {
     destinationDirectory = layout.buildDirectory.dir('libs')
 
     from('multimc') {
-        exclude 'patches/RetroWrapper-J7.json'
+        exclude 'patches/RetroWrapper-J6.json'
         filesMatching(["mmc-pack.json", "patches/RetroWrapper-J9.json"]) {
             filter(ReplaceTokens, tokens: [rrVersion: project.version])
         }

@@ -1,6 +1,7 @@
 package com.zero.retrowrapper.emulator;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -24,8 +25,11 @@ public final class RetroEmulator extends Thread {
         mapsDirectory.mkdir();
         cacheDirectory = new File(RetroEmulator.getInstance().getDirectory(), "cache");
         cacheDirectory.mkdir();
+        ServerSocket server = null;
 
-        try (ServerSocket server = new ServerSocket(EmulatorConfig.getInstance().getPort())) {
+        try {
+            server = new ServerSocket(EmulatorConfig.getInstance().getPort());
+
             while (true) {
                 final Socket socket = server.accept();
 
@@ -39,6 +43,15 @@ public final class RetroEmulator extends Thread {
         } catch (final Exception e) {
             // TODO Better error handling
             e.printStackTrace();
+        } finally {
+            if (server != null) {
+                try {
+                    server.close();
+                } catch (final IOException ee) {
+                    // TODO Better error handling
+                    ee.printStackTrace();
+                }
+            }
         }
     }
 

@@ -322,30 +322,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                         final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
 
                         if (reorderLoadIns != null) {
-                            final LabelNode normalLoad = new LabelNode();
-                            final LabelNode callMethod = new LabelNode();
-                            final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
-                            final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, normalLoad);
-                            final JumpInsnNode jumpToCallMethod = new JumpInsnNode(Opcodes.GOTO, callMethod);
-
-                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
-                                methodNode.instructions.insertBefore(_p3, getFullscreen);
-                                methodNode.instructions.insertBefore(_p3, skipIfFullscreen);
-                            }
-
-                            methodNode.instructions.insertBefore(_p3, reorderLoadIns[0]);
-                            methodNode.instructions.insertBefore(_p3, reorderLoadIns[1]);
-                            methodNode.instructions.insertBefore(_p3, reorderLoadIns[2]);
-
-                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
-                                methodNode.instructions.insertBefore(_p3, jumpToCallMethod);
-                                methodNode.instructions.insertBefore(_p3, normalLoad);
-                                methodNode.instructions.insertBefore(toPatch, callMethod);
-                            } else {
-                                methodNode.instructions.remove(_p1);
-                                methodNode.instructions.remove(_p2);
-                                methodNode.instructions.remove(_p3);
-                            }
+                            reorder3LoadIns(methodNode, reorderLoadIns, toPatch, _p1, _p2, _p3);
                         } else {
                             final LabelNode target = new LabelNode();
                             final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
@@ -386,30 +363,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                         final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
 
                         if (reorderLoadIns != null) {
-                            final LabelNode normalLoad = new LabelNode();
-                            final LabelNode callMethod = new LabelNode();
-                            final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
-                            final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, normalLoad);
-                            final JumpInsnNode jumpToCallMethod = new JumpInsnNode(Opcodes.GOTO, callMethod);
-
-                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
-                                methodNode.instructions.insertBefore(_p3, getFullscreen);
-                                methodNode.instructions.insertBefore(_p3, skipIfFullscreen);
-                            }
-
-                            methodNode.instructions.insertBefore(_p3, reorderLoadIns[0]);
-                            methodNode.instructions.insertBefore(_p3, reorderLoadIns[1]);
-                            methodNode.instructions.insertBefore(_p3, reorderLoadIns[2]);
-
-                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
-                                methodNode.instructions.insertBefore(_p3, jumpToCallMethod);
-                                methodNode.instructions.insertBefore(_p3, normalLoad);
-                                methodNode.instructions.insertBefore(toPatch, callMethod);
-                            } else {
-                                methodNode.instructions.remove(_p1);
-                                methodNode.instructions.remove(_p2);
-                                methodNode.instructions.remove(_p3);
-                            }
+                            reorder3LoadIns(methodNode, reorderLoadIns, toPatch, _p1, _p2, _p3);
                         } else {
                             final LabelNode target = new LabelNode();
                             final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
@@ -468,30 +422,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                         final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p4, _p3, _p2});
 
                         if (JavaUtil.isOpcodeLoadIns(_p1) && (reorderLoadIns != null)) {
-                            final LabelNode normalLoad = new LabelNode();
-                            final LabelNode callMethod = new LabelNode();
-                            final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
-                            final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, normalLoad);
-                            final JumpInsnNode jumpToCallMethod = new JumpInsnNode(Opcodes.GOTO, callMethod);
-
-                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
-                                methodNode.instructions.insertBefore(_p4, getFullscreen);
-                                methodNode.instructions.insertBefore(_p4, skipIfFullscreen);
-                            }
-
-                            methodNode.instructions.insertBefore(_p4, reorderLoadIns[0]);
-                            methodNode.instructions.insertBefore(_p4, reorderLoadIns[1]);
-                            methodNode.instructions.insertBefore(_p4, reorderLoadIns[2]);
-
-                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
-                                methodNode.instructions.insertBefore(_p4, jumpToCallMethod);
-                                methodNode.instructions.insertBefore(_p4, normalLoad);
-                                methodNode.instructions.insertBefore(_p1, callMethod);
-                            } else {
-                                methodNode.instructions.remove(_p2);
-                                methodNode.instructions.remove(_p3);
-                                methodNode.instructions.remove(_p4);
-                            }
+                            reorder3LoadIns(methodNode, reorderLoadIns, _p1, _p2, _p3, _p4);
                         } else {
                             final Type storeType = Type.getArgumentTypes(toPatch.desc)[0];
                             final int index = methodNode.maxLocals;
@@ -538,30 +469,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                         final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p4, _p3, _p2});
 
                         if (JavaUtil.isOpcodeLoadIns(_p1) && (reorderLoadIns != null)) {
-                            final LabelNode normalLoad = new LabelNode();
-                            final LabelNode callMethod = new LabelNode();
-                            final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
-                            final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, normalLoad);
-                            final JumpInsnNode jumpToCallMethod = new JumpInsnNode(Opcodes.GOTO, callMethod);
-
-                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
-                                methodNode.instructions.insertBefore(_p4, getFullscreen);
-                                methodNode.instructions.insertBefore(_p4, skipIfFullscreen);
-                            }
-
-                            methodNode.instructions.insertBefore(_p4, reorderLoadIns[0]);
-                            methodNode.instructions.insertBefore(_p4, reorderLoadIns[1]);
-                            methodNode.instructions.insertBefore(_p4, reorderLoadIns[2]);
-
-                            if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
-                                methodNode.instructions.insertBefore(_p4, jumpToCallMethod);
-                                methodNode.instructions.insertBefore(_p4, normalLoad);
-                                methodNode.instructions.insertBefore(_p1, callMethod);
-                            } else {
-                                methodNode.instructions.remove(_p2);
-                                methodNode.instructions.remove(_p3);
-                                methodNode.instructions.remove(_p4);
-                            }
+                            reorder3LoadIns(methodNode, reorderLoadIns, _p1, _p2, _p3, _p4);
                         } else {
                             final int index = methodNode.maxLocals;
                             methodNode.maxLocals += 2;
@@ -673,6 +581,33 @@ public final class M1ColorTweakInjector implements IClassTransformer {
             }
         } else {
             System.out.println("Could not find reload textures method");
+        }
+    }
+
+    private static void reorder3LoadIns(MethodNode methodNode, AbstractInsnNode[] reorderLoadIns, AbstractInsnNode toPatch, AbstractInsnNode _p1, AbstractInsnNode _p2, AbstractInsnNode _p3) {
+        final LabelNode normalLoad = new LabelNode();
+        final LabelNode callMethod = new LabelNode();
+        final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
+        final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, normalLoad);
+        final JumpInsnNode jumpToCallMethod = new JumpInsnNode(Opcodes.GOTO, callMethod);
+
+        if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+            methodNode.instructions.insertBefore(_p3, getFullscreen);
+            methodNode.instructions.insertBefore(_p3, skipIfFullscreen);
+        }
+
+        methodNode.instructions.insertBefore(_p3, reorderLoadIns[0]);
+        methodNode.instructions.insertBefore(_p3, reorderLoadIns[1]);
+        methodNode.instructions.insertBefore(_p3, reorderLoadIns[2]);
+
+        if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
+            methodNode.instructions.insertBefore(_p3, jumpToCallMethod);
+            methodNode.instructions.insertBefore(_p3, normalLoad);
+            methodNode.instructions.insertBefore(toPatch, callMethod);
+        } else {
+            methodNode.instructions.remove(_p1);
+            methodNode.instructions.remove(_p2);
+            methodNode.instructions.remove(_p3);
         }
     }
 

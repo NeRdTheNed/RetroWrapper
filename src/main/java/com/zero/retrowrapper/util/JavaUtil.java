@@ -20,10 +20,36 @@ public final class JavaUtil {
         return toGet;
     }
 
-    public static AbstractInsnNode cloneLoadInsOrNull(AbstractInsnNode ins) {
-        final int opcode = ins.getOpcode();
+    public static boolean areAllOpcodesLoadIns(AbstractInsnNode... ins) {
+        for (final AbstractInsnNode in : ins) {
+            if (!isOpcodeLoadIns(in)) {
+                return false;
+            }
+        }
 
-        if ((opcode >= Opcodes.ACONST_NULL) && (opcode <= Opcodes.ALOAD)) {
+        return true;
+    }
+
+    public static boolean areAllOpcodesLoadIns(int... ins) {
+        for (final int in : ins) {
+            if (!isOpcodeLoadIns(in)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static boolean isOpcodeLoadIns(AbstractInsnNode ins) {
+        return isOpcodeLoadIns(ins.getOpcode());
+    }
+
+    public static boolean isOpcodeLoadIns(int opcode) {
+        return (opcode >= Opcodes.ACONST_NULL) && (opcode <= Opcodes.ALOAD);
+    }
+
+    public static AbstractInsnNode cloneLoadInsOrNull(AbstractInsnNode ins) {
+        if (isOpcodeLoadIns(ins)) {
             return ins.clone(null);
         }
 
@@ -33,7 +59,7 @@ public final class JavaUtil {
     public static boolean doLoadInsMatch(AbstractInsnNode load1, AbstractInsnNode load2) {
         final int opcode = load1.getOpcode();
 
-        if ((opcode == load2.getOpcode()) && (opcode >= Opcodes.ACONST_NULL) && (opcode <= Opcodes.ALOAD)) {
+        if ((opcode == load2.getOpcode()) && isOpcodeLoadIns(opcode)) {
             if (opcode == Opcodes.LDC) {
                 final LdcInsnNode ldc1 = (LdcInsnNode)load1;
                 final LdcInsnNode ldc2 = (LdcInsnNode)load2;

@@ -317,7 +317,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final AbstractInsnNode _p2 = _p1.getPrevious();
                     final AbstractInsnNode _p3 = _p2.getPrevious();
 
-                    if (!JavaUtil.doLoadInsMatch(_p1, _p3)) {
+                    if (!JavaUtil.isOpcodeLoadIns(_p2) || !JavaUtil.doLoadInsMatch(_p1, _p3)) {
                         System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                         final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
 
@@ -381,7 +381,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final AbstractInsnNode _p2 = _p1.getPrevious();
                     final AbstractInsnNode _p3 = _p2.getPrevious();
 
-                    if (!JavaUtil.doLoadInsMatch(_p1, _p3)) {
+                    if (!JavaUtil.isOpcodeLoadIns(_p2) || !JavaUtil.doLoadInsMatch(_p1, _p3)) {
                         System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                         final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
 
@@ -463,11 +463,11 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final AbstractInsnNode _p3 = _p2.getPrevious();
                     final AbstractInsnNode _p4 = _p3.getPrevious();
 
-                    if (!JavaUtil.doLoadInsMatch(_p2, _p4)) {
+                    if (!JavaUtil.areAllOpcodesLoadIns(_p1, _p3) || !JavaUtil.doLoadInsMatch(_p2, _p4)) {
                         System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                         final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p4, _p3, _p2});
 
-                        if (reorderLoadIns != null) {
+                        if (JavaUtil.isOpcodeLoadIns(_p1) && (reorderLoadIns != null)) {
                             final LabelNode normalLoad = new LabelNode();
                             final LabelNode callMethod = new LabelNode();
                             final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
@@ -533,11 +533,11 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final AbstractInsnNode _p3 = _p2.getPrevious();
                     final AbstractInsnNode _p4 = _p3.getPrevious();
 
-                    if (!JavaUtil.doLoadInsMatch(_p2, _p4)) {
+                    if (!JavaUtil.areAllOpcodesLoadIns(_p1, _p3) || !JavaUtil.doLoadInsMatch(_p2, _p4)) {
                         System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                         final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p4, _p3, _p2});
 
-                        if (reorderLoadIns != null) {
+                        if (JavaUtil.isOpcodeLoadIns(_p1) && (reorderLoadIns != null)) {
                             final LabelNode normalLoad = new LabelNode();
                             final LabelNode callMethod = new LabelNode();
                             final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");

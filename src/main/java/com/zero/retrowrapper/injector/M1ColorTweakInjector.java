@@ -113,25 +113,14 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                             if (ldc.cst instanceof String) {
                                 final String string = (String)ldc.cst;
 
-                                switch (string) {
-                                case "##":
+                                if ("##".equals(string)) {
                                     hasHashes = true;
-                                    break;
-
-                                case "%%":
+                                } else if ("%%".equals(string)) {
                                     hasPercents = true;
-                                    break;
-
-                                case "%clamp%":
+                                } else if ("%clamp%".equals(string)) {
                                     hasClamp = true;
-                                    break;
-
-                                case "%blur%":
+                                } else if ("%blur%".equals(string)) {
                                     hasBlur = true;
-                                    break;
-
-                                default:
-                                    break;
                                 }
                             }
                         } else if (opcode == Opcodes.INVOKESTATIC) {

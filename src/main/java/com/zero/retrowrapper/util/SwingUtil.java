@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -144,7 +143,7 @@ public class SwingUtil {
             textPane.setContentType("text/html");
             textPane.setText("<html>" +
                              "<p>Please report this issue on GitHub (the link autofills this information for you):</p><br>" +
-                             "<a href=\"https://github.com/NeRdTheNed/RetroWrapper/issues/new?title=" + URLEncoder.encode(githubIssueTitle, StandardCharsets.UTF_8.name()) + "&body=" + URLEncoder.encode(githubIssueBody, StandardCharsets.UTF_8.name()) + "\">Create an issue on Github!</a><br>" +
+                             "<a href=\"https://github.com/NeRdTheNed/RetroWrapper/issues/new?title=" + URLEncoder.encode(githubIssueTitle, "UTF-8") + "&body=" + URLEncoder.encode(githubIssueBody, "UTF-8") + "\">Create an issue on Github!</a><br>" +
                              "<p>" + escapeHtml4(dialogTitle).replace("\n", "<br>") + "</p><br>" +
                              "<br><p>" + escapeHtml4(issueTitle).replace("\n", "<br>") + "</p><br>" +
                              "<br><p>" + escapeHtml4(displayIssueBody).replace("\n", "<br>") + "</p><br>" +

@@ -3,7 +3,7 @@ package com.zero.retrowrapper.util;
 import java.util.Collection;
 
 public final class CollectionUtil {
-    @SafeVarargs
+    //@SafeVarargs
     public static <T> void addNonNullToCollection(Collection<T> collection, T... toAdd) {
         for (final T entryToAdd : toAdd) {
             if (entryToAdd != null) {

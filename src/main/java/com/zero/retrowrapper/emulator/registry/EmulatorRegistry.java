@@ -2,7 +2,6 @@ package com.zero.retrowrapper.emulator.registry;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +46,7 @@ public final class EmulatorRegistry {
         if (directory.isDirectory()) {
             for (final File file : FileUtils.listFiles(directory, ext, true)) {
                 try {
-                    if (Files.size(file.toPath()) < smallestSize) {
+                    if (FileUtils.sizeOf(file) < smallestSize) {
                         final String baseFile = directory.getParent() + "/_invalidFiles/" + file.getAbsolutePath().replace(directory.getAbsolutePath(), "");
                         File newDir = new File(baseFile);
 

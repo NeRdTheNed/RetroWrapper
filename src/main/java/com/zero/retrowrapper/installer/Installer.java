@@ -14,10 +14,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -58,8 +55,8 @@ public final class Installer {
     private static JButton install;
     private static JButton uninstall;
 
-    private static DefaultListModel<String> model;
-    private static JList<String> list;
+    private static DefaultListModel model;
+    private static JList list;
 
     private static JFrame frame;
 
@@ -158,8 +155,8 @@ public final class Installer {
             installerLogger.log(Level.WARNING, "setLookAndFeel failed", e);
         }
 
-        model = new DefaultListModel<String>();
-        list = new JList<String>(model);
+        model = new DefaultListModel();
+        list = new JList(model);
         frame = new JFrame("RetroWrapper - NeRd Fork");
         frame.setPreferredSize(new Dimension(654, 420));
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
@@ -205,7 +202,14 @@ public final class Installer {
         install.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                final List<String> versionList = list.getSelectedValuesList();
+                final Object[] versionListO = list.getSelectedValues();
+                final String[] versionList = new String[versionListO.length];
+
+                for (int i = 0; i < versionListO.length; i++) {
+                    final String tempVer = (String)versionListO[i];
+                    versionList[i] = tempVer;
+                }
+
                 final StringBuilder finalVersions = new StringBuilder();
                 final File libsDir = new File(directory, "libraries" + File.separator + "com" + File.separator + "zero");
 
@@ -254,10 +258,10 @@ public final class Installer {
                         libDir.mkdirs();
 
                         try (FileOutputStream fos = new FileOutputStream(new File(wrapDir, versionWrapped + ".json"))) {
-                            Files.copy(new File(versions, version + File.separator + version + ".jar").toPath(), new File(wrapDir, versionWrapped + ".jar").toPath(), StandardCopyOption.REPLACE_EXISTING);
+                            FileUtils.copyFile(new File(versions, version + File.separator + version + ".jar"), new File(wrapDir, versionWrapped + ".jar"));
                             fos.write(versionJson.toString().getBytes());
                             final File jar = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-                            Files.copy(jar.toPath(), new File(libDir, "retrowrapper-installer.jar").toPath(), StandardCopyOption.REPLACE_EXISTING);
+                            FileUtils.copyFile(jar, new File(libDir, "retrowrapper-installer.jar"));
                         } catch (final IOException ee) {
                             // TODO better logging
                             final LogRecord logRecord = new LogRecord(Level.SEVERE, "An IOException was thrown while trying to wrap version {0}");
@@ -280,7 +284,7 @@ public final class Installer {
                     }
                 }
 
-                JOptionPane.showMessageDialog(null, (versionList.size() > 1 ? "Successfully wrapped versions\n" : "Successfully wrapped version\n") + finalVersions.toString(), "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, (versionList.length > 1 ? "Successfully wrapped versions\n" : "Successfully wrapped version\n") + finalVersions.toString(), "Success", JOptionPane.INFORMATION_MESSAGE);
                 refreshList(workingDirectory, installerLogger);
             }
         });
@@ -450,7 +454,8 @@ public final class Installer {
 
                         final StringBuilder selectedBuilder = new StringBuilder();
 
-                        for (final String selected : list.getSelectedValuesList()) {
+                        for (final Object selectedO : list.getSelectedValues()) {
+                            final String selected = (String)selectedO;
                             selectedBuilder.append("\n" + selected);
                         }
 

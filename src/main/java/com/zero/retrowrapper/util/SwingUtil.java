@@ -97,7 +97,12 @@ public class SwingUtil {
 
                 if (!bufferedImageList.isEmpty()) {
                     for (final Frame frame : frames) {
-                        frame.setIconImages(bufferedImageList);
+                        try {
+                            frame.setIconImages(bufferedImageList);
+                        } catch (final NoClassDefFoundError ignored) {
+                            ignored.printStackTrace();
+                            frame.setIconImage(bufferedImageList.get(0));
+                        }
                     }
                 }
             }
@@ -109,7 +114,6 @@ public class SwingUtil {
     public static void setupMacOSProperties(Logger logger, String title) {
         try {
             System.setProperty("apple.awt.application.name", title);
-            // TODO Backport to Java 6
             System.setProperty("com.apple.mrj.application.apple.menu.about.name", title);
             System.setProperty("apple.laf.useScreenMenuBar", "true");
 
@@ -154,6 +158,9 @@ public class SwingUtil {
                         try {
                             Desktop.getDesktop().browse(event.getURL().toURI());
                         } catch (final Exception ignored) {
+                            logger.log(Level.WARNING, "Could not open link from hyperlinkUpdate", ignored);
+                            JOptionPane.showMessageDialog(textPane, "Your platform doesn't let Java open links.\nPlease browse to https://github.com/NeRdTheNed/RetroWrapper/issues/new to create an issue.\nPlease copy-paste the error report into the issue.\nThanks for putting up with this!", "Sorry", JOptionPane.INFORMATION_MESSAGE);
+                        } catch (final NoClassDefFoundError ignored) {
                             logger.log(Level.WARNING, "Could not open link from hyperlinkUpdate", ignored);
                             JOptionPane.showMessageDialog(textPane, "Your platform doesn't let Java open links.\nPlease browse to https://github.com/NeRdTheNed/RetroWrapper/issues/new to create an issue.\nPlease copy-paste the error report into the issue.\nThanks for putting up with this!", "Sorry", JOptionPane.INFORMATION_MESSAGE);
                         }

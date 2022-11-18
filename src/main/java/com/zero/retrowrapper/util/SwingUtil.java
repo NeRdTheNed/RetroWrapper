@@ -4,12 +4,13 @@ import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
 
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -98,8 +99,10 @@ public class SwingUtil {
                 if (!bufferedImageList.isEmpty()) {
                     for (final Frame frame : frames) {
                         try {
-                            frame.setIconImages(bufferedImageList);
-                        } catch (final NoClassDefFoundError ignored) {
+                            final Method setIconImages = Frame.class.getMethod("setIconImages", List.class);
+                            setIconImages.invoke(frame, bufferedImageList);
+                        } catch (final Exception ignored) {
+                            System.out.println("Are you running RetroWrapper on Java 5?");
                             ignored.printStackTrace();
                             frame.setIconImage(bufferedImageList.get(0));
                         }
@@ -156,11 +159,16 @@ public class SwingUtil {
                 public void hyperlinkUpdate(HyperlinkEvent event) {
                     if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                         try {
-                            Desktop.getDesktop().browse(event.getURL().toURI());
+                            final Class<?> desktopClass = Class.forName("java.awt.Desktop");
+                            final Method getDesktop = desktopClass.getMethod("getDesktop");
+                            final Object desktopObject = getDesktop.invoke(null);
+                            final Method browse = desktopClass.getMethod("browse", URI.class);
+                            browse.invoke(desktopObject, event.getURL().toURI());
                         } catch (final Exception ignored) {
-                            logger.log(Level.WARNING, "Could not open link from hyperlinkUpdate", ignored);
-                            JOptionPane.showMessageDialog(textPane, "Your platform doesn't let Java open links.\nPlease browse to https://github.com/NeRdTheNed/RetroWrapper/issues/new to create an issue.\nPlease copy-paste the error report into the issue.\nThanks for putting up with this!", "Sorry", JOptionPane.INFORMATION_MESSAGE);
-                        } catch (final NoClassDefFoundError ignored) {
+                            if (ignored instanceof NoSuchMethodException) {
+                                System.out.println("Are you running RetroWrapper on Java 5?");
+                            }
+
                             logger.log(Level.WARNING, "Could not open link from hyperlinkUpdate", ignored);
                             JOptionPane.showMessageDialog(textPane, "Your platform doesn't let Java open links.\nPlease browse to https://github.com/NeRdTheNed/RetroWrapper/issues/new to create an issue.\nPlease copy-paste the error report into the issue.\nThanks for putting up with this!", "Sorry", JOptionPane.INFORMATION_MESSAGE);
                         }

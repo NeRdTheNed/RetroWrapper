@@ -165,7 +165,7 @@ public class SwingUtil {
                             final Method browse = desktopClass.getMethod("browse", URI.class);
                             browse.invoke(desktopObject, event.getURL().toURI());
                         } catch (final Exception ignored) {
-                            if (ignored instanceof NoSuchMethodException) {
+                            if ((ignored instanceof NoSuchMethodException) || (ignored instanceof ClassNotFoundException)) {
                                 System.out.println("Are you running RetroWrapper on Java 5?");
                             }
 

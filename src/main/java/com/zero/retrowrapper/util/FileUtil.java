@@ -34,7 +34,7 @@ public class FileUtil {
 
         for (int arg5 = 0; arg5 < arg4; ++arg5) {
             final int color = arg3[arg5];
-            buffer.putInt((color << 8) | ((color >> 24) & 255));
+            buffer.putInt((color << 8) | (color >>> 24));
         }
 
         buffer.flip();

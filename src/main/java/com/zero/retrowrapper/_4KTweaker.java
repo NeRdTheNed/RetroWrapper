@@ -22,6 +22,6 @@ public final class _4KTweaker implements ITweaker {
     }
 
     public String[] getLaunchArguments() {
-        return args.toArray(new String[args.size()]);
+        return args.toArray(new String[0]);
     }
 }

@@ -56,7 +56,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             int minorVersion = 0;
             int patchVersion = 0;
 
-            if ((versionSplit != null) && (versionSplit.length > 0)) {
+            if (versionSplit.length > 0) {
                 try {
                     majorVersion = Integer.parseInt(versionSplit[0]);
                 } catch (final NumberFormatException e) {

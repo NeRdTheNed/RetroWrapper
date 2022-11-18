@@ -19,7 +19,7 @@ public final class ByteUtil {
             bos.write(b);
         }
 
-        return new String(bos.toByteArray());
+        return bos.toString();
     }
 
     public static String readString(DataInputStream dis) throws IOException {

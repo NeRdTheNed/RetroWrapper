@@ -249,7 +249,7 @@ public final class Installer {
                         }
 
                         versionJson.set("id",  versionWrapped);
-                        // Replace any of Mojangs tweakers with RetroWrapper tweakers
+                        // Replace any of Mojang's tweakers with RetroWrapper tweakers
                         String modifiedLaunchArgs = versionJson.getString("minecraftArguments", "null");
 
                         if (modifiedLaunchArgs.contains("VanillaTweaker")) {
@@ -312,7 +312,7 @@ public final class Installer {
                     }
                 }
 
-                JOptionPane.showMessageDialog(null, (versionList.length > 1 ? "Successfully wrapped versions\n" : "Successfully wrapped version\n") + finalVersions.toString(), "Success", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, (versionList.length > 1 ? "Successfully wrapped versions\n" : "Successfully wrapped version\n") + finalVersions, "Success", JOptionPane.INFORMATION_MESSAGE);
                 refreshList(workingDirectory, installerLogger);
             }
         });
@@ -469,28 +469,28 @@ public final class Installer {
                         final StringBuilder tempDirBuilder = new StringBuilder();
 
                         for (final File tempDir : directories) {
-                            tempDirBuilder.append("\n" + tempDir);
+                            tempDirBuilder.append("\n").append(tempDir);
                         }
 
                         final StringBuilder wrappableBuilder = new StringBuilder();
 
                         for (final Object wrappable : model.toArray()) {
-                            wrappableBuilder.append("\n" + wrappable);
+                            wrappableBuilder.append("\n").append(wrappable);
                         }
 
                         final StringBuilder selectedBuilder = new StringBuilder();
 
                         for (final Object selectedO : list.getSelectedValues()) {
                             final String selected = (String)selectedO;
-                            selectedBuilder.append("\n" + selected);
+                            selectedBuilder.append("\n").append(selected);
                         }
 
                         final String toShow = "\nWorking directory " + workingDirectory +
                                               "\nDirectory " + directory +
                                               "\nVersions folder " + versions +
-                                              "\nCurrently selected Minecraft versions in list " + selectedBuilder.toString() +
-                                              "\nWrappable versions of Minecraft in versions folder " + wrappableBuilder.toString() +
-                                              "\nAll verions of Minecraft in versions folder " + tempDirBuilder.toString();
+                                              "\nCurrently selected Minecraft versions in list " + selectedBuilder +
+                                              "\nWrappable versions of Minecraft in versions folder " + wrappableBuilder +
+                                              "\nAll versions of Minecraft in versions folder " + tempDirBuilder;
                         final JTextPane textPane = new JTextPane();
                         textPane.setText("Debug F3 + H: Show variable info: " + toShow);
                         textPane.setCaretPosition(0);

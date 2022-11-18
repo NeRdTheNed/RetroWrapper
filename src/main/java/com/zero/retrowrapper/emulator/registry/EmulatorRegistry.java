@@ -32,10 +32,10 @@ public final class EmulatorRegistry {
             final StringBuilder builder = new StringBuilder();
 
             for (final String s : ext) {
-                builder.append(" " + s);
+                builder.append(" ").append(s);
             }
 
-            toPrint = "Scanning for invalid files of type(s)" + builder.toString() + " to move in " + directory;
+            toPrint = "Scanning for invalid files of type(s)" + builder + " to move in " + directory;
         } else {
             toPrint = "Scanning for invalid files to move in " + directory;
         }

@@ -69,7 +69,7 @@ public final class HackThread extends Thread {
                     final float dz = Float.parseFloat(z.getText().replace(",", "").replace(" ", ""));
                     player.teleport(dx, dy, dz);
                 } catch (final Exception ee) {
-                    JOptionPane.showMessageDialog(null, "Exception occured!\n" + ee.getClass().getName() + "\n" + ee.getMessage());
+                    JOptionPane.showMessageDialog(null, "Exception occurred!\n" + ee.getClass().getName() + "\n" + ee.getMessage());
                 }
             }
         });

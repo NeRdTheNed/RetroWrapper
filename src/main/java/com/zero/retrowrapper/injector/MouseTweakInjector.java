@@ -140,8 +140,6 @@ public final class MouseTweakInjector implements IClassTransformer {
                         System.out.println("Patching call to " + toPatch.name + " at class " + name);
                         methodNode.instructions.remove(next2);
                         methodNode.instructions.remove(toPatch);
-                    } else {
-                        //System.out.println("Warning: Return value of call to " + toPatch.name + " at class " + name + " was actually used, this should never happen!");
                     }
                 }
 
@@ -156,7 +154,7 @@ public final class MouseTweakInjector implements IClassTransformer {
                         shouldHide = 1;
                     }
 
-                    final LdcInsnNode loadShouldHide = new LdcInsnNode(Integer.valueOf(shouldHide));
+                    final LdcInsnNode loadShouldHide = new LdcInsnNode(shouldHide);
                     final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/MouseTweakInjector", "setNativeCursorPatch", "(Lorg/lwjgl/input/Cursor;Z)Lorg/lwjgl/input/Cursor;");
                     methodNode.instructions.insertBefore(toPatch, loadShouldHide);
                     methodNode.instructions.insertBefore(toPatch, methodInsNode);

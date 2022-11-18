@@ -130,14 +130,14 @@ public class SwingUtil {
     }
 
     public static void showExceptionHandler(final Logger logger, final String context, final Exception toShow) {
-        final String exeptText = ExceptionUtils.getStackTrace(toShow);
-        logger.log(Level.FINE, "Displaying exception handler with context \"{0}\" and stacktrace \"{1}\"", new Object[] { context, exeptText });
+        final String exceptText = ExceptionUtils.getStackTrace(toShow);
+        logger.log(Level.FINE, "Displaying exception handler with context \"{0}\" and stacktrace \"{1}\"", new Object[] { context, exceptText });
         final String dialogTitle = "RetroWrapper error report: " + context;
         final String issueTitle = toShow.getClass().getSimpleName() + " thrown when running RetroWrapper " + MetadataUtil.VERSION;
         final String githubIssueTitle = issueTitle + " (modify to add context)";
         final String baseIssueBody = "RetroWrapper version: " + MetadataUtil.VERSION + "\nOS: " + SystemUtils.OS_NAME + "\nJava version: " + SystemUtils.JAVA_VERSION + "\nInternal reason: " + context;
-        final String displayIssueBody = baseIssueBody + "\nStacktrace:\n" + exeptText;
-        final String githubIssueBody = baseIssueBody + "\n\nAdd some context about what you were doing when this error occurred!\n\nStacktrace (don't modify):\n```java\n" + exeptText + "```";
+        final String displayIssueBody = baseIssueBody + "\nStacktrace:\n" + exceptText;
+        final String githubIssueBody = baseIssueBody + "\n\nAdd some context about what you were doing when this error occurred!\n\nStacktrace (don't modify):\n```java\n" + exceptText + "```";
         final JFrame errorFrame = new JFrame();
         errorFrame.setResizable(true);
         errorFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -149,7 +149,7 @@ public class SwingUtil {
             textPane.setBorder(null);
             textPane.setContentType("text/html");
             textPane.setText("<html>" +
-                             "<p>Please report this issue on GitHub (the link autofills this information for you):</p><br>" +
+                             "<p>Please report this issue on GitHub (the link will autofill this information for you):</p><br>" +
                              "<a href=\"https://github.com/NeRdTheNed/RetroWrapper/issues/new?title=" + URLEncoder.encode(githubIssueTitle, "UTF-8") + "&body=" + URLEncoder.encode(githubIssueBody, "UTF-8") + "\">Create an issue on Github!</a><br>" +
                              "<p>" + escapeHtml4(dialogTitle).replace("\n", "<br>") + "</p><br>" +
                              "<br><p>" + escapeHtml4(issueTitle).replace("\n", "<br>") + "</p><br>" +

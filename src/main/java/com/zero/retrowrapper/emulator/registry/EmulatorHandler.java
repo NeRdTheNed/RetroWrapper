@@ -13,7 +13,7 @@ public abstract class EmulatorHandler implements IHandler {
          + "Content-Type: audio/ogg\n"
          + "Connection: Closed\r\n\n").getBytes();
 
-    protected String url;
+    protected final String url;
 
     protected EmulatorHandler(String url) {
         this.url = url;

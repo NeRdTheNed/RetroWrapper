@@ -27,7 +27,7 @@ public class FileUtil {
     // TODO Re-add?
     public static ByteBuffer loadIcon(File iconFile) throws IOException {
         final BufferedImage icon = ImageIO.read(iconFile);
-        final int[] rgb = icon.getRGB(0, 0, icon.getWidth(), icon.getHeight(), (int[]) null, 0, icon.getWidth());
+        final int[] rgb = icon.getRGB(0, 0, icon.getWidth(), icon.getHeight(), null, 0, icon.getWidth());
         final ByteBuffer buffer = ByteBuffer.allocate(4 * rgb.length);
         final int[] arg3 = rgb;
         final int arg4 = rgb.length;

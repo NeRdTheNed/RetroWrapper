@@ -463,8 +463,6 @@ public final class M1ColorTweakInjector implements IClassTransformer {
             try {
                 final Class<?> classWithReloadTextureMethod = RetroTweakInjectorTarget.getaClass(reloadTexturesClassName);
                 reloadTexturesMethod = classWithReloadTextureMethod.getMethod(reloadTexturesMethodName);
-                //System.out.println(classWithReloadTextureMethod);
-                //System.out.println(reloadTexturesMethod);
                 final EmulatorConfig config = EmulatorConfig.getInstance();
                 config.minecraftField.setAccessible(true);
                 final Object minecraft = config.minecraftField.get(config.applet);
@@ -476,14 +474,6 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                         break;
                     }
                 }
-
-                /*
-                if (reloadTexturesInstance != null) {
-                    System.out.println("reloadTexturesInstance " + reloadTexturesInstance);
-                } else {
-                    System.out.println("no reloadTexturesInstance found");
-                }
-                */
             } catch (final Exception e) {
                 System.out.println("Exception while trying to get reload textures method");
                 e.printStackTrace();

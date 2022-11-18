@@ -34,7 +34,7 @@ public final class RetroTweaker implements ITweaker {
         // Patches to use a 24 bit depth buffer when creating displays
         classLoader.registerTransformer("com.zero.retrowrapper.injector.DisplayTweakInjector");
 
-        // Patches to fix crash bugs on MacOS related to mouse movement + some tweaks to display the cursor correctly
+        // Patches to fix crash bugs on macOS related to mouse movement + some tweaks to display the cursor correctly
         if (SystemUtils.IS_OS_MAC) {
             classLoader.registerTransformer("com.zero.retrowrapper.injector.MouseTweakInjector");
         }
@@ -67,6 +67,6 @@ public final class RetroTweaker implements ITweaker {
     }
 
     public String[] getLaunchArguments() {
-        return args.toArray(new String[args.size()]);
+        return args.toArray(new String[0]);
     }
 }

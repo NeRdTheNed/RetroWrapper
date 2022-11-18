@@ -4,7 +4,6 @@ import java.applet.Applet;
 import java.applet.AppletStub;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 
 import com.zero.retrowrapper.emulator.EmulatorConfig;
@@ -12,7 +11,7 @@ import com.zero.retrowrapper.emulator.EmulatorConfig;
 public final class LauncherFake extends Applet implements AppletStub {
     private static final long serialVersionUID = 1L;
 
-    private Map<String, String> params = new HashMap<String, String>();
+    private final Map<String, String> params;
 
     public LauncherFake(Map<String, String> params, Applet applet) {
         this.params = params;

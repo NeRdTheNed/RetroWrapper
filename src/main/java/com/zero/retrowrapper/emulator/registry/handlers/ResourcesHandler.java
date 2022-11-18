@@ -127,7 +127,7 @@ public final class ResourcesHandler extends EmulatorHandler {
 
             if ((bytes != null) && (bytes.length > smallestSize)) {
                 os.write(bytes);
-                System.out.println("Succesfully installed resource! " + name + " (" + bytes.length + ")");
+                System.out.println("Successfully installed resource! " + name + " (" + bytes.length + ")");
             } else {
                 System.out.println("Error installing resource " + name);
             }

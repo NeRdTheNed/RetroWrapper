@@ -65,6 +65,9 @@ tasks.withType(JavaCompile).configureEach {
     javaCompiler = compiler
     sourceCompatibility = 1.5
     targetCompatibility = 1.5
+    // Tells Gradle to include more debug information in compiled .class files.
+    options.debug = true
+    options.debugOptions.debugLevel = "source,lines,vars"
 }
 
 repositories {

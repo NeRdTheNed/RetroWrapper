@@ -8,16 +8,22 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 public final class JavaUtil {
 
-    public static Class<?> getMostSuper(Class<?> toGet) {
-        while (true) {
-            if (toGet.getSuperclass().equals(Object.class)) {
-                break;
-            }
+    // TODO proper generic usage
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static <T extends Object> Class<? super Object> getMostSuper(final Class<T> toGet) {
+        Class toReturn = toGet;
 
-            toGet = toGet.getSuperclass();
+        if ((toReturn == null) || Object.class.equals(toReturn)) {
+            return toReturn;
         }
 
-        return toGet;
+        Class superClass;
+
+        while (!Object.class.equals(superClass = toReturn.getSuperclass())) {
+            toReturn = superClass;
+        }
+
+        return toReturn;
     }
 
     public static boolean areAllOpcodesLoadIns(AbstractInsnNode... ins) {

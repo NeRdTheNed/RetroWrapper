@@ -12,7 +12,7 @@ public final class ByteUtil {
         while (true) {
             final int b = dis.read();
 
-            if (b == 0x0a) {
+            if (b == '\n') {
                 break;
             }
 

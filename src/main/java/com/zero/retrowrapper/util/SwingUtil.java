@@ -62,8 +62,7 @@ public class SwingUtil {
 
     public static void loadIconsOnFrames() {
         final List<File> iconList = new ArrayList<File>();
-        final File[] files = { FileUtil.tryFindResourceFile("icons/icon_16x16.png"), FileUtil.tryFindResourceFile("icons/icon_32x32.png") };
-        CollectionUtil.addNonNullToCollection(iconList, files);
+        CollectionUtil.addNonNullToCollection(iconList, FileUtil.tryFindResourceFile("icons/icon_16x16.png"), FileUtil.tryFindResourceFile("icons/icon_32x32.png"));
 
         if (!iconList.isEmpty()) {
             System.out.println("Loading current icons for window from: " + iconList);

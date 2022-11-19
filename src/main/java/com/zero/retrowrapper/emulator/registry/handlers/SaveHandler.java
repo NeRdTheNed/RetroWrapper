@@ -18,7 +18,9 @@ public final class SaveHandler extends EmulatorHandler {
 
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
         final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
+        // Username, not used
         ByteUtil.readString(dis);
+        // Auth token, not used
         ByteUtil.readString(dis);
         final String levelName = ByteUtil.readString(dis);
         final byte id = dis.readByte();

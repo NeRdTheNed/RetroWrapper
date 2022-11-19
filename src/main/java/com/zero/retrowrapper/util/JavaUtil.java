@@ -13,14 +13,12 @@ public final class JavaUtil {
     public static <T extends Object> Class<? super Object> getMostSuper(final Class<T> toGet) {
         Class toReturn = toGet;
 
-        if ((toReturn == null) || Object.class.equals(toReturn)) {
-            return toReturn;
-        }
+        if ((toReturn != null) && !Object.class.equals(toReturn)) {
+            Class superClass;
 
-        Class superClass;
-
-        while (!Object.class.equals(superClass = toReturn.getSuperclass())) {
-            toReturn = superClass;
+            while (!Object.class.equals(superClass = toReturn.getSuperclass())) {
+                toReturn = superClass;
+            }
         }
 
         return toReturn;

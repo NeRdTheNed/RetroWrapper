@@ -14,8 +14,8 @@ public final class JavaUtil {
         Class toReturn = toGet;
 
         if (toReturn != null) {
-            for (Class superClass = toReturn; !Object.class.equals(superClass); toReturn = superClass = superClass.getSuperclass()) {
-                // This loop left intentionally blank
+            for (Class superClass = toReturn; !Object.class.equals(superClass); superClass = superClass.getSuperclass()) {
+                toReturn = superClass;
             }
         }
 

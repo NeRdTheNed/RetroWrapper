@@ -346,9 +346,9 @@
 # Remove - File fields which are not used.
 -assumenosideeffects public class java.io.File {
     public static final char separatorChar;
-    public static final String separator;
+    public static final java.lang.String separator;
     public static final char pathSeparatorChar;
-    public static final String pathSeparator;
+    public static final java.lang.String pathSeparator;
 }
 
 # Remove - Uses of StringBuilderWriter which are not used.
@@ -360,6 +360,7 @@
 
 # Remove - Uses of JavaVersion which are not used.
 -assumenosideeffects class com.zero.retrowrapper.shadow.commons-lang3.JavaVersion {
+    <init>(float,java.lang.String);
     <init>(java.lang.String);
     com.zero.retrowrapper.shadow.commons-lang3.JavaVersion get(java.lang.String);
 }
@@ -367,8 +368,11 @@
 # Remove - Uses of SystemUtils which are not used.
 -assumenosideeffects class com.zero.retrowrapper.shadow.commons-lang3.SystemUtils {
     boolean getOsMatches(java.lang.String,java.lang.String);
+    boolean getOSMatches(java.lang.String,java.lang.String);
+    boolean getOSMatchesName(java.lang.String);
     boolean isOSNameMatch(java.lang.String,java.lang.String);
     java.lang.String getSystemProperty(java.lang.String,java.lang.String);
+    java.lang.String getSystemProperty(java.lang.String);
 }
 
 # TODO Can't get this to work.

@@ -21,6 +21,9 @@ src/.classpath
 src/.project
 src/.settings/
 
+# IntelliJ
+.idea/
+
 # gradle
 build
 .gradle

@@ -29,11 +29,10 @@ public class FileUtil {
         final BufferedImage icon = ImageIO.read(iconFile);
         final int[] rgb = icon.getRGB(0, 0, icon.getWidth(), icon.getHeight(), null, 0, icon.getWidth());
         final ByteBuffer buffer = ByteBuffer.allocate(4 * rgb.length);
-        final int[] arg3 = rgb;
         final int arg4 = rgb.length;
 
         for (int arg5 = 0; arg5 < arg4; ++arg5) {
-            final int color = arg3[arg5];
+            final int color = rgb[arg5];
             buffer.putInt((color << 8) | (color >>> 24));
         }
 

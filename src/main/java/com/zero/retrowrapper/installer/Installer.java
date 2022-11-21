@@ -257,16 +257,15 @@ public final class Installer {
 
                                 if ("1.5".equals(libVersion)) {
                                     // Replace LaunchWrapper 1.5 with LaunchWrapper 1.12
-                                    final JsonObject newLaunchWrapper = Json.object().add("name", "net.minecraft:launchwrapper:1.12")
-                                                                        .add("downloads", Json.object()
-                                                                                .add("artifact", Json.object()
-                                                                                        .add("path", "net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar")
-                                                                                        .add("url", "https://libraries.minecraft.net/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar")
-                                                                                        .add("sha1", "111e7bea9c968cdb3d06ef4632bf7ff0824d0f36")
-                                                                                        .add("size", 32999)
-                                                                                    )
-                                                                            );
-                                    toAdd = newLaunchWrapper;
+                                    toAdd = Json.object().add("name", "net.minecraft:launchwrapper:1.12")
+                                            .add("downloads", Json.object()
+                                                 .add("artifact", Json.object()
+                                                      .add("path", "net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar")
+                                                      .add("url", "https://libraries.minecraft.net/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar")
+                                                      .add("sha1", "111e7bea9c968cdb3d06ef4632bf7ff0824d0f36")
+                                                      .add("size", 32999)
+                                                     )
+                                                );
                                 }
                             } else if (libName.contains("org.apache.logging.log4j:log4j-api")) {
                                 hasLogAPI = true;

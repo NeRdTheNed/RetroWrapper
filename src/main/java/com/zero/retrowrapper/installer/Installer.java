@@ -45,6 +45,7 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
+import com.eclipsesource.json.PrettyPrint;
 import com.zero.retrowrapper.util.FileUtil;
 import com.zero.retrowrapper.util.MetadataUtil;
 import com.zero.retrowrapper.util.SwingUtil;
@@ -354,7 +355,7 @@ public final class Installer {
                         try {
                             fos = new FileOutputStream(new File(wrapDir, versionWrapped + ".json"));
                             FileUtils.copyFile(new File(versions, version + File.separator + version + ".jar"), new File(wrapDir, versionWrapped + ".jar"));
-                            fos.write(versionJson.toString().getBytes());
+                            fos.write(versionJson.toString(PrettyPrint.indentWithSpaces(4)).getBytes());
                             FileUtils.copyFile(jar, new File(libDir, "retrowrapper-" + MetadataUtil.VERSION + ".jar"));
                         } catch (final IOException ee) {
                             // TODO better logging
@@ -397,12 +398,6 @@ public final class Installer {
                     if (f.isDirectory() && f.getName().contains("-wrapped")) {
                         FileUtils.deleteQuietly(f);
                     }
-                }
-
-                final File libDir = new File(directory, "libraries" + File.separator + "com" + File.separator + "zero");
-
-                if (libDir.exists()) {
-                    FileUtils.deleteQuietly(libDir);
                 }
 
                 JOptionPane.showMessageDialog(null, "Successfully uninstalled wrapper", "Success", JOptionPane.INFORMATION_MESSAGE);

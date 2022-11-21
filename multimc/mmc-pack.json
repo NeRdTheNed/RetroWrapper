@@ -1,37 +1,37 @@
 {
-  "components": [
-    {
-      "cachedName": "LWJGL 2",
-      "cachedVersion": "2.9.4-nightly-20150209",
-      "cachedVolatile": true,
-      "dependencyOnly": true,
-      "uid": "org.lwjgl",
-      "version": "2.9.4-nightly-20150209"
-    },
-    {
-      "cachedName": "Minecraft",
-      "cachedRequires": [
+    "components": [
         {
-          "suggests": "2.9.4-nightly-20150209",
-          "uid": "org.lwjgl"
-        }
-      ],
-      "cachedVersion": "c0.30_01c",
-      "important": true,
-      "uid": "net.minecraft",
-      "version": "c0.30_01c"
-    },
-    {
-      "cachedName": "retrowrapper",
-      "cachedRequires": [
+            "cachedName": "LWJGL 2",
+            "cachedVersion": "2.9.4-nightly-20150209",
+            "cachedVolatile": true,
+            "dependencyOnly": true,
+            "uid": "org.lwjgl",
+            "version": "2.9.4-nightly-20150209"
+        },
         {
-          "uid": "net.minecraft"
+            "cachedName": "Minecraft",
+            "cachedRequires": [
+                {
+                    "suggests": "2.9.4-nightly-20150209",
+                    "uid": "org.lwjgl"
+                }
+            ],
+            "cachedVersion": "c0.30_01c",
+            "important": true,
+            "uid": "net.minecraft",
+            "version": "c0.30_01c"
+        },
+        {
+            "cachedName": "retrowrapper",
+            "cachedRequires": [
+                {
+                    "uid": "net.minecraft"
+                }
+            ],
+            "cachedVersion": "@rrVersion@",
+            "dependencyOnly": true,
+            "uid": "RetroWrapper"
         }
-      ],
-      "cachedVersion": "@rrVersion@",
-      "dependencyOnly": true,
-      "uid": "RetroWrapper"
-    }
-  ],
-  "formatVersion": 1
+    ],
+    "formatVersion": 1
 }

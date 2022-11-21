@@ -32,6 +32,7 @@ import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.util.JavaUtil;
 
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraft.launchwrapper.LogWrapper;
 
 public final class M1ColorTweakInjector implements IClassTransformer {
     /**
@@ -184,20 +185,20 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 }
 
                 if (hasHashes && (hasPercents || (hasClamp && hasBlur) || callsImageIO)) {
-                    System.out.println("Found texture reload method at class " + name);
+                    LogWrapper.fine("Found texture reload method at class " + name);
                     reloadTexturesClassName = name;
                     reloadTexturesMethodName = methodNode.name;
                 }
 
                 for (final MethodInsnNode toPatch : foundSetFullscreenCalls) {
-                    System.out.println("Hooking fullscreen call at class " + name);
+                    LogWrapper.fine("Hooking fullscreen call at class " + name);
                     final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "setFullscreenWrapper", "(Z)V");
                     methodNode.instructions.insertBefore(toPatch, methodInsNode);
                     methodNode.instructions.remove(toPatch);
                 }
 
                 for (final MethodInsnNode toPatch : foundGetRGBCalls) {
-                    System.out.println("Patching call to getRGB at class " + name);
+                    LogWrapper.fine("Patching call to getRGB at class " + name);
                     final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "buffImageTweaker", "(Ljava/awt/image/BufferedImage;IIII[III)[I");
                     methodNode.instructions.insertBefore(toPatch, methodInsNode);
                     methodNode.instructions.remove(toPatch);
@@ -209,7 +210,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 int index4 = -1;
 
                 for (final MethodInsnNode toPatch : foundFogFloatBufCalls) {
-                    System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
+                    LogWrapper.fine("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                     // RGBA to BRGA
                     final LabelNode target = new LabelNode();
                     final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
@@ -319,7 +320,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final AbstractInsnNode _p3 = _p2.getPrevious();
 
                     if (!JavaUtil.isOpcodeLoadIns(_p2) || !JavaUtil.doLoadInsMatch(_p1, _p3)) {
-                        System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
+                        LogWrapper.fine("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                         final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
 
                         if (reorderLoadIns != null) {
@@ -338,7 +339,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final AbstractInsnNode _p3 = _p2.getPrevious();
 
                     if (!JavaUtil.isOpcodeLoadIns(_p2) || !JavaUtil.doLoadInsMatch(_p1, _p3)) {
-                        System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
+                        LogWrapper.fine("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                         final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
 
                         if (reorderLoadIns != null) {
@@ -368,7 +369,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final AbstractInsnNode _p4 = _p3.getPrevious();
 
                     if (!JavaUtil.areAllOpcodesLoadIns(_p1, _p3) || !JavaUtil.doLoadInsMatch(_p2, _p4)) {
-                        System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
+                        LogWrapper.fine("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                         final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p4, _p3, _p2});
                         final boolean isP1Load = JavaUtil.isOpcodeLoadIns(_p1);
 
@@ -399,7 +400,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final AbstractInsnNode _p4 = _p3.getPrevious();
 
                     if (!JavaUtil.areAllOpcodesLoadIns(_p1, _p3) || !JavaUtil.doLoadInsMatch(_p2, _p4)) {
-                        System.out.println("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
+                        LogWrapper.fine("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
                         final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p4, _p3, _p2});
                         final boolean isP1Load = JavaUtil.isOpcodeLoadIns(_p1);
 
@@ -448,9 +449,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
             classNode.accept(writer);
             return writer.toByteArray();
         } catch (final Exception e) {
-            System.out.println("Exception while transforming class " + name);
-            e.printStackTrace();
-            System.out.println(e);
+            LogWrapper.severe("Exception while transforming class " + name, e);
             return bytesOld;
         }
     }
@@ -475,9 +474,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     }
                 }
             } catch (final Exception e) {
-                System.out.println("Exception while trying to get reload textures method");
-                e.printStackTrace();
-                System.out.println(e);
+                LogWrapper.warning("Exception while trying to get reload textures method", e);
             }
         }
 
@@ -485,12 +482,10 @@ public final class M1ColorTweakInjector implements IClassTransformer {
             try {
                 reloadTexturesMethod.invoke(reloadTexturesInstance);
             } catch (final Exception e) {
-                System.out.println("Exception while trying to invoke reload textures method");
-                e.printStackTrace();
-                System.out.println(e);
+                LogWrapper.warning("Exception while trying to invoke reload textures method", e);
             }
         } else {
-            System.out.println("Could not find reload textures method");
+            LogWrapper.warning("Could not find reload textures method");
         }
     }
 
@@ -663,7 +658,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
 
     private static AbstractInsnNode[] convLoadInsOrNull(AbstractInsnNode[] from) {
         if (from.length != 3) {
-            System.out.println("from.length was not 3!");
+            LogWrapper.severe("from.length was not 3!");
             return null;
         }
 

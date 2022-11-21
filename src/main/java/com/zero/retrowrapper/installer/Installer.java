@@ -35,6 +35,7 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
@@ -285,14 +286,7 @@ public final class Installer {
                             logRecord.setThrown(ee);
                             installerLogger.log(logRecord);
                         } finally {
-                            if (fos != null) {
-                                try {
-                                    fos.close();
-                                } catch (final IOException ee) {
-                                    // TODO Better error handling
-                                    ee.printStackTrace();
-                                }
-                            }
+                            IOUtils.closeQuietly(fos);
                         }
                     } catch (final IOException ee) {
                         // TODO better logging
@@ -301,14 +295,7 @@ public final class Installer {
                         logRecord.setThrown(ee);
                         installerLogger.log(logRecord);
                     } finally {
-                        if (s != null) {
-                            try {
-                                s.close();
-                            } catch (final IOException ee) {
-                                // TODO Better error handling
-                                ee.printStackTrace();
-                            }
-                        }
+                        IOUtils.closeQuietly(s);
                     }
                 }
 

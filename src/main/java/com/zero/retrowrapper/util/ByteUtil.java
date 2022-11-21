@@ -5,6 +5,8 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import net.minecraft.launchwrapper.LogWrapper;
+
 public final class ByteUtil {
     public static String readLine(InputStream dis) throws IOException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -24,7 +26,7 @@ public final class ByteUtil {
 
     public static String readString(DataInputStream dis) throws IOException {
         final int len = dis.readUnsignedShort();
-        System.out.println(len);
+        LogWrapper.fine(Integer.toString(len));
         final byte[] bytes = new byte[len];
         dis.read(bytes);
         return new String(bytes);

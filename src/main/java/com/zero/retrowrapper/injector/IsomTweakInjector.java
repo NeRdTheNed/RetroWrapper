@@ -17,6 +17,7 @@ import com.zero.retrowrapper.util.SwingUtil;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LogWrapper;
 
 public final class IsomTweakInjector implements IClassTransformer {
     /**
@@ -33,7 +34,7 @@ public final class IsomTweakInjector implements IClassTransformer {
     // TODO can the throws be removed?
     public static void main(String[] args) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
         final Class<?> clazz = getaClass("net.minecraft.isom.IsomPreviewApplet");
-        System.out.println("IsomTweakInjector.class.getClassLoader() = " + IsomTweakInjector.class.getClassLoader());
+        LogWrapper.fine("IsomTweakInjector.class.getClassLoader() = " + IsomTweakInjector.class.getClassLoader());
         final Constructor<?> constructor = clazz.getConstructor();
         final Object object = constructor.newInstance();
         startMinecraft((Applet) object, args);

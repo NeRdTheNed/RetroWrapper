@@ -36,6 +36,8 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.lwjgl.opengl.Display;
 
+import net.minecraft.launchwrapper.LogWrapper;
+
 public class SwingUtil {
     public static void addJButtonCentered(Container container, JButton component) {
         component.setHorizontalAlignment(SwingConstants.CENTER);
@@ -65,7 +67,7 @@ public class SwingUtil {
         CollectionUtil.addNonNullToCollection(iconList, FileUtil.tryFindResourceFile("icons/icon_16x16.png"), FileUtil.tryFindResourceFile("icons/icon_32x32.png"));
 
         if (!iconList.isEmpty()) {
-            System.out.println("Loading current icons for window from: " + iconList);
+            LogWrapper.fine("Loading current icons for window from: " + iconList);
             // TODO Refactor
             final List<ByteBuffer> iconsAsByteBufferArrayList = new ArrayList<ByteBuffer>();
 
@@ -75,7 +77,7 @@ public class SwingUtil {
                     iconsAsByteBufferArrayList.add(loadedIcon);
                 } catch (final IOException e) {
                     // TODO Better error handling
-                    e.printStackTrace();
+                    LogWrapper.warning("Issue loading icon " + icon, e);
                 }
             }
 
@@ -91,7 +93,7 @@ public class SwingUtil {
                         bufferedImageList.add(iconImage);
                     } catch (final IOException e) {
                         // TODO Better error handling
-                        e.printStackTrace();
+                        LogWrapper.warning("Issue reading icon " + icon, e);
                     }
                 }
 
@@ -101,15 +103,14 @@ public class SwingUtil {
                             final Method setIconImages = Frame.class.getMethod("setIconImages", List.class);
                             setIconImages.invoke(frame, bufferedImageList);
                         } catch (final Exception ignored) {
-                            System.out.println("Are you running RetroWrapper on Java 5?");
-                            ignored.printStackTrace();
+                            LogWrapper.warning("Are you running RetroWrapper on Java 5?", ignored);
                             frame.setIconImage(bufferedImageList.get(0));
                         }
                     }
                 }
             }
         } else {
-            System.out.println("Could not find any icon files!");
+            LogWrapper.warning("Could not find any icon files!");
         }
     }
 
@@ -165,7 +166,7 @@ public class SwingUtil {
                             browse.invoke(desktopObject, event.getURL().toURI());
                         } catch (final Exception ignored) {
                             if ((ignored instanceof NoSuchMethodException) || (ignored instanceof ClassNotFoundException)) {
-                                System.out.println("Are you running RetroWrapper on Java 5?");
+                                logger.log(Level.WARNING, "Are you running RetroWrapper on Java 5?");
                             }
 
                             logger.log(Level.WARNING, "Could not open link from hyperlinkUpdate", ignored);

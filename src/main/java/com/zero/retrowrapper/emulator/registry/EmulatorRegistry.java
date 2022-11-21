@@ -16,6 +16,7 @@ import com.zero.retrowrapper.emulator.registry.handlers.SingleResponseHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.SkinOrCapeHandler;
 
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LogWrapper;
 
 public final class EmulatorRegistry {
     private EmulatorRegistry() {
@@ -40,7 +41,7 @@ public final class EmulatorRegistry {
             toPrint = "Scanning for invalid files to move in " + directory;
         }
 
-        System.out.println(toPrint);
+        LogWrapper.info(toPrint);
         directory.mkdirs();
 
         if (directory.isDirectory()) {
@@ -56,10 +57,10 @@ public final class EmulatorRegistry {
 
                         newDir.getParentFile().mkdirs();
                         FileUtils.moveFile(file, newDir);
-                        System.out.println("Moved file " + file + " to " + newDir + ", too small to be a valid file.");
+                        LogWrapper.warning("Moved file " + file + " to " + newDir + ", too small to be a valid file.");
                     }
                 } catch (final IOException e) {
-                    e.printStackTrace();
+                    LogWrapper.warning("Problem moving " + file, e);
                 }
             }
         }

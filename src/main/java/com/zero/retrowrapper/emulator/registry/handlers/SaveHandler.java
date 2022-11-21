@@ -7,9 +7,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.apache.commons.io.IOUtils;
+
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
 import com.zero.retrowrapper.util.ByteUtil;
+
+import net.minecraft.launchwrapper.LogWrapper;
 
 public final class SaveHandler extends EmulatorHandler {
     public SaveHandler() {
@@ -25,7 +29,7 @@ public final class SaveHandler extends EmulatorHandler {
         final String levelName = ByteUtil.readString(dis);
         final byte id = dis.readByte();
         final int levelLength = dis.readInt();
-        System.out.println(levelLength + ";" + data.length);
+        LogWrapper.fine(levelLength + ";" + data.length);
         final byte[] level = new byte[levelLength];
         dis.readFully(level);
         os.write("ok\n".getBytes());
@@ -39,16 +43,9 @@ public final class SaveHandler extends EmulatorHandler {
             fos1.write(level);
         } catch (final Exception e) {
             // TODO Better error handling
-            e.printStackTrace();
+            LogWrapper.warning("Error when trying to save level", e);
         } finally {
-            if (fos1 != null) {
-                try {
-                    fos1.close();
-                } catch (final IOException ee) {
-                    // TODO Better error handling
-                    ee.printStackTrace();
-                }
-            }
+            IOUtils.closeQuietly(fos1);
         }
 
         FileOutputStream fos2 = null;
@@ -58,16 +55,9 @@ public final class SaveHandler extends EmulatorHandler {
             fos2.write(levelName.getBytes());
         } catch (final Exception e) {
             // TODO Better error handling
-            e.printStackTrace();
+            LogWrapper.warning("Error when trying to save level metadata", e);
         } finally {
-            if (fos2 != null) {
-                try {
-                    fos2.close();
-                } catch (final IOException ee) {
-                    // TODO Better error handling
-                    ee.printStackTrace();
-                }
-            }
+            IOUtils.closeQuietly(fos2);
         }
     }
 }

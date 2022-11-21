@@ -25,6 +25,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraft.launchwrapper.LogWrapper;
 
 public final class MouseTweakInjector implements IClassTransformer {
     /**
@@ -98,7 +99,7 @@ public final class MouseTweakInjector implements IClassTransformer {
                 }
 
                 for (final MethodInsnNode toPatch : foundMouseMoveMethodCalls) {
-                    System.out.println("Patching call to mouseMove at class " + name);
+                    LogWrapper.fine("Patching call to mouseMove at class " + name);
                     final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/MouseTweakInjector", "mouseMovePatch", "(II)V");
                     final InsnNode pop = new InsnNode(Opcodes.POP);
                     methodNode.instructions.insertBefore(toPatch, methodInsNode);
@@ -114,16 +115,16 @@ public final class MouseTweakInjector implements IClassTransformer {
 
                         // Patch the call to MouseInfo.getPointerInfo().getLocation().
                         if ("java/awt/MouseInfo".equals(prevCall.owner) && "()Ljava/awt/PointerInfo;".equals(prevCall.desc) && "getPointerInfo".equals(prevCall.name)) {
-                            System.out.println("Patching call to getLocation at class " + name);
+                            LogWrapper.fine("Patching call to getLocation at class " + name);
                             final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/MouseTweakInjector", "getLocationPatch", "()Ljava/awt/Point;");
                             methodNode.instructions.insertBefore(toPatch.getNext(), methodInsNode);
                             methodNode.instructions.remove(prev);
                             methodNode.instructions.remove(toPatch);
                         } else {
-                            System.out.println("Warning: Something went wrong when trying to patch " + toPatch.name + " at class " + name);
+                            LogWrapper.warning("Warning: Something went wrong when trying to patch " + toPatch.name + " at class " + name);
                         }
                     } else {
-                        System.out.println("Warning: Something went wrong when trying to patch " + toPatch.name + " at class " + name);
+                        LogWrapper.warning("Warning: Something went wrong when trying to patch " + toPatch.name + " at class " + name);
                     }
                 }
 
@@ -133,18 +134,18 @@ public final class MouseTweakInjector implements IClassTransformer {
 
                     // Patch calls to Mouse.getDX or Mouse.getDY that are discarded.
                     if (next.getOpcode() == Opcodes.POP) {
-                        System.out.println("Patching call to " + toPatch.name + " at class " + name);
+                        LogWrapper.fine("Patching call to " + toPatch.name + " at class " + name);
                         methodNode.instructions.remove(next);
                         methodNode.instructions.remove(toPatch);
                     } else if ((next.getOpcode() == Opcodes.ICONST_0) && (next2.getOpcode() == Opcodes.IMUL)) {
-                        System.out.println("Patching call to " + toPatch.name + " at class " + name);
+                        LogWrapper.fine("Patching call to " + toPatch.name + " at class " + name);
                         methodNode.instructions.remove(next2);
                         methodNode.instructions.remove(toPatch);
                     }
                 }
 
                 for (final MethodInsnNode toPatch : foundNativeCursorMethodCalls) {
-                    System.out.println("Patching call to setNativeCursor at class " + name);
+                    LogWrapper.fine("Patching call to setNativeCursor at class " + name);
                     // Check if the method deliberately loaded null. This implies the cursor should be shown.
                     final int shouldHide;
 
@@ -166,9 +167,7 @@ public final class MouseTweakInjector implements IClassTransformer {
             classNode.accept(writer);
             return writer.toByteArray();
         } catch (final Exception e) {
-            System.out.println("Exception while transforming class " + name);
-            e.printStackTrace();
-            System.out.println(e);
+            LogWrapper.severe("Exception while transforming class " + name, e);
             return bytesOld;
         }
     }
@@ -189,7 +188,7 @@ public final class MouseTweakInjector implements IClassTransformer {
             final java.awt.Cursor useCursor = shouldHide ? hiddenCursor : normalCursor;
             Display.getParent().setCursor(useCursor);
         } catch (final Exception e) {
-            e.printStackTrace();
+            LogWrapper.warning("Something went wrong when trying to set AWT cursor", e);
         }
 
         if (System.getProperties().getProperty("retrowrapper.disableMouseReplacementPatches") == null) {

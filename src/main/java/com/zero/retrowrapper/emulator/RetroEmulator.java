@@ -1,11 +1,13 @@
 package com.zero.retrowrapper.emulator;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.apache.commons.io.IOUtils;
+
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LogWrapper;
 
 public final class RetroEmulator extends Thread {
     private static RetroEmulator instance;
@@ -17,7 +19,7 @@ public final class RetroEmulator extends Thread {
     public void run() {
         // TODO Is this threadsafe, and does it need to be?
         instance = this;
-        System.out.println("Old servers emulator is running!");
+        LogWrapper.info("Old servers emulator is running!");
         directory = new File(Launch.minecraftHome, "retrowrapper");
         directory.mkdirs();
         mapsDirectory = new File(RetroEmulator.getInstance().getDirectory(), "maps");
@@ -36,21 +38,14 @@ public final class RetroEmulator extends Thread {
                     new SocketEmulator(socket).parseIncoming();
                 } catch (final Exception e) {
                     // TODO Better error handling
-                    e.printStackTrace();
+                    LogWrapper.warning("Error when parsing incoming data for RetroWrapper local server", e);
                 }
             }
         } catch (final Exception e) {
             // TODO Better error handling
-            e.printStackTrace();
+            LogWrapper.severe("Error when starting RetroWrapper local server! This is very bad.", e);
         } finally {
-            if (server != null) {
-                try {
-                    server.close();
-                } catch (final IOException ee) {
-                    // TODO Better error handling
-                    ee.printStackTrace();
-                }
-            }
+            IOUtils.closeQuietly(server);
         }
     }
 

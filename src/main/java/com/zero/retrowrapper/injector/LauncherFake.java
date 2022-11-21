@@ -8,6 +8,8 @@ import java.util.Map;
 
 import com.zero.retrowrapper.emulator.EmulatorConfig;
 
+import net.minecraft.launchwrapper.LogWrapper;
+
 public final class LauncherFake extends Applet implements AppletStub {
     private static final long serialVersionUID = 1L;
 
@@ -42,7 +44,7 @@ public final class LauncherFake extends Applet implements AppletStub {
         try {
             return new URL("http://127.0.0.1:" + EmulatorConfig.getInstance().getPort() + "/game/");
         } catch (final MalformedURLException e) {
-            e.printStackTrace();
+            LogWrapper.severe("Local server URL was malformed?", e);
         }
 
         return null;
@@ -53,7 +55,7 @@ public final class LauncherFake extends Applet implements AppletStub {
             return params.get(paramName);
         }
 
-        System.err.println("Client asked for parameter: " + paramName);
+        LogWrapper.warning("Client asked for parameter: " + paramName);
         return null;
     }
 }

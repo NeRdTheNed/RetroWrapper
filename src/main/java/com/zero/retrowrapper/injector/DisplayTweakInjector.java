@@ -16,6 +16,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraft.launchwrapper.LogWrapper;
 
 public final class DisplayTweakInjector implements IClassTransformer {
     /**
@@ -63,7 +64,7 @@ public final class DisplayTweakInjector implements IClassTransformer {
                 }
 
                 for (final MethodInsnNode toPatch : foundDisplayCreateCalls) {
-                    System.out.println("Patching call to Display.create() at class " + name);
+                    LogWrapper.fine("Patching call to Display.create() at class " + name);
                     // Replace calls to Display.create() with Display.create(new PixelFormat().withDepthBits(24))
                     final TypeInsnNode newPixelFormat = new TypeInsnNode(Opcodes.NEW, "org/lwjgl/opengl/PixelFormat");
                     final InsnNode dup = new InsnNode(Opcodes.DUP);
@@ -85,9 +86,7 @@ public final class DisplayTweakInjector implements IClassTransformer {
             classNode.accept(writer);
             return writer.toByteArray();
         } catch (final Exception e) {
-            System.out.println("Exception while transforming class " + name);
-            e.printStackTrace();
-            System.out.println(e);
+            LogWrapper.severe("Exception while transforming class " + name, e);
             return bytesOld;
         }
     }

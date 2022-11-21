@@ -17,6 +17,7 @@ import com.zero.retrowrapper.util.SwingUtil;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LogWrapper;
 
 public final class _4KTweakInjector implements IClassTransformer {
     /**
@@ -33,7 +34,7 @@ public final class _4KTweakInjector implements IClassTransformer {
     // TODO can the throws be removed?
     public static void main(String[] args) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, ClassNotFoundException {
         final Class<?> clazz = getaClass("M");
-        System.out.println("_4KTweakInjector.class.getClassLoader() = " + _4KTweakInjector.class.getClassLoader());
+        LogWrapper.fine("_4KTweakInjector.class.getClassLoader() = " + _4KTweakInjector.class.getClassLoader());
         final Constructor<?> constructor = clazz.getConstructor();
         final Object object = constructor.newInstance();
         startMinecraft((Applet) object, args);

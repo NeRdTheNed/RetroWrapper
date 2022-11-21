@@ -3,6 +3,8 @@ package com.zero.retrowrapper.hack;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
+import net.minecraft.launchwrapper.LogWrapper;
+
 public final class RetroPlayer {
     private Field x, y, z, x2, y2, z2;
     private double ax, ay, az;
@@ -31,7 +33,7 @@ public final class RetroPlayer {
                 thread.setLabelText(getLabelText());
             }
         } catch (final Exception e) {
-            e.printStackTrace();
+            LogWrapper.warning("Something went wrong with RetroPlayer on tick", e);
             Thread.sleep(1000);
         }
     }
@@ -44,7 +46,7 @@ public final class RetroPlayer {
             tempY = Math.floor(getY() * 10) / 10;
             tempZ = Math.floor(getZ() * 10) / 10;
         } catch (final Exception e) {
-            e.printStackTrace();
+            LogWrapper.warning("Something went wrong with getting the label text from RetroPlayer", e);
         }
 
         return "<html>Position:<br>&nbsp&nbsp&nbsp;x: " + tempX + "<br>&nbsp&nbsp&nbsp;y: " + tempY + "<br>&nbsp&nbsp&nbsp;z: " + tempZ + "</html>";

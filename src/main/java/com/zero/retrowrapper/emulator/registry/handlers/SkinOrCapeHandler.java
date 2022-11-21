@@ -25,6 +25,8 @@ import com.eclipsesource.json.JsonValue;
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
 
+import net.minecraft.launchwrapper.LogWrapper;
+
 public final class SkinOrCapeHandler extends EmulatorHandler {
     private final HashMap<String, byte[]> imagesCache = new HashMap<String, byte[]>();
     // TODO Refactor
@@ -82,7 +84,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
             reader = new InputStreamReader(new URL("https://api.mojang.com/users/profiles/minecraft/" + username + "?at=" + System.currentTimeMillis()).openStream());
             final JsonObject profile1 = (JsonObject) Json.parse(reader);
             final String uuid = profile1.get("id").asString();
-            System.out.println(uuid);
+            LogWrapper.fine(uuid);
             InputStreamReader reader2 = null;
 
             try {
@@ -111,16 +113,16 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
 
                 if (imageLinkJSON == null) {
                     if (cape) {
-                        System.out.println("No cape found for username " + username);
+                        LogWrapper.warning("No cape found for username " + username);
                     } else {
-                        System.out.println("No skin found for username " + username);
+                        LogWrapper.warning("No skin found for username " + username);
                     }
 
                     return null;
                 }
 
                 final String imageURL = imageLinkJSON.get("url").asString();
-                System.out.println(imageURL);
+                LogWrapper.fine(imageURL);
                 final InputStream is = new URL(imageURL).openStream();
                 final byte[] imageBytes = IOUtils.toByteArray(is);
                 FileOutputStream fos = null;
@@ -129,29 +131,15 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                     fos = new FileOutputStream(imageCache);
                     fos.write(imageBytes);
                 } finally {
-                    if (fos != null) {
-                        try {
-                            fos.close();
-                        } catch (final IOException ee) {
-                            // TODO Better error handling
-                            ee.printStackTrace();
-                        }
-                    }
+                    IOUtils.closeQuietly(fos);
                 }
 
                 return imageBytes;
             } finally {
-                if (reader2 != null) {
-                    try {
-                        reader2.close();
-                    } catch (final IOException ee) {
-                        // TODO Better error handling
-                        ee.printStackTrace();
-                    }
-                }
+                IOUtils.closeQuietly(reader2);
             }
         } catch (final Exception e) {
-            e.printStackTrace();
+            LogWrapper.warning("Error when trying to get skin or cape for username " + username, e);
 
             if (imageCache.exists()) {
                 FileInputStream fis = null;
@@ -160,27 +148,13 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                     fis = new FileInputStream(imageCache);
                     return IOUtils.toByteArray(fis);
                 } finally {
-                    if (fis != null) {
-                        try {
-                            fis.close();
-                        } catch (final IOException ee) {
-                            // TODO Better error handling
-                            ee.printStackTrace();
-                        }
-                    }
+                    IOUtils.closeQuietly(fis);
                 }
             }
 
             return null;
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException ee) {
-                    // TODO Better error handling
-                    ee.printStackTrace();
-                }
-            }
+            IOUtils.closeQuietly(reader);
         }
     }
 }

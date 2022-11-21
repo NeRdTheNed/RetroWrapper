@@ -27,6 +27,7 @@ import com.zero.retrowrapper.util.SwingUtil;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LogWrapper;
 
 public final class RetroTweakInjectorTarget implements IClassTransformer {
     /**
@@ -42,15 +43,17 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
 
     // TODO can the throws be removed?
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        System.out.println("******************************");
-        System.out.println("*     old mojang servers     *");
-        System.out.println("*       emulator by 000      *");
-        System.out.println("******************************");
-        System.out.println("RetroWrapper version " + MetadataUtil.VERSION);
+        LogWrapper.info(
+            "\n******************************" +
+            "\n*     old mojang servers     *" +
+            "\n*       emulator by 000      *" +
+            "\n******************************"
+        );
+        LogWrapper.info("RetroWrapper version " + MetadataUtil.VERSION);
 
         try {
             final String lwjglVersion = Sys.getVersion();
-            System.out.println("LWJGL version " + lwjglVersion);
+            LogWrapper.info("LWJGL version " + lwjglVersion);
             final String[] versionSplit = lwjglVersion.split("\\.");
             int majorVersion = 0;
             int minorVersion = 0;
@@ -60,33 +63,33 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
                 try {
                     majorVersion = Integer.parseInt(versionSplit[0]);
                 } catch (final NumberFormatException e) {
-                    e.printStackTrace();
+                    LogWrapper.warning("There's something wrong with LWJGL", e);
                 }
 
                 if (versionSplit.length > 1) {
                     try {
                         minorVersion = Integer.parseInt(versionSplit[1]);
                     } catch (final NumberFormatException e) {
-                        e.printStackTrace();
+                        LogWrapper.warning("There's something wrong with LWJGL", e);
                     }
 
                     if (versionSplit.length > 2) {
                         try {
                             patchVersion = Integer.parseInt(versionSplit[2]);
                         } catch (final NumberFormatException e) {
-                            e.printStackTrace();
+                            LogWrapper.warning("There's something wrong with LWJGL", e);
                         }
                     }
                 }
             }
 
             if (majorVersion > 2) {
-                System.out.println("Somehow, you're using LWJGL " + majorVersion + " despite this method calling a LWJGL 2 method. Consider me impressed.");
+                LogWrapper.info("Somehow, you're using LWJGL " + majorVersion + " despite this method calling a LWJGL 2 method. Consider me impressed.");
             } else if (SystemUtils.IS_OS_MAC && (majorVersion == 2) && ((minorVersion < 9) || ((minorVersion == 9) && (patchVersion < 3)))) {
-                System.out.println("Warning: LWJGL 2.9.3 or higher is recommended on newer versions of MacOS.");
+                LogWrapper.warning("Warning: LWJGL 2.9.3 or higher is recommended on newer versions of MacOS.");
             }
         } catch (final Exception e) {
-            e.printStackTrace();
+            LogWrapper.warning("There's something wrong with LWJGL", e);
         }
 
         new RetroEmulator().start();
@@ -123,14 +126,14 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
                 final String name = field.getType().getName();
 
                 if (!name.contains("awt") && !name.contains("java") && !field.getType().equals(Long.TYPE)) {
-                    System.out.println("Found likely Minecraft candidate: " + field);
+                    LogWrapper.fine("Found likely Minecraft candidate: " + field);
                     EmulatorConfig.getInstance().minecraftField = field;
                     final Field fileField = getWorkingDirField(name);
 
                     if (veryOld) {
                         field.setAccessible(true);
                         final Object mcObj = field.get(object);
-                        System.out.println(mcObj);
+                        LogWrapper.fine(mcObj.toString());
                         Field appletField = null;
 
                         for (final Field f : mcObj.getClass().getDeclaredFields()) {
@@ -141,13 +144,13 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
                         }
 
                         if (appletField != null) {
-                            System.out.println("Applet mode: " + appletField.get(mcObj));
+                            LogWrapper.fine("Applet mode: " + appletField.get(mcObj));
                             appletField.set(mcObj, false);
                         }
                     }
 
                     if (fileField != null) {
-                        System.out.println("Found File, changing to " + Launch.minecraftHome);
+                        LogWrapper.fine("Found File, changing to " + Launch.minecraftHome);
                         fileField.setAccessible(true);
                         fileField.set(null, Launch.minecraftHome);
                         break;
@@ -162,7 +165,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
                 new HackThread().start();
             }
         } catch (final Exception e) {
-            e.printStackTrace();
+            LogWrapper.severe("Fatal error while starting RetroWrapper", e);
             System.exit(1);
         }
     }

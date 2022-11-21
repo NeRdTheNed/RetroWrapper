@@ -27,6 +27,7 @@ import com.zero.retrowrapper.util.SwingUtil;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LogWrapper;
 
 public final class RetroTweakInjector implements IClassTransformer {
     /**
@@ -74,7 +75,7 @@ public final class RetroTweakInjector implements IClassTransformer {
                 return bytes;
             }
 
-            System.out.println("Probably the Minecraft class (it has run && is applet!): " + name);
+            LogWrapper.fine("Probably the Minecraft class (it has run && is applet!): " + name);
             @SuppressWarnings("unchecked")
             final ListIterator<AbstractInsnNode> iterator = runMethod.instructions.iterator();
             int firstSwitchJump = -1;
@@ -114,18 +115,16 @@ public final class RetroTweakInjector implements IClassTransformer {
             classNode.accept(writer);
             return writer.toByteArray();
         } catch (final Exception e) {
-            System.out.println("Exception while transforming class " + name);
-            e.printStackTrace();
-            System.out.println(e);
+            LogWrapper.severe("Exception while transforming class " + name, e);
             return bytesOld;
         }
     }
 
     public static File inject() throws IllegalArgumentException, IllegalAccessException, ClassNotFoundException {
-        System.out.println("Turning off ImageIO disk-caching");
+        LogWrapper.fine("Turning off ImageIO disk-caching");
         ImageIO.setUseCache(false);
         SwingUtil.loadIconsOnFrames();
-        System.out.println("Setting gameDir to: " + Launch.minecraftHome);
+        LogWrapper.fine("Setting gameDir to: " + Launch.minecraftHome);
         return Launch.minecraftHome;
     }
 }

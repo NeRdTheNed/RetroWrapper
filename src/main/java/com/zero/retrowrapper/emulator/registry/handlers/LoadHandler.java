@@ -11,6 +11,8 @@ import org.apache.commons.io.IOUtils;
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
 
+import net.minecraft.launchwrapper.LogWrapper;
+
 public final class LoadHandler extends EmulatorHandler {
     public LoadHandler() {
         super("/level/load.html?id=");
@@ -28,16 +30,9 @@ public final class LoadHandler extends EmulatorHandler {
             dis.write(bytes);
         } catch (final Exception e) {
             // TODO Better error handling
-            e.printStackTrace();
+            LogWrapper.warning("Problem loading level " + id, e);
         } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (final IOException ee) {
-                    // TODO Better error handling
-                    ee.printStackTrace();
-                }
-            }
+            IOUtils.closeQuietly(fis);
         }
     }
 }

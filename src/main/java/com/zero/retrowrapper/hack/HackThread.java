@@ -18,6 +18,8 @@ import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.injector.RetroTweakInjectorTarget;
 import com.zero.retrowrapper.util.JavaUtil;
 
+import net.minecraft.launchwrapper.LogWrapper;
+
 public final class HackThread extends Thread {
     // TODO Refactor
     private JLabel label;
@@ -27,7 +29,7 @@ public final class HackThread extends Thread {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (final Exception e) {
-            e.printStackTrace();
+            LogWrapper.warning("Could not set look and feel", e);
         }
 
         final JFrame frame = new JFrame("Retrowrapper");
@@ -88,7 +90,7 @@ public final class HackThread extends Thread {
             });
         } catch (final Exception e) {
             // TODO Better error handling
-            e.printStackTrace();
+            LogWrapper.warning("Something went wrong with starting the hack thread", e);
         }
 
         try {
@@ -96,8 +98,8 @@ public final class HackThread extends Thread {
             config.minecraftField.setAccessible(true);
             player.minecraft = config.minecraftField.get(config.applet);
             final Class<?> mcClass = JavaUtil.getMostSuper(player.minecraft.getClass());
-            System.out.println("Minecraft class: " + mcClass.getName());
-            System.out.println("Mob class: " + config.mobClass);
+            LogWrapper.fine("Minecraft class: " + mcClass.getName());
+            LogWrapper.fine("Mob class: " + config.mobClass);
             player.playerObj = null;
             final Class<?> mobClass = RetroTweakInjectorTarget.getaClass(config.mobClass);
 
@@ -113,9 +115,9 @@ public final class HackThread extends Thread {
                 Thread.sleep(1000);
             }
 
-            System.out.println("Player class: " + player.playerObj.getClass().getName());
+            LogWrapper.fine("Player class: " + player.playerObj.getClass().getName());
             player.entityClass = JavaUtil.getMostSuper(mobClass);
-            System.out.println("Entity class: " + player.entityClass.getName());
+            LogWrapper.fine("Entity class: " + player.entityClass.getName());
             player.setAABB();
 
             if (player.isAABBNonNull()) {
@@ -125,7 +127,7 @@ public final class HackThread extends Thread {
                 }
             }
         } catch (final Exception e) {
-            e.printStackTrace();
+            LogWrapper.warning("Something went wrong with the hack thread", e);
         }
     }
 
@@ -138,7 +140,7 @@ public final class HackThread extends Thread {
             });
         } catch (final Exception e) {
             // TODO Better error handling
-            e.printStackTrace();
+            LogWrapper.warning("Something went wrong with setting the label text in the hack thread", e);
         }
     }
 }

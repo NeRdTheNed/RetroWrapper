@@ -23,6 +23,7 @@ import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
 import com.zero.retrowrapper.util.FileUtil;
 
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LogWrapper;
 
 public final class ResourcesHandler extends EmulatorHandler {
     private static final byte[] OLD_SOUNDS_LIST =
@@ -56,7 +57,7 @@ public final class ResourcesHandler extends EmulatorHandler {
         try {
             downloadSoundData();
         } catch (final Exception e) {
-            System.out.println(ExceptionUtils.getStackTrace(e));
+            LogWrapper.warning("Error when downloading sound data", e);
         }
     }
 
@@ -69,10 +70,10 @@ public final class ResourcesHandler extends EmulatorHandler {
             final JsonObject obj = json.asObject();
             jsonObjects = obj.get("objects").asObject();
         } catch (final Exception e) {
-            System.out.println("Exception downloading legacy.json: " + ExceptionUtils.getStackTrace(e));
+            LogWrapper.warning("Exception downloading legacy.json", e);
 
             if (e instanceof SSLHandshakeException) {
-                System.out.println("The Java installation that Minecraft is running on " +
+                LogWrapper.warning("The Java installation that Minecraft is running on " +
                                    "(" + SystemUtils.JAVA_VERSION + " (" + SystemUtils.JAVA_VENDOR + " " + SystemUtils.JAVA_VM_VERSION + ") located at " + SystemUtils.JAVA_HOME + ")" +
                                    " may not support modern versions of TLS/SSL (e.g. TLSv1.3). Consider using a newer Java installation to fix this.");
             }
@@ -90,16 +91,16 @@ public final class ResourcesHandler extends EmulatorHandler {
                     final JsonValue json = Json.parse(sc2.next());
                     final JsonObject obj = json.asObject();
                     jsonObjects = obj.get("objects").asObject();
-                    System.out.println("Using local legacy.json.");
+                    LogWrapper.info("Using local legacy.json.");
                 } catch (final Exception ee) {
-                    System.out.println("Exception loading local legacy.json: " + ExceptionUtils.getStackTrace(ee) + "\nThe sound fix probably won't work.");
+                    LogWrapper.warning("Exception loading local legacy.json: " + ExceptionUtils.getStackTrace(ee) + "\nThe sound fix probably won't work.");
                 } finally {
                     if (sc2 != null) {
                         sc2.close();
                     }
                 }
             } else {
-                System.out.println("Could not find local legacy.json.\nThe sound fix probably won't work.");
+                LogWrapper.warning("Could not find local legacy.json.\nThe sound fix probably won't work.");
             }
         } finally {
             if (sc != null) {
@@ -119,7 +120,7 @@ public final class ResourcesHandler extends EmulatorHandler {
                 final byte[] asBytes = IOUtils.toByteArray(is);
                 os.write(asBytes);
             } catch (final Exception e) {
-                e.printStackTrace();
+                LogWrapper.warning("Error when connecting to sound data URL " + "http://s3.amazonaws.com" + get, e);
             }
         } else {
             final String name = get.replace("/resources/", "").replace("/MinecraftResources/", "");
@@ -127,9 +128,9 @@ public final class ResourcesHandler extends EmulatorHandler {
 
             if ((bytes != null) && (bytes.length > smallestSize)) {
                 os.write(bytes);
-                System.out.println("Successfully installed resource! " + name + " (" + bytes.length + ")");
+                LogWrapper.info("Successfully installed resource! " + name + " (" + bytes.length + ")");
             } else {
-                System.out.println("Error installing resource " + name);
+                LogWrapper.warning("Error installing resource " + name);
             }
         }
     }
@@ -146,16 +147,9 @@ public final class ResourcesHandler extends EmulatorHandler {
                 fis = new FileInputStream(resourceCache);
                 return IOUtils.toByteArray(fis);
             } catch (final Exception e) {
-                e.printStackTrace();
+                LogWrapper.warning("Error when reading local resource file " + resourceCache, e);
             } finally {
-                if (fis != null) {
-                    try {
-                        fis.close();
-                    } catch (final IOException ee) {
-                        // TODO Better error handling
-                        ee.printStackTrace();
-                    }
-                }
+                IOUtils.closeQuietly(fis);
             }
         }
 
@@ -169,7 +163,7 @@ public final class ResourcesHandler extends EmulatorHandler {
             }
 
             final String hash = jsonObjects.get(res).asObject().get("hash").asString();
-            System.out.println(res + " " + hash);
+            LogWrapper.fine(res + " " + hash);
             final URL toDownload = new URL("http://resources.download.minecraft.net/" + hash.substring(0, 2) + "/" + hash);
             final InputStream is = toDownload.openStream();
             final byte[] resourceBytes = IOUtils.toByteArray(is);
@@ -182,14 +176,7 @@ public final class ResourcesHandler extends EmulatorHandler {
                     fos = new FileOutputStream(resourceCache);
                     fos.write(resourceBytes);
                 } finally {
-                    if (fos != null) {
-                        try {
-                            fos.close();
-                        } catch (final IOException ee) {
-                            // TODO Better error handling
-                            ee.printStackTrace();
-                        }
-                    }
+                    IOUtils.closeQuietly(fos);
                 }
 
                 return resourceBytes;
@@ -197,8 +184,7 @@ public final class ResourcesHandler extends EmulatorHandler {
 
             throw new IllegalStateException("The resource server for URL " + toDownload + " might be down");
         } catch (final Exception e) {
-            System.out.println("Resource " + res + " not downloaded due to exception: " + ExceptionUtils.getStackTrace(e));
-            e.printStackTrace();
+            LogWrapper.warning("Resource " + res + " not downloaded due to exception", e);
             final File backupFile = FileUtil.tryFindResourceFile(res);
 
             if (backupFile != null) {
@@ -206,23 +192,16 @@ public final class ResourcesHandler extends EmulatorHandler {
 
                 try {
                     fis = new FileInputStream(backupFile);
-                    System.out.println("Using " + backupFile);
+                    LogWrapper.info("Using " + backupFile);
                     return IOUtils.toByteArray(fis);
                 } catch (final Exception ee) {
-                    ee.printStackTrace();
+                    LogWrapper.warning("Error when reading local resource file " + backupFile, ee);
                 } finally {
-                    if (fis != null) {
-                        try {
-                            fis.close();
-                        } catch (final IOException ee) {
-                            // TODO Better error handling
-                            ee.printStackTrace();
-                        }
-                    }
+                    IOUtils.closeQuietly(fis);
                 }
             }
 
-            System.out.println("No backup location found for resource " + res);
+            LogWrapper.warning("No backup location found for resource " + res);
             return null;
         }
     }

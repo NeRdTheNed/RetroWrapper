@@ -9,6 +9,7 @@ import com.zero.retrowrapper.injector.M1ColorTweakInjector;
 
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.LaunchClassLoader;
+import net.minecraft.launchwrapper.LogWrapper;
 
 public final class RetroTweaker implements ITweaker {
 
@@ -50,7 +51,7 @@ public final class RetroTweaker implements ITweaker {
                 m1PatchMode = M1PatchMode.valueOf(patchMode);
             }
         } catch (final Exception e) {
-            e.printStackTrace();
+            LogWrapper.warning("Issue getting system properties", e);
         }
 
         if (RetroTweaker.m1PatchMode == M1PatchMode.ForceEnable) {

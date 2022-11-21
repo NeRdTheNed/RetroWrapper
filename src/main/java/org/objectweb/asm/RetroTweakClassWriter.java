@@ -6,6 +6,8 @@ import java.util.List;
 import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.emulator.registry.EmulatorRegistry;
 
+import net.minecraft.launchwrapper.LogWrapper;
+
 public final class RetroTweakClassWriter extends ClassWriter {
     private static final String foundUrlTextString = "Found URL!: ";
     private static final String replacedWithTextString = "Replaced with: ";
@@ -73,19 +75,19 @@ public final class RetroTweakClassWriter extends ClassWriter {
                 // 79.136.77.240 is a hardcoded URL for early multiplayer tests.
                 // TODO Allow patching 79.136.77.240 to be anything the user wants, along with the hardcoded port (5565)
                 if ("79.136.77.240".equals(constant) || "minecraft.net".equals(constant)) {
-                    System.out.println(foundUrlTextString + constant);
+                    LogWrapper.info(foundUrlTextString + constant);
                     transformed = "127.0.0.1";
-                    System.out.println(replacedWithTextString + transformed);
+                    LogWrapper.info(replacedWithTextString + transformed);
                 } else if (constant.contains("joinserver.jsp") || constant.contains("checkserver.jsp")) {
-                    System.out.println(foundUrlTextString + constant);
+                    LogWrapper.info(foundUrlTextString + constant);
                     transformed = constant.replace("www.minecraft.net", "session.minecraft.net");
-                    System.out.println(replacedWithTextString + transformed);
+                    LogWrapper.info(replacedWithTextString + transformed);
                 } else {
                     final boolean isNet = constant.contains(".net");
                     final boolean isCom = constant.contains(".com");
 
                     if (isNet || isCom) {
-                        System.out.println(foundUrlTextString + constant);
+                        LogWrapper.info(foundUrlTextString + constant);
 
                         if (constant.contains("minecraft.net") || (EmulatorRegistry.getHandlerByUrl(constant) != null)) {
                             final String prepend = isCom ?
@@ -100,10 +102,10 @@ public final class RetroTweakClassWriter extends ClassWriter {
                             }
 
                             transformed = prepend + "127.0.0.1:" + EmulatorConfig.getInstance().getPort() + postpend;
-                            System.out.println(replacedWithTextString + transformed);
+                            LogWrapper.info(replacedWithTextString + transformed);
                         } else {
                             transformed = constant;
-                            System.out.println("No handler for " + transformed + ", did not replace.");
+                            LogWrapper.warning("No handler for " + transformed + ", did not replace.");
                         }
                     } else {
                         transformed = constant;

@@ -11,6 +11,8 @@ import com.zero.retrowrapper.emulator.registry.EmulatorRegistry;
 import com.zero.retrowrapper.emulator.registry.IHandler;
 import com.zero.retrowrapper.util.ByteUtil;
 
+import net.minecraft.launchwrapper.LogWrapper;
+
 public final class SocketEmulator {
     private final Socket socket;
 
@@ -67,19 +69,14 @@ public final class SocketEmulator {
 
         if (handler != null) {
             try {
-                System.out.println("Request: " + get);
+                LogWrapper.info("Request: " + get);
                 handler.sendHeaders(os);
                 handler.handle(os, get, data);
             } catch (final Exception e) {
-                System.out.println("***************************************");
-                System.out.println("   Exception in handling URL: " + get);
-                System.out.println("***************************************");
-                e.printStackTrace();
+                LogWrapper.warning("Exception in handling URL:", e);
             }
         } else {
-            System.out.println("***************************************");
-            System.out.println("   No handler for URL: " + get);
-            System.out.println("***************************************");
+            LogWrapper.warning("No handler for URL: " + get);
         }
 
         os.flush();

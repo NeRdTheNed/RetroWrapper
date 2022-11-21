@@ -27,6 +27,7 @@ jobs:
     - name: Build with Gradle
       env:
         BUILD_RELEASE: ${{ github.event.release.prerelease == false }}
+        RELEASE_TAG: ${{ github.event.release.tag_name }}
       uses: gradle/gradle-build-action@v2
       with:
         gradle-version: wrapper

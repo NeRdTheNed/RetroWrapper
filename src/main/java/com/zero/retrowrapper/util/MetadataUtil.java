@@ -1,31 +1,43 @@
 package com.zero.retrowrapper.util;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 
 public final class MetadataUtil {
-    public static final List<String> INSTALLER_SPLASHES = getSplashes();
-    public static final String VERSION = getVersion();
+    public static final List<String> INSTALLER_SPLASHES;
+    public static final String VERSION;
+    public static final String TAG;
+    public static final boolean IS_RELEASE;
 
-    private static List<String> getSplashes() {
+    static {
+        List<String> tempSplash;
+
         try {
-            return IOUtils.readLines(ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperInstallerSplashes.txt"), "UTF-8");
-        } catch (final IOException e) {
+            tempSplash = IOUtils.readLines(ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperInstallerSplashes.txt"), "UTF-8");
+        } catch (final Exception e) {
             final ArrayList<String> missingno = new ArrayList<String>();
             missingno.add("missingno");
-            return missingno;
+            tempSplash = missingno;
         }
-    }
 
-    private static String getVersion() {
+        INSTALLER_SPLASHES = tempSplash;
+        String tempVer;
+        String tempTag;
+
         try {
-            return IOUtils.toString(ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperVersion.txt"), "UTF-8");
-        } catch (final IOException e) {
-            return "0.0.0-SNAPSHOT+missingno";
+            final List<String> versionLines = IOUtils.readLines(ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperVersion.txt"), "UTF-8");
+            tempVer = versionLines.get(0);
+            tempTag = versionLines.get(1);
+        } catch (final Exception e) {
+            tempVer = "0.0.0-SNAPSHOT+missingno";
+            tempTag = "missingno";
         }
+
+        VERSION = tempVer;
+        TAG = tempTag;
+        IS_RELEASE = !VERSION.contains("SNAPSHOT");
     }
 
     private MetadataUtil() {

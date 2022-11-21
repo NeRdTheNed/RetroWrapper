@@ -322,6 +322,10 @@ public final class Installer {
                             IOUtils.closeQuietly(input);
                         }
 
+                        if (MetadataUtil.IS_RELEASE) {
+                            retroWrapperArtifact.add("url", "https://github.com/NeRdTheNed/RetroWrapper/releases/download/" + MetadataUtil.TAG + "/RetroWrapper-" + MetadataUtil.VERSION + ".jar");
+                        }
+
                         // Add the RetroWrapper library to the list of libraries.
                         final JsonObject retrowrapperLibraryJson = Json.object()
                                 .add("name", "com.zero:retrowrapper:" + MetadataUtil.VERSION)

@@ -108,14 +108,18 @@ shadowJar {
 
 version = project.version
 def versionWithMetadata = version
+def gitTag
 
 task checkRelease {
     if (!(System.getenv("BUILD_RELEASE") == "true")) {
         version += ("-SNAPSHOT")
-        versionWithMetadata = version + "+" + 'git rev-parse --short HEAD'.execute().text.trim()
+        gitTag = 'git rev-parse --short HEAD'.execute().text.trim()
+        versionWithMetadata = version + "+" + gitTag
         if (!System.getenv("CI")) {
             versionWithMetadata += ".local"
         }
+    } else {
+        gitTag = System.getenv("RELEASE_TAG")
     }
 }
 
@@ -152,9 +156,10 @@ dependencies {
 processResources {
     inputs.property "version", project.version // Redo this task when version value changes.
     inputs.property "versionWithMetadata", versionWithMetadata
+    inputs.property "gitTag", gitTag
     filesMatching('com/zero/retrowrapper/retrowrapperVersion.txt') {
         // replace build variables
-        expand 'version': versionWithMetadata
+        expand 'version': versionWithMetadata, 'tag': gitTag
     }
 }
 

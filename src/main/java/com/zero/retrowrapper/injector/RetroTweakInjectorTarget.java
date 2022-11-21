@@ -17,6 +17,7 @@ import java.util.Map;
 import javax.swing.JPanel;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.lwjgl.Sys;
 
 import com.zero.retrowrapper.emulator.EmulatorConfig;
@@ -63,21 +64,21 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
                 try {
                     majorVersion = Integer.parseInt(versionSplit[0]);
                 } catch (final NumberFormatException e) {
-                    LogWrapper.warning("There's something wrong with LWJGL", e);
+                    LogWrapper.warning("There's something wrong with LWJGL: " + ExceptionUtils.getStackTrace(e));
                 }
 
                 if (versionSplit.length > 1) {
                     try {
                         minorVersion = Integer.parseInt(versionSplit[1]);
                     } catch (final NumberFormatException e) {
-                        LogWrapper.warning("There's something wrong with LWJGL", e);
+                        LogWrapper.warning("There's something wrong with LWJGL: " + ExceptionUtils.getStackTrace(e));
                     }
 
                     if (versionSplit.length > 2) {
                         try {
                             patchVersion = Integer.parseInt(versionSplit[2]);
                         } catch (final NumberFormatException e) {
-                            LogWrapper.warning("There's something wrong with LWJGL", e);
+                            LogWrapper.warning("There's something wrong with LWJGL: " + ExceptionUtils.getStackTrace(e));
                         }
                     }
                 }
@@ -89,7 +90,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
                 LogWrapper.warning("Warning: LWJGL 2.9.3 or higher is recommended on newer versions of MacOS.");
             }
         } catch (final Exception e) {
-            LogWrapper.warning("There's something wrong with LWJGL", e);
+            LogWrapper.warning("There's something wrong with LWJGL: " + ExceptionUtils.getStackTrace(e));
         }
 
         new RetroEmulator().start();
@@ -165,7 +166,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
                 new HackThread().start();
             }
         } catch (final Exception e) {
-            LogWrapper.severe("Fatal error while starting RetroWrapper", e);
+            LogWrapper.severe("Fatal error while starting RetroWrapper: " + ExceptionUtils.getStackTrace(e));
             System.exit(1);
         }
     }

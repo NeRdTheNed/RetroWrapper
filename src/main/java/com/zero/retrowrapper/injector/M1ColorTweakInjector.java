@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.objectweb.asm.ClassReader;
@@ -449,7 +450,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
             classNode.accept(writer);
             return writer.toByteArray();
         } catch (final Exception e) {
-            LogWrapper.severe("Exception while transforming class " + name, e);
+            LogWrapper.severe("Exception while transforming class " + name + ": " + ExceptionUtils.getStackTrace(e));
             return bytesOld;
         }
     }
@@ -474,7 +475,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     }
                 }
             } catch (final Exception e) {
-                LogWrapper.warning("Exception while trying to get reload textures method", e);
+                LogWrapper.warning("Exception while trying to get reload textures method: " + ExceptionUtils.getStackTrace(e));
             }
         }
 
@@ -482,7 +483,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
             try {
                 reloadTexturesMethod.invoke(reloadTexturesInstance);
             } catch (final Exception e) {
-                LogWrapper.warning("Exception while trying to invoke reload textures method", e);
+                LogWrapper.warning("Exception while trying to invoke reload textures method: " + ExceptionUtils.getStackTrace(e));
             }
         } else {
             LogWrapper.warning("Could not find reload textures method");

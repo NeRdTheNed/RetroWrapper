@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
@@ -139,7 +140,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                 IOUtils.closeQuietly(reader2);
             }
         } catch (final Exception e) {
-            LogWrapper.warning("Error when trying to get skin or cape for username " + username, e);
+            LogWrapper.warning("Error when trying to get skin or cape for username " + username + ": " + ExceptionUtils.getStackTrace(e));
 
             if (imageCache.exists()) {
                 FileInputStream fis = null;

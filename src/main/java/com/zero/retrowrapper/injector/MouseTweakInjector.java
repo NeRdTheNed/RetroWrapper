@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Cursor;
 import org.lwjgl.input.Mouse;
@@ -167,7 +168,7 @@ public final class MouseTweakInjector implements IClassTransformer {
             classNode.accept(writer);
             return writer.toByteArray();
         } catch (final Exception e) {
-            LogWrapper.severe("Exception while transforming class " + name, e);
+            LogWrapper.severe("Exception while transforming class " + name + ": " + ExceptionUtils.getStackTrace(e));
             return bytesOld;
         }
     }
@@ -188,7 +189,7 @@ public final class MouseTweakInjector implements IClassTransformer {
             final java.awt.Cursor useCursor = shouldHide ? hiddenCursor : normalCursor;
             Display.getParent().setCursor(useCursor);
         } catch (final Exception e) {
-            LogWrapper.warning("Something went wrong when trying to set AWT cursor", e);
+            LogWrapper.warning("Something went wrong when trying to set AWT cursor: " + ExceptionUtils.getStackTrace(e));
         }
 
         if (System.getProperties().getProperty("retrowrapper.disableMouseReplacementPatches") == null) {

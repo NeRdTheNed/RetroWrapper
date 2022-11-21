@@ -77,7 +77,7 @@ public class SwingUtil {
                     iconsAsByteBufferArrayList.add(loadedIcon);
                 } catch (final IOException e) {
                     // TODO Better error handling
-                    LogWrapper.warning("Issue loading icon " + icon, e);
+                    LogWrapper.warning("Issue loading icon " + icon + ": " + ExceptionUtils.getStackTrace(e));
                 }
             }
 
@@ -93,7 +93,7 @@ public class SwingUtil {
                         bufferedImageList.add(iconImage);
                     } catch (final IOException e) {
                         // TODO Better error handling
-                        LogWrapper.warning("Issue reading icon " + icon, e);
+                        LogWrapper.warning("Issue reading icon " + icon + ": " + ExceptionUtils.getStackTrace(e));
                     }
                 }
 
@@ -103,7 +103,7 @@ public class SwingUtil {
                             final Method setIconImages = Frame.class.getMethod("setIconImages", List.class);
                             setIconImages.invoke(frame, bufferedImageList);
                         } catch (final Exception ignored) {
-                            LogWrapper.warning("Are you running RetroWrapper on Java 5?", ignored);
+                            LogWrapper.warning("Are you running RetroWrapper on Java 5?: " + ExceptionUtils.getStackTrace(ignored));
                             frame.setIconImage(bufferedImageList.get(0));
                         }
                     }
@@ -125,7 +125,7 @@ public class SwingUtil {
                 System.setProperty("apple.awt.application.appearance", "system");
             }
         } catch (final Exception ignored) {
-            logger.log(Level.WARNING, "An Exception was thrown while trying to set system properties", ignored);
+            logger.log(Level.WARNING, "An Exception was thrown while trying to set system properties: " + ExceptionUtils.getStackTrace(ignored));
         }
     }
 

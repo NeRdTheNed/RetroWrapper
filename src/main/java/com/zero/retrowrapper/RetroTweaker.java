@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.zero.retrowrapper.injector.M1ColorTweakInjector;
 
@@ -51,7 +52,7 @@ public final class RetroTweaker implements ITweaker {
                 m1PatchMode = M1PatchMode.valueOf(patchMode);
             }
         } catch (final Exception e) {
-            LogWrapper.warning("Issue getting system properties", e);
+            LogWrapper.warning("Issue getting system properties: " + ExceptionUtils.getStackTrace(e));
         }
 
         if (RetroTweaker.m1PatchMode == M1PatchMode.ForceEnable) {

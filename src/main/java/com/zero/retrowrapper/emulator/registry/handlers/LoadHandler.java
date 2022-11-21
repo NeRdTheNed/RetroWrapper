@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
@@ -30,7 +31,7 @@ public final class LoadHandler extends EmulatorHandler {
             dis.write(bytes);
         } catch (final Exception e) {
             // TODO Better error handling
-            LogWrapper.warning("Problem loading level " + id, e);
+            LogWrapper.warning("Problem loading level " + id + ": " + ExceptionUtils.getStackTrace(e));
         } finally {
             IOUtils.closeQuietly(fis);
         }

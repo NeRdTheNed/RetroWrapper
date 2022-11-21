@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.emulator.registry.handlers.ListmapsHandler;
@@ -60,7 +61,7 @@ public final class EmulatorRegistry {
                         LogWrapper.warning("Moved file " + file + " to " + newDir + ", too small to be a valid file.");
                     }
                 } catch (final IOException e) {
-                    LogWrapper.warning("Problem moving " + file, e);
+                    LogWrapper.warning("Problem moving " + file + ": " + ExceptionUtils.getStackTrace(e));
                 }
             }
         }

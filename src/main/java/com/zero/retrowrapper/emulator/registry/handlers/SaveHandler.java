@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
@@ -43,7 +44,7 @@ public final class SaveHandler extends EmulatorHandler {
             fos1.write(level);
         } catch (final Exception e) {
             // TODO Better error handling
-            LogWrapper.warning("Error when trying to save level", e);
+            LogWrapper.warning("Error when trying to save level: " + ExceptionUtils.getStackTrace(e));
         } finally {
             IOUtils.closeQuietly(fos1);
         }
@@ -55,7 +56,7 @@ public final class SaveHandler extends EmulatorHandler {
             fos2.write(levelName.getBytes());
         } catch (final Exception e) {
             // TODO Better error handling
-            LogWrapper.warning("Error when trying to save level metadata", e);
+            LogWrapper.warning("Error when trying to save level metadata: " + ExceptionUtils.getStackTrace(e));
         } finally {
             IOUtils.closeQuietly(fos2);
         }

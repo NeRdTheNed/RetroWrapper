@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.zero.retrowrapper.emulator.registry.EmulatorRegistry;
 import com.zero.retrowrapper.emulator.registry.IHandler;
 import com.zero.retrowrapper.util.ByteUtil;
@@ -73,7 +75,7 @@ public final class SocketEmulator {
                 handler.sendHeaders(os);
                 handler.handle(os, get, data);
             } catch (final Exception e) {
-                LogWrapper.warning("Exception in handling URL:", e);
+                LogWrapper.warning("Exception in handling URL: " + ExceptionUtils.getStackTrace(e));
             }
         } else {
             LogWrapper.warning("No handler for URL: " + get);

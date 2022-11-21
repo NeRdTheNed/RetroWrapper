@@ -14,6 +14,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.injector.RetroTweakInjectorTarget;
 import com.zero.retrowrapper.util.JavaUtil;
@@ -29,7 +31,7 @@ public final class HackThread extends Thread {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (final Exception e) {
-            LogWrapper.warning("Could not set look and feel", e);
+            LogWrapper.warning("Could not set look and feel: " + ExceptionUtils.getStackTrace(e));
         }
 
         final JFrame frame = new JFrame("Retrowrapper");
@@ -90,7 +92,7 @@ public final class HackThread extends Thread {
             });
         } catch (final Exception e) {
             // TODO Better error handling
-            LogWrapper.warning("Something went wrong with starting the hack thread", e);
+            LogWrapper.warning("Something went wrong with starting the hack thread: " + ExceptionUtils.getStackTrace(e));
         }
 
         try {
@@ -127,7 +129,7 @@ public final class HackThread extends Thread {
                 }
             }
         } catch (final Exception e) {
-            LogWrapper.warning("Something went wrong with the hack thread", e);
+            LogWrapper.warning("Something went wrong with the hack thread: " + ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -140,7 +142,7 @@ public final class HackThread extends Thread {
             });
         } catch (final Exception e) {
             // TODO Better error handling
-            LogWrapper.warning("Something went wrong with setting the label text in the hack thread", e);
+            LogWrapper.warning("Something went wrong with setting the label text in the hack thread: " + ExceptionUtils.getStackTrace(e));
         }
     }
 }

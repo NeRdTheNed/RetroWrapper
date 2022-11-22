@@ -246,6 +246,14 @@ public final class Installer {
             installerLogger.log(Level.WARNING, "setLookAndFeel failed", e);
         }
 
+        try {
+            final File cacheDir = new File(workingDirectory, "retrowrapper/cache");
+            cacheDir.mkdirs();
+            SwingUtil.checkAndDisplayUpdate(cacheDir);
+        } catch (final Exception e) {
+            installerLogger.log(Level.WARNING, "Update check failed!", e);
+        }
+
         model = new DefaultListModel();
         list = new JList(model);
         listInternal = new ArrayList();

@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -63,6 +64,13 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             }
         } catch (final Exception e) {
             LogWrapper.warning("There's something wrong with LWJGL: " + ExceptionUtils.getStackTrace(e));
+        }
+
+        try {
+            final File cacheDir = new File(Launch.minecraftHome, "retrowrapper/cache");
+            SwingUtil.checkAndDisplayUpdate(cacheDir);
+        } catch (final Exception e) {
+            LogWrapper.warning("Update check failed: " + ExceptionUtils.getStackTrace(e));
         }
 
         new RetroEmulator().start();

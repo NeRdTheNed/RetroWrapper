@@ -224,7 +224,7 @@ public final class SwingUtil {
 
                 connectionInputStream = httpConnection.getInputStream();
 
-                if ((httpConnection.getResponseCode() == 304) && cachedGithubResponseFile.isFile()) {
+                if ((httpConnection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED) && cachedGithubResponseFile.isFile()) {
                     // If the response code is 304 (Not Modified), use the cached file.
                     FileInputStream fis = null;
 

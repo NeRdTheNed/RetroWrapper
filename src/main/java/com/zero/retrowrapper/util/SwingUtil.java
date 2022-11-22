@@ -225,7 +225,7 @@ public class SwingUtil {
                 connectionInputStream = httpConnection.getInputStream();
 
                 if ((httpConnection.getResponseCode() == 304) && cachedGithubResponseFile.isFile()) {
-                	// If the response code is 304 (Not Modified), use the cached file.
+                    // If the response code is 304 (Not Modified), use the cached file.
                     FileInputStream fis = null;
 
                     try {
@@ -235,7 +235,7 @@ public class SwingUtil {
                         IOUtils.closeQuietly(fis);
                     }
                 } else {
-                	// The cached file is out of date, or we don't have a cached file.
+                    // The cached file is out of date, or we don't have a cached file.
                     JSONBytes = IOUtils.toByteArray(connectionInputStream);
                     FileOutputStream fos = null;
 

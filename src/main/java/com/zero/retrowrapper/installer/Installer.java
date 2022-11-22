@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -21,7 +20,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -98,61 +96,49 @@ public final class Installer {
                         final File jar = new File(f, f.getName() + ".jar");
 
                         if (json.exists() && jar.exists() && !f.getName().contains("-wrapped")) {
-                            Scanner s = null;
+                            final JsonObject versionJson = getVersionJson(f.getName(), installerLogger);
 
-                            try {
-                                s = new Scanner(json).useDelimiter("\\A");
-                                final String content = s.next();
+                            if (versionJson.getString("type", "").contains("old_") && (getRetroWrapperVersionFromInstance(versionJson, installerLogger) == null)) {
+                                if (new File(versions, f.getName() + "-wrapped").exists()) {
+                                    wrappedVersionCount++;
+                                    final String verNotif;
+                                    final JsonObject versionJsonWrapped = getVersionJson(f.getName() + "-wrapped", installerLogger);
 
-                                if (content.contains("old_") && !content.contains("retrowrapper")) {
-                                    if (new File(versions, f.getName() + "-wrapped").exists()) {
-                                        wrappedVersionCount++;
-                                        final String verNotif;
-                                        final JsonObject versionJson = getVersionJson(f.getName() + "-wrapped", installerLogger);
+                                    if (versionJsonWrapped != null) {
+                                        final String oldVersion = getRetroWrapperVersionFromInstance(versionJsonWrapped, installerLogger);
 
-                                        if (versionJson != null) {
-                                            final String oldVersion = getRetroWrapperVersionFromInstance(versionJson, installerLogger);
+                                        if (!"installer".equals(oldVersion)) {
+                                            String tempVerNotif;
 
-                                            if (!"installer".equals(oldVersion)) {
-                                                String tempVerNotif;
-
-                                                try {
-                                                    if (MetadataUtil.compareSemver(MetadataUtil.VERSION, oldVersion) > 0) {
-                                                        tempVerNotif = "(outdated RetroWrapper version " + oldVersion + "!)";
-                                                    } else if (!MetadataUtil.VERSION.equals(oldVersion) && MetadataUtil.isVersionSnapshot(oldVersion)) {
-                                                        tempVerNotif = "(possibly outdated RetroWrapper version " + oldVersion + "!)";
-                                                    } else {
-                                                        tempVerNotif = "(RetroWrapper version " + oldVersion + ")";
-                                                    }
-                                                } catch (final NumberFormatException e) {
-                                                    installerLogger.log(Level.WARNING, "Issue parsing version number for version " + f.getPath(), e);
+                                            try {
+                                                if (MetadataUtil.compareSemver(MetadataUtil.VERSION, oldVersion) > 0) {
                                                     tempVerNotif = "(outdated RetroWrapper version " + oldVersion + "!)";
+                                                } else if (!MetadataUtil.VERSION.equals(oldVersion) && MetadataUtil.isVersionSnapshot(oldVersion)) {
+                                                    tempVerNotif = "(possibly outdated RetroWrapper version " + oldVersion + "!)";
+                                                } else {
+                                                    tempVerNotif = "(RetroWrapper version " + oldVersion + ")";
                                                 }
-
-                                                verNotif = tempVerNotif;
-                                            } else {
-                                                verNotif = "(outdated RetroWrapper version 1.6.4 or earlier!)";
+                                            } catch (final NumberFormatException e) {
+                                                installerLogger.log(Level.WARNING, "Issue parsing version number for version " + f.getPath(), e);
+                                                tempVerNotif = "(outdated RetroWrapper version " + oldVersion + "!)";
                                             }
-                                        } else {
-                                            installerLogger.warning("Could not parse JSON file for instance " + f.getName() + "-wrapped");
-                                            verNotif = "error parsing JSON file for wrapped instance?";
-                                        }
 
-                                        model.addElement(f.getName() + " - " + verNotif + " already wrapped");
+                                            verNotif = tempVerNotif;
+                                        } else {
+                                            verNotif = "(outdated RetroWrapper version 1.6.4 or earlier!)";
+                                        }
                                     } else {
-                                        versionCount++;
-                                        model.addElement(f.getName());
+                                        installerLogger.warning("Could not parse JSON file for instance " + f.getName() + "-wrapped");
+                                        verNotif = "error parsing JSON file for wrapped instance?";
                                     }
 
-                                    listInternal.add(f.getName());
+                                    model.addElement(f.getName() + " - " + verNotif + " already wrapped");
+                                } else {
+                                    versionCount++;
+                                    model.addElement(f.getName());
                                 }
-                            } catch (final FileNotFoundException e) {
-                                // TODO Better logging
-                                installerLogger.log(Level.SEVERE, "A FileNotFoundException was thrown while trying to refresh the list of versions", e);
-                            } finally {
-                                if (s != null) {
-                                    s.close();
-                                }
+
+                                listInternal.add(f.getName());
                             }
                         }
                     }
@@ -314,11 +300,12 @@ public final class Installer {
                     String version = versionList[i];
 
                     if (version.contains("already wrapped")) {
-                        version = (String) listInternal.get(i);
+                        version = (String) listInternal.get(list.getSelectedIndices()[i]);
                         FileUtils.deleteQuietly(new File(directory, "versions" + File.separator + version + "-wrapped"));
                     }
 
                     try {
+                        finalVersions.append(version).append("\n");
                         final JsonObject versionJson = getVersionJson(version, installerLogger);
 
                         if (versionJson != null) {
@@ -457,7 +444,7 @@ public final class Installer {
                                 IOUtils.closeQuietly(fos);
                             }
                         } else {
-                            // big error
+                            installerLogger.severe("Error when getting version JSON!");
                         }
                     } catch (final IOException ee) {
                         // TODO better logging

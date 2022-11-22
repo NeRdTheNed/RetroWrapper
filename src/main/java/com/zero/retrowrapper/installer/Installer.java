@@ -64,7 +64,7 @@ public final class Installer {
 
     private static DefaultListModel model;
     private static JList list;
-    private static List listInternal;
+    private static List<String> listInternal;
 
     private static JFrame frame;
 
@@ -242,7 +242,7 @@ public final class Installer {
 
         model = new DefaultListModel();
         list = new JList(model);
-        listInternal = new ArrayList();
+        listInternal = new ArrayList<String>();
         frame = new JFrame("RetroWrapper - NeRd Fork");
         frame.setPreferredSize(new Dimension(654, 420));
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
@@ -300,7 +300,7 @@ public final class Installer {
                     String version = versionList[i];
 
                     if (version.contains("already wrapped")) {
-                        version = (String) listInternal.get(list.getSelectedIndices()[i]);
+                        version = listInternal.get(list.getSelectedIndices()[i]);
                         FileUtils.deleteQuietly(new File(directory, "versions" + File.separator + version + "-wrapped"));
                     }
 

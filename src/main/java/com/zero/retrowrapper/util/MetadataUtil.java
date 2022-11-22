@@ -74,7 +74,7 @@ public final class MetadataUtil {
         int minorVersion2 = 0;
         int patchVersion2 = 0;
         final boolean snapshot2 = isVersionSnapshot(ver2);
-        final String[] versionSplit2 = ver1.split("-SNAPSHOT")[0].split("\\.");
+        final String[] versionSplit2 = ver2.split("-SNAPSHOT")[0].split("\\.");
 
         if (versionSplit2.length > 0) {
             majorVersion2 = Integer.parseInt(versionSplit2[0]);

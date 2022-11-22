@@ -1,6 +1,5 @@
 package com.zero.retrowrapper.injector;
 
-import static org.objectweb.asm.Opcodes.ASM4;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.GOTO;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
@@ -15,6 +14,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.RetroTweakClassWriter;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -50,7 +50,7 @@ public final class RetroTweakInjector implements IClassTransformer {
             cr.accept(classNodeOld, ClassReader.EXPAND_FRAMES);
             final RetroTweakClassWriter cw = new RetroTweakClassWriter(0, classNodeOld.name.replace('/', '.'));
             // TODO The linter doesn't like this for some reason
-            final ClassVisitor s = new ClassVisitor(ASM4, cw) {};
+            final ClassVisitor s = new EmptyClassVisitor(cw);
             cr.accept(s, 0);
             final byte[] bytes = cw.toByteArray();
             final ClassReader classReader = new ClassReader(bytes);
@@ -127,5 +127,11 @@ public final class RetroTweakInjector implements IClassTransformer {
         SwingUtil.loadIconsOnFrames();
         LogWrapper.fine("Setting gameDir to: " + Launch.minecraftHome);
         return Launch.minecraftHome;
+    }
+
+    private static class EmptyClassVisitor extends ClassVisitor {
+        public EmptyClassVisitor(RetroTweakClassWriter cw) {
+            super(Opcodes.ASM4, cw);
+        }
     }
 }

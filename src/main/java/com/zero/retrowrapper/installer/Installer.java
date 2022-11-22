@@ -400,9 +400,12 @@ public final class Installer {
                             }
 
                             // Add the RetroWrapper library to the list of libraries.
-                            final JsonObject retrowrapperLibraryJson = Json.object()
-                                    .add("name", "com.zero:retrowrapper:" + MetadataUtil.VERSION)
-                                    .add("downloads", Json.object().add("artifact", retroWrapperArtifact));
+                            final JsonObject retrowrapperLibraryJson = Json.object().add("name", "com.zero:retrowrapper:" + MetadataUtil.VERSION);
+
+                            if (!MetadataUtil.VERSION.endsWith(".local")) {
+                                retrowrapperLibraryJson.add("downloads", Json.object().add("artifact", retroWrapperArtifact));
+                            }
+
                             newLibraries.add(retrowrapperLibraryJson);
                             versionJson.set("libraries", newLibraries);
 
@@ -433,7 +436,13 @@ public final class Installer {
                                 fos = new FileOutputStream(new File(wrapDir, versionWrapped + ".json"));
                                 FileUtils.copyFile(new File(versions, version + File.separator + version + ".jar"), new File(wrapDir, versionWrapped + ".jar"));
                                 fos.write(versionJson.toString(PrettyPrint.indentWithSpaces(4)).getBytes());
-                                FileUtils.copyFile(jar, new File(libDir, "retrowrapper-" + MetadataUtil.VERSION + ".jar"));
+                                final File libFile = new File(libDir, "retrowrapper-" + MetadataUtil.VERSION + ".jar");
+
+                                if (libFile.isFile()) {
+                                    libFile.delete();
+                                }
+
+                                FileUtils.copyFile(jar, libFile);
                             } catch (final IOException ee) {
                                 // TODO better logging
                                 final LogRecord logRecord = new LogRecord(Level.SEVERE, "An IOException was thrown while trying to wrap version {0}");

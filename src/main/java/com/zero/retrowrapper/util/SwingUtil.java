@@ -14,12 +14,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,7 +49,7 @@ import com.eclipsesource.json.JsonValue;
 
 import net.minecraft.launchwrapper.LogWrapper;
 
-public class SwingUtil {
+public final class SwingUtil {
     public static void addJButtonCentered(Container container, JButton component) {
         component.setHorizontalAlignment(SwingConstants.CENTER);
         component.setVerticalAlignment(SwingConstants.CENTER);
@@ -74,7 +74,7 @@ public class SwingUtil {
     }
 
     public static void loadIconsOnFrames() {
-        final List<File> iconList = new ArrayList<File>();
+        final Collection<File> iconList = new ArrayList<File>();
         CollectionUtil.addNonNullToCollection(iconList, FileUtil.tryFindResourceFile("icons/icon_16x16.png"), FileUtil.tryFindResourceFile("icons/icon_32x32.png"));
 
         if (!iconList.isEmpty()) {
@@ -199,7 +199,7 @@ public class SwingUtil {
         errorFrame.dispose();
     }
 
-    public static void checkAndDisplayUpdate(File cacheDirectory) throws MalformedURLException, IOException {
+    public static void checkAndDisplayUpdate(File cacheDirectory) throws IOException {
         // Check for a new release, and inform the user if there is one
         if (MetadataUtil.IS_RELEASE) {
             cacheDirectory.mkdirs();

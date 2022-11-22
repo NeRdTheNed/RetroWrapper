@@ -7,7 +7,7 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.ListIterator;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -58,10 +58,10 @@ public final class MouseTweakInjector implements IClassTransformer {
 
             for (final Object methodNodeO : classNode.methods) {
                 final MethodNode methodNode = (MethodNode) methodNodeO;
-                final List<MethodInsnNode> foundNativeCursorMethodCalls = new ArrayList<MethodInsnNode>();
-                final List<MethodInsnNode> foundMouseDXYMethodCalls = new ArrayList<MethodInsnNode>();
-                final List<MethodInsnNode> foundMouseInfoMethodCalls = new ArrayList<MethodInsnNode>();
-                final List<MethodInsnNode> foundMouseMoveMethodCalls = new ArrayList<MethodInsnNode>();
+                final Collection<MethodInsnNode> foundNativeCursorMethodCalls = new ArrayList<MethodInsnNode>();
+                final Collection<MethodInsnNode> foundMouseDXYMethodCalls = new ArrayList<MethodInsnNode>();
+                final Collection<MethodInsnNode> foundMouseInfoMethodCalls = new ArrayList<MethodInsnNode>();
+                final Collection<MethodInsnNode> foundMouseMoveMethodCalls = new ArrayList<MethodInsnNode>();
                 @SuppressWarnings("unchecked")
                 final ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 

@@ -22,11 +22,12 @@ public final class LoadHandler extends EmulatorHandler {
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
         final String id = get.replace("/level/load.html?id=", "").split("&")[0];
         FileInputStream fis = null;
+        DataOutputStream dis = null;
 
         try {
             fis = new FileInputStream(new File(RetroEmulator.getInstance().getMapsDirectory(), "map" + id + ".mclevel"));
             final byte[] bytes = IOUtils.toByteArray(fis);
-            final DataOutputStream dis = new DataOutputStream(os);
+            dis = new DataOutputStream(os);
             dis.writeUTF("ok");
             dis.write(bytes);
         } catch (final Exception e) {
@@ -34,6 +35,7 @@ public final class LoadHandler extends EmulatorHandler {
             LogWrapper.warning("Problem loading level " + id + ": " + ExceptionUtils.getStackTrace(e));
         } finally {
             IOUtils.closeQuietly(fis);
+            IOUtils.closeQuietly(dis);
         }
     }
 }

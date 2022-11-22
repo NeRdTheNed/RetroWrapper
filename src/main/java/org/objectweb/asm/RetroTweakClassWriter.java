@@ -1,7 +1,7 @@
 package org.objectweb.asm;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.emulator.registry.EmulatorRegistry;
@@ -37,7 +37,7 @@ public final class RetroTweakClassWriter extends ClassWriter {
     public byte[] toByteArray() {
         final ClassWriter writer = new ClassWriter(0);
         final byte[] bytes = super.toByteArray();
-        final List<Item> items = new ArrayList<Item>();
+        final Collection<Item> items = new ArrayList<Item>();
 
         for (final Item item : e) {
             Item next = item;

@@ -91,7 +91,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
             try {
                 reader2 = new InputStreamReader(new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid).openStream());
                 final JsonObject profile2 = (JsonObject) Json.parse(reader2);
-                final JsonArray properties = (JsonArray) profile2.get("properties");
+                final Iterable<JsonValue> properties = (JsonArray) profile2.get("properties");
                 String base64 = "";
 
                 for (final JsonValue property : properties) {

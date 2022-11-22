@@ -21,7 +21,7 @@ public final class MetadataUtil {
         try {
             tempSplash = IOUtils.readLines(ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperInstallerSplashes.txt"), "UTF-8");
         } catch (final Exception e) {
-            final ArrayList<String> missingno = new ArrayList<String>();
+            final List<String> missingno = new ArrayList<String>();
             missingno.add("missingno");
             tempSplash = missingno;
         }

@@ -11,7 +11,7 @@ import org.apache.commons.lang3.SystemUtils;
 
 import net.minecraft.launchwrapper.Launch;
 
-public class FileUtil {
+public final class FileUtil {
     public static String defaultMinecraftDirectory() {
         if (SystemUtils.IS_OS_WINDOWS) { // windows uses the %appdata%/.minecraft structure
             return System.getenv("AppData") + File.separator + ".minecraft";

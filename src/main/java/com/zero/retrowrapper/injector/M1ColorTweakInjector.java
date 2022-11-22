@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.ListIterator;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -88,13 +88,13 @@ public final class M1ColorTweakInjector implements IClassTransformer {
 
             for (final Object methodNodeO : classNode.methods) {
                 final MethodNode methodNode = (MethodNode) methodNodeO;
-                final List<MethodInsnNode> foundSetFullscreenCalls = new ArrayList<MethodInsnNode>();
-                final List<MethodInsnNode> foundGetRGBCalls = new ArrayList<MethodInsnNode>();
-                final List<MethodInsnNode> foundFogFloatBufCalls = new ArrayList<MethodInsnNode>();
-                final List<MethodInsnNode> foundSwap3Calls = new ArrayList<MethodInsnNode>();
-                final List<MethodInsnNode> foundSwap3DoubleCalls = new ArrayList<MethodInsnNode>();
-                final List<MethodInsnNode> foundSwap4Calls = new ArrayList<MethodInsnNode>();
-                final List<MethodInsnNode> foundSwap4DoubleCalls = new ArrayList<MethodInsnNode>();
+                final Collection<MethodInsnNode> foundSetFullscreenCalls = new ArrayList<MethodInsnNode>();
+                final Collection<MethodInsnNode> foundGetRGBCalls = new ArrayList<MethodInsnNode>();
+                final Collection<MethodInsnNode> foundFogFloatBufCalls = new ArrayList<MethodInsnNode>();
+                final Collection<MethodInsnNode> foundSwap3Calls = new ArrayList<MethodInsnNode>();
+                final Collection<MethodInsnNode> foundSwap3DoubleCalls = new ArrayList<MethodInsnNode>();
+                final Collection<MethodInsnNode> foundSwap4Calls = new ArrayList<MethodInsnNode>();
+                final Collection<MethodInsnNode> foundSwap4DoubleCalls = new ArrayList<MethodInsnNode>();
                 @SuppressWarnings("unchecked")
                 final ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
                 boolean hasHashes = false;

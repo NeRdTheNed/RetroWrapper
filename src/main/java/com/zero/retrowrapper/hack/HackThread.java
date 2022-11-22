@@ -24,10 +24,10 @@ import net.minecraft.launchwrapper.LogWrapper;
 
 public final class HackThread extends Thread {
     // TODO Refactor
-    private JLabel label;
-    private RetroPlayer player;
+    JLabel label;
+    RetroPlayer player;
 
-    private void setupSwingGUI() {
+    void setupSwingGUI() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (final Exception e) {

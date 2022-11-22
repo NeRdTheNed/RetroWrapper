@@ -1,15 +1,15 @@
 plugins {
-    id "com.gradle.enterprise" version "3.11.2"
+    id 'com.gradle.enterprise' version '3.11.2'
 }
 
 gradleEnterprise {
     buildScan {
-        termsOfServiceUrl = "https://gradle.com/terms-of-service"
-        termsOfServiceAgree = "yes"
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
 
-        if (System.getenv("CI")) {
+        if (System.getenv('CI')) {
             publishAlways()
-            tag "CI"
+            tag 'CI'
         }
     }
 }

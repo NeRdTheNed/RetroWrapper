@@ -1,7 +1,7 @@
 package com.zero.retrowrapper.injector;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.ListIterator;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -44,7 +44,7 @@ public final class DisplayTweakInjector implements IClassTransformer {
 
             for (final Object methodNodeO : classNode.methods) {
                 final MethodNode methodNode = (MethodNode) methodNodeO;
-                final List<MethodInsnNode> foundDisplayCreateCalls = new ArrayList<MethodInsnNode>();
+                final Collection<MethodInsnNode> foundDisplayCreateCalls = new ArrayList<MethodInsnNode>();
                 @SuppressWarnings("unchecked")
                 final ListIterator<AbstractInsnNode> iterator = methodNode.instructions.iterator();
 

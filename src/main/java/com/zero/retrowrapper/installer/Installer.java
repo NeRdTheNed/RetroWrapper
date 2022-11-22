@@ -36,6 +36,7 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
+import javax.swing.text.JTextComponent;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -55,20 +56,20 @@ public final class Installer {
     private static final Random rand = new Random();
 
     // TODO Some of these variables should possibly be refactored to not be static
-    private static String workingDirectory;
-    private static File directory;
-    private static File[] directories;
-    private static File versions;
+    static String workingDirectory;
+    static File directory;
+    static File[] directories;
+    static File versions;
     private static JButton install;
     private static JButton uninstall;
 
-    private static DefaultListModel model;
-    private static JList list;
-    private static List<String> listInternal;
+    static DefaultListModel model;
+    static JList list;
+    static List<String> listInternal;
 
     private static JFrame frame;
 
-    private static boolean refreshList(String givenDirectory, final Logger installerLogger) {
+    static boolean refreshList(String givenDirectory, final Logger installerLogger) {
         int versionCount = 0;
         int wrappedVersionCount = 0;
         model.removeAllElements();
@@ -181,7 +182,7 @@ public final class Installer {
         return true;
     }
 
-    private static JsonObject getVersionJson(String version, final Logger installerLogger) {
+    static JsonObject getVersionJson(String version, final Logger installerLogger) {
         JsonObject versionJson = null;
         Reader s = null;
 
@@ -205,16 +206,14 @@ public final class Installer {
     private static String getRetroWrapperVersionFromInstance(JsonObject versionJson, final Logger installerLogger) {
         String toReturn = null;
         final JsonArray libraries = versionJson.get("libraries").asArray();
-        final Iterator<JsonValue> libraryIterator = libraries.iterator();
 
-        while (libraryIterator.hasNext()) {
-            final JsonObject library = libraryIterator.next().asObject();
+        for (final JsonValue jsonValue : libraries) {
+            final JsonObject library = jsonValue.asObject();
             final String libName = library.get("name").asString();
 
             if (libName.contains("com.zero:retrowrapper")) {
                 final String[] libNameSplit = libName.split(":");
-                final String libVersion = libNameSplit[libNameSplit.length - 1];
-                toReturn = libVersion;
+                toReturn = libNameSplit[libNameSplit.length - 1];
             }
         }
 
@@ -245,16 +244,16 @@ public final class Installer {
         listInternal = new ArrayList<String>();
         frame = new JFrame("RetroWrapper - NeRd Fork");
         frame.setPreferredSize(new Dimension(654, 420));
-        frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
+        frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.PAGE_AXIS));
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setResizable(true);
         // Installer label
         final JLabel installerLabel = new JLabel("RetroWrapper Installer");
-        installerLabel.setFont(installerLabel.getFont().deriveFont(20F).deriveFont(Font.BOLD));
+        installerLabel.setFont(installerLabel.getFont().deriveFont(20.0F).deriveFont(Font.BOLD));
         SwingUtil.addJLabelCentered(frame, installerLabel);
         // Version label
         final JLabel versionLabel = new JLabel(MetadataUtil.VERSION + " - " + MetadataUtil.INSTALLER_SPLASHES.get(rand.nextInt(MetadataUtil.INSTALLER_SPLASHES.size())));
-        versionLabel.setFont(installerLabel.getFont().deriveFont(12F));
+        versionLabel.setFont(installerLabel.getFont().deriveFont(12.0F));
         SwingUtil.addJLabelCentered(frame, versionLabel);
         // Working directory text field
         final JTextField workDir = new JTextField(workingDirectory);
@@ -262,7 +261,7 @@ public final class Installer {
         // TODO Refactor
         workDir.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                final String workDirPath = ((JTextField)e.getSource()).getText();
+                final String workDirPath = ((JTextComponent) e.getSource()).getText();
                 final File minecraftDir = new File(workDirPath);
 
                 if (minecraftDir.exists() && refreshList(workDirPath, installerLogger)) {
@@ -272,7 +271,7 @@ public final class Installer {
                         JOptionPane.showMessageDialog(null, "No directory / minecraft directory detected!\n", "Error", JOptionPane.INFORMATION_MESSAGE);
                     }
 
-                    ((JTextField)e.getSource()).setText(workingDirectory);
+                    ((JTextComponent) e.getSource()).setText(workingDirectory);
                     refreshList(workingDirectory, installerLogger);
                 }
             }
@@ -411,7 +410,7 @@ public final class Installer {
 
                             // Replace version ID with the wrapped version ID (e.g "c0.30-3" with "c0.30-3-wrapped")
                             if (!versionJson.getString("id", "null").equals(version)) {
-                                JOptionPane.showMessageDialog(null, "The version ID " + versionJson.getString("id", "null") + " found in the JSON file " + version + File.separator + version + ".json" + "did not match the expected version ID " + version + ". Things will not go as planned!", "Error", JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(null, "The version ID " + versionJson.getString("id", "null") + " found in the JSON file " + version + File.separator + version + ".json did not match the expected version ID " + version + ". Things will not go as planned!", "Error", JOptionPane.ERROR_MESSAGE);
                             }
 
                             versionJson.set("id",  versionWrapped);
@@ -467,7 +466,6 @@ public final class Installer {
                         logRecord.setParameters(new Object[] { version });
                         logRecord.setThrown(e1);
                         installerLogger.log(logRecord);
-                        e1.printStackTrace();
                     }
                 }
 
@@ -493,8 +491,8 @@ public final class Installer {
         });
         SwingUtil.addJButtonCentered(frame, uninstall);
         // Copyright label
-        final JLabel copyrightLabel = new JLabel("\u00a92018 000");
-        copyrightLabel.setFont(copyrightLabel.getFont().deriveFont(12F));
+        final JLabel copyrightLabel = new JLabel("©2018 000");
+        copyrightLabel.setFont(copyrightLabel.getFont().deriveFont(12.0F));
         SwingUtil.addJLabelCentered(frame, copyrightLabel);
         refreshList(workingDirectory, installerLogger);
         frame.pack();

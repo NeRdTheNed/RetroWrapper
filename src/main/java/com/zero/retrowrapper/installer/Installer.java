@@ -16,8 +16,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -64,6 +66,7 @@ public final class Installer {
 
     private static DefaultListModel model;
     private static JList list;
+    private static List listInternal;
 
     private static JFrame frame;
 
@@ -71,6 +74,7 @@ public final class Installer {
         int versionCount = 0;
         int wrappedVersionCount = 0;
         model.removeAllElements();
+        listInternal.clear();
 
         if (givenDirectory.length() != 0) {
             directory = new File(givenDirectory);
@@ -103,11 +107,44 @@ public final class Installer {
                                 if (content.contains("old_") && !content.contains("retrowrapper")) {
                                     if (new File(versions, f.getName() + "-wrapped").exists()) {
                                         wrappedVersionCount++;
-                                        model.addElement(f.getName() + " - already wrapped");
+                                        final String verNotif;
+                                        final JsonObject versionJson = getVersionJson(f.getName() + "-wrapped", installerLogger);
+
+                                        if (versionJson != null) {
+                                            final String oldVersion = getRetroWrapperVersionFromInstance(versionJson, installerLogger);
+
+                                            if (!"installer".equals(oldVersion)) {
+                                                String tempVerNotif;
+
+                                                try {
+                                                    if (MetadataUtil.compareSemver(MetadataUtil.VERSION, oldVersion) > 0) {
+                                                        tempVerNotif = "(outdated RetroWrapper version " + oldVersion + "!)";
+                                                    } else if (!MetadataUtil.VERSION.equals(oldVersion) && MetadataUtil.isVersionSnapshot(oldVersion)) {
+                                                        tempVerNotif = "(possibly outdated RetroWrapper version " + oldVersion + "!)";
+                                                    } else {
+                                                        tempVerNotif = "(RetroWrapper version " + oldVersion + ")";
+                                                    }
+                                                } catch (final NumberFormatException e) {
+                                                    installerLogger.log(Level.WARNING, "Issue parsing version number for version " + f.getPath(), e);
+                                                    tempVerNotif = "(outdated RetroWrapper version " + oldVersion + "!)";
+                                                }
+
+                                                verNotif = tempVerNotif;
+                                            } else {
+                                                verNotif = "(outdated RetroWrapper version 1.6.4 or earlier!)";
+                                            }
+                                        } else {
+                                            installerLogger.warning("Could not parse JSON file for instance " + f.getName() + "-wrapped");
+                                            verNotif = "error parsing JSON file for wrapped instance?";
+                                        }
+
+                                        model.addElement(f.getName() + " - " + verNotif + " already wrapped");
                                     } else {
                                         versionCount++;
                                         model.addElement(f.getName());
                                     }
+
+                                    listInternal.add(f.getName());
                                 }
                             } catch (final FileNotFoundException e) {
                                 // TODO Better logging
@@ -158,6 +195,46 @@ public final class Installer {
         return true;
     }
 
+    private static JsonObject getVersionJson(String version, final Logger installerLogger) {
+        JsonObject versionJson = null;
+        Reader s = null;
+
+        try {
+            s = new FileReader(new File(versions, version + File.separator + version + ".json"));
+            versionJson = Json.parse(s).asObject();
+        } catch (final IOException ee) {
+            // TODO better logging
+            final LogRecord logRecord = new LogRecord(Level.SEVERE, "An IOException was thrown while trying to wrap version {0}");
+            logRecord.setParameters(new Object[] { version });
+            logRecord.setThrown(ee);
+            installerLogger.log(logRecord);
+        } finally {
+            IOUtils.closeQuietly(s);
+        }
+
+        return versionJson;
+    }
+
+    // May return "installer" for older versions
+    private static String getRetroWrapperVersionFromInstance(JsonObject versionJson, final Logger installerLogger) {
+        String toReturn = null;
+        final JsonArray libraries = versionJson.get("libraries").asArray();
+        final Iterator<JsonValue> libraryIterator = libraries.iterator();
+
+        while (libraryIterator.hasNext()) {
+            final JsonObject library = libraryIterator.next().asObject();
+            final String libName = library.get("name").asString();
+
+            if (libName.contains("com.zero:retrowrapper")) {
+                final String[] libNameSplit = libName.split(":");
+                final String libVersion = libNameSplit[libNameSplit.length - 1];
+                toReturn = libVersion;
+            }
+        }
+
+        return toReturn;
+    }
+
     // TODO Refactor parts into separate method
     // TODO The installer can take a very long time to start up when there are large amounts of instances
     private Installer(final Logger installerLogger) throws Exception {
@@ -171,6 +248,7 @@ public final class Installer {
 
         model = new DefaultListModel();
         list = new JList(model);
+        listInternal = new ArrayList();
         frame = new JFrame("RetroWrapper - NeRd Fork");
         frame.setPreferredSize(new Dimension(654, 420));
         frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
@@ -224,151 +302,154 @@ public final class Installer {
 
                 final StringBuilder finalVersions = new StringBuilder();
 
-                for (String version : versionList) {
-                    if (version.contains("- already wrapped")) {
-                        version = version.replace(" - already wrapped", "");
+                for (int i = 0; i < versionList.length; ++i) {
+                    String version = versionList[i];
+
+                    if (version.contains("already wrapped")) {
+                        version = (String) listInternal.get(i);
                         FileUtils.deleteQuietly(new File(directory, "versions" + File.separator + version + "-wrapped"));
                     }
 
-                    Reader s = null;
-
                     try {
-                        s = new FileReader(new File(versions, version + File.separator + version + ".json"));
-                        finalVersions.append(version).append("\n");
-                        final JsonObject versionJson = Json.parse(s).asObject();
-                        final String versionWrapped = version + "-wrapped";
-                        // RetroWrapper adds and changes a few libraries.
-                        // A library is a JSON object, and libraries are stored in an array of JSON objects.
-                        final JsonArray libraries = versionJson.get("libraries").asArray();
-                        final JsonArray newLibraries = Json.array();
-                        final Iterator<JsonValue> libraryIterator = libraries.iterator();
-                        // If the version already has Log4j API
-                        boolean hasLogAPI = false;
-                        // If the version already has Log4j core
-                        boolean hasLogCore = false;
+                        final JsonObject versionJson = getVersionJson(version, installerLogger);
 
-                        while (libraryIterator.hasNext()) {
-                            final JsonObject library = libraryIterator.next().asObject();
-                            JsonObject toAdd = library;
-                            final String libName = library.get("name").asString();
+                        if (versionJson != null) {
+                            final String versionWrapped = version + "-wrapped";
+                            // RetroWrapper adds and changes a few libraries.
+                            // A library is a JSON object, and libraries are stored in an array of JSON objects.
+                            final JsonArray libraries = versionJson.get("libraries").asArray();
+                            final JsonArray newLibraries = Json.array();
+                            final Iterator<JsonValue> libraryIterator = libraries.iterator();
+                            // If the version already has Log4j API
+                            boolean hasLogAPI = false;
+                            // If the version already has Log4j core
+                            boolean hasLogCore = false;
 
-                            if (libName.contains("net.minecraft:launchwrapper")) {
-                                final String[] libNameSplit = libName.split(":");
-                                final String libVersion = libNameSplit[libNameSplit.length - 1];
+                            while (libraryIterator.hasNext()) {
+                                final JsonObject library = libraryIterator.next().asObject();
+                                JsonObject toAdd = library;
+                                final String libName = library.get("name").asString();
 
-                                if ("1.5".equals(libVersion)) {
-                                    // Replace LaunchWrapper 1.5 with LaunchWrapper 1.12
-                                    toAdd = Json.object().add("name", "net.minecraft:launchwrapper:1.12")
-                                            .add("downloads", Json.object()
-                                                 .add("artifact", Json.object()
-                                                      .add("path", "net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar")
-                                                      .add("url", "https://libraries.minecraft.net/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar")
-                                                      .add("sha1", "111e7bea9c968cdb3d06ef4632bf7ff0824d0f36")
-                                                      .add("size", 32999)
-                                                     )
-                                                );
+                                if (libName.contains("net.minecraft:launchwrapper")) {
+                                    final String[] libNameSplit = libName.split(":");
+                                    final String libVersion = libNameSplit[libNameSplit.length - 1];
+
+                                    if ("1.5".equals(libVersion)) {
+                                        // Replace LaunchWrapper 1.5 with LaunchWrapper 1.12
+                                        toAdd = Json.object().add("name", "net.minecraft:launchwrapper:1.12")
+                                                .add("downloads", Json.object()
+                                                     .add("artifact", Json.object()
+                                                          .add("path", "net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar")
+                                                          .add("url", "https://libraries.minecraft.net/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar")
+                                                          .add("sha1", "111e7bea9c968cdb3d06ef4632bf7ff0824d0f36")
+                                                          .add("size", 32999)
+                                                         )
+                                                    );
+                                    }
+                                } else if (libName.contains("org.apache.logging.log4j:log4j-api")) {
+                                    hasLogAPI = true;
+                                } else if (libName.contains("org.apache.logging.log4j:log4j-core")) {
+                                    hasLogCore = true;
                                 }
-                            } else if (libName.contains("org.apache.logging.log4j:log4j-api")) {
-                                hasLogAPI = true;
-                            } else if (libName.contains("org.apache.logging.log4j:log4j-core")) {
-                                hasLogCore = true;
+
+                                newLibraries.add(toAdd);
                             }
 
-                            newLibraries.add(toAdd);
-                        }
+                            if (!hasLogAPI) {
+                                // Add Log4j API, LaunchWrapper 1.12 requires it.
+                                // 2.3.2 is the latest (RCE patched) version to support Java 6.
+                                final JsonObject log4jAPI = Json.object().add("name", "org.apache.logging.log4j:log4j-api:2.3.2")
+                                                            .add("downloads", Json.object()
+                                                                 .add("artifact", Json.object()
+                                                                      .add("path", "org/apache/logging/log4j/log4j-api/2.3.2/log4j-api-2.3.2.jar")
+                                                                      .add("url", "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.3.2/log4j-api-2.3.2.jar")
+                                                                      .add("sha1", "294fb56d66693b6f97f1a2f2c7acfb101859388a")
+                                                                      .add("size", 134942)
+                                                                     )
+                                                                );
+                                newLibraries.add(log4jAPI);
+                            }
 
-                        if (!hasLogAPI) {
-                            // Add Log4j API, LaunchWrapper 1.12 requires it.
-                            // 2.3.2 is the latest (RCE patched) version to support Java 6.
-                            final JsonObject log4jAPI = Json.object().add("name", "org.apache.logging.log4j:log4j-api:2.3.2")
-                                                        .add("downloads", Json.object()
-                                                             .add("artifact", Json.object()
-                                                                  .add("path", "org/apache/logging/log4j/log4j-api/2.3.2/log4j-api-2.3.2.jar")
-                                                                  .add("url", "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.3.2/log4j-api-2.3.2.jar")
-                                                                  .add("sha1", "294fb56d66693b6f97f1a2f2c7acfb101859388a")
-                                                                  .add("size", 134942)
-                                                                 )
-                                                            );
-                            newLibraries.add(log4jAPI);
-                        }
+                            if (!hasLogCore) {
+                                // Add Log4j core, LaunchWrapper 1.12 requires it.
+                                // 2.3.2 is the latest (RCE patched) version to support Java 6.
+                                final JsonObject log4jCore = Json.object().add("name", "org.apache.logging.log4j:log4j-core:2.3.2")
+                                                             .add("downloads", Json.object()
+                                                                  .add("artifact", Json.object()
+                                                                       .add("path", "org/apache/logging/log4j/log4j-core/2.3.2/log4j-core-2.3.2.jar")
+                                                                       .add("url", "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.3.2/log4j-core-2.3.2.jar")
+                                                                       .add("sha1", "fcd866619df2b131be0defc4f63b09b703649031")
+                                                                       .add("size", 833136)
+                                                                      )
+                                                                 );
+                                newLibraries.add(log4jCore);
+                            }
 
-                        if (!hasLogCore) {
-                            // Add Log4j core, LaunchWrapper 1.12 requires it.
-                            // 2.3.2 is the latest (RCE patched) version to support Java 6.
-                            final JsonObject log4jCore = Json.object().add("name", "org.apache.logging.log4j:log4j-core:2.3.2")
-                                                         .add("downloads", Json.object()
-                                                              .add("artifact", Json.object()
-                                                                   .add("path", "org/apache/logging/log4j/log4j-core/2.3.2/log4j-core-2.3.2.jar")
-                                                                   .add("url", "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.3.2/log4j-core-2.3.2.jar")
-                                                                   .add("sha1", "fcd866619df2b131be0defc4f63b09b703649031")
-                                                                   .add("size", 833136)
-                                                                  )
-                                                             );
-                            newLibraries.add(log4jCore);
-                        }
+                            final String retroWrapperLibraryLocation = "com" + File.separator + "zero" + File.separator + "retrowrapper" + File.separator + MetadataUtil.VERSION;
+                            final File jar = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+                            final JsonObject retroWrapperArtifact = Json.object()
+                                                                    .add("path", retroWrapperLibraryLocation)
+                                                                    .add("size", jar.length());
+                            InputStream input = null;
 
-                        final String retroWrapperLibraryLocation = "com" + File.separator + "zero" + File.separator + "retrowrapper" + File.separator + MetadataUtil.VERSION;
-                        final File jar = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-                        final JsonObject retroWrapperArtifact = Json.object()
-                                                                .add("path", retroWrapperLibraryLocation)
-                                                                .add("size", jar.length());
-                        InputStream input = null;
+                            try {
+                                input = new FileInputStream(jar);
+                                final String hash = DigestUtils.shaHex(input);
+                                retroWrapperArtifact.add("sha1", hash);
+                            } finally {
+                                IOUtils.closeQuietly(input);
+                            }
 
-                        try {
-                            input = new FileInputStream(jar);
-                            final String hash = DigestUtils.shaHex(input);
-                            retroWrapperArtifact.add("sha1", hash);
-                        } finally {
-                            IOUtils.closeQuietly(input);
-                        }
+                            if (MetadataUtil.IS_RELEASE) {
+                                retroWrapperArtifact.add("url", "https://github.com/NeRdTheNed/RetroWrapper/releases/download/" + MetadataUtil.TAG + "/RetroWrapper-" + MetadataUtil.VERSION + ".jar");
+                            }
 
-                        if (MetadataUtil.IS_RELEASE) {
-                            retroWrapperArtifact.add("url", "https://github.com/NeRdTheNed/RetroWrapper/releases/download/" + MetadataUtil.TAG + "/RetroWrapper-" + MetadataUtil.VERSION + ".jar");
-                        }
+                            // Add the RetroWrapper library to the list of libraries.
+                            final JsonObject retrowrapperLibraryJson = Json.object()
+                                    .add("name", "com.zero:retrowrapper:" + MetadataUtil.VERSION)
+                                    .add("downloads", Json.object().add("artifact", retroWrapperArtifact));
+                            newLibraries.add(retrowrapperLibraryJson);
+                            versionJson.set("libraries", newLibraries);
 
-                        // Add the RetroWrapper library to the list of libraries.
-                        final JsonObject retrowrapperLibraryJson = Json.object()
-                                .add("name", "com.zero:retrowrapper:" + MetadataUtil.VERSION)
-                                .add("downloads", Json.object().add("artifact", retroWrapperArtifact));
-                        newLibraries.add(retrowrapperLibraryJson);
-                        versionJson.set("libraries", newLibraries);
+                            // Replace version ID with the wrapped version ID (e.g "c0.30-3" with "c0.30-3-wrapped")
+                            if (!versionJson.getString("id", "null").equals(version)) {
+                                JOptionPane.showMessageDialog(null, "The version ID " + versionJson.getString("id", "null") + " found in the JSON file " + version + File.separator + version + ".json" + "did not match the expected version ID " + version + ". Things will not go as planned!", "Error", JOptionPane.ERROR_MESSAGE);
+                            }
 
-                        // Replace version ID with the wrapped version ID (e.g "c0.30-3" with "c0.30-3-wrapped")
-                        if (!versionJson.getString("id", "null").equals(version)) {
-                            JOptionPane.showMessageDialog(null, "The version ID " + versionJson.getString("id", "null") + " found in the JSON file " + version + File.separator + version + ".json" + "did not match the expected version ID " + version + ". Things will not go as planned!", "Error", JOptionPane.ERROR_MESSAGE);
-                        }
+                            versionJson.set("id",  versionWrapped);
+                            // Replace any of Mojang's tweakers with RetroWrapper tweakers
+                            String modifiedLaunchArgs = versionJson.getString("minecraftArguments", "null");
 
-                        versionJson.set("id",  versionWrapped);
-                        // Replace any of Mojang's tweakers with RetroWrapper tweakers
-                        String modifiedLaunchArgs = versionJson.getString("minecraftArguments", "null");
+                            if (modifiedLaunchArgs.contains("VanillaTweaker")) {
+                                modifiedLaunchArgs = modifiedLaunchArgs.replace("net.minecraft.launchwrapper.AlphaVanillaTweaker", "com.zero.retrowrapper.RetroTweaker");
+                                modifiedLaunchArgs = modifiedLaunchArgs.replace("net.minecraft.launchwrapper.IndevVanillaTweaker", "com.zero.retrowrapper.RetroTweaker");
+                            } else {
+                                modifiedLaunchArgs = modifiedLaunchArgs.replace("--assetsDir ${game_assets}", "--assetsDir ${game_assets} --tweakClass com.zero.retrowrapper.RetroTweaker");
+                            }
 
-                        if (modifiedLaunchArgs.contains("VanillaTweaker")) {
-                            modifiedLaunchArgs = modifiedLaunchArgs.replace("net.minecraft.launchwrapper.AlphaVanillaTweaker", "com.zero.retrowrapper.RetroTweaker");
-                            modifiedLaunchArgs = modifiedLaunchArgs.replace("net.minecraft.launchwrapper.IndevVanillaTweaker", "com.zero.retrowrapper.RetroTweaker");
+                            versionJson.set("minecraftArguments", modifiedLaunchArgs);
+                            final File wrapDir = new File(versions, versionWrapped + File.separator);
+                            wrapDir.mkdirs();
+                            final File libDir = new File(directory, "libraries" + File.separator + retroWrapperLibraryLocation);
+                            libDir.mkdirs();
+                            FileOutputStream fos = null;
+
+                            try {
+                                fos = new FileOutputStream(new File(wrapDir, versionWrapped + ".json"));
+                                FileUtils.copyFile(new File(versions, version + File.separator + version + ".jar"), new File(wrapDir, versionWrapped + ".jar"));
+                                fos.write(versionJson.toString(PrettyPrint.indentWithSpaces(4)).getBytes());
+                                FileUtils.copyFile(jar, new File(libDir, "retrowrapper-" + MetadataUtil.VERSION + ".jar"));
+                            } catch (final IOException ee) {
+                                // TODO better logging
+                                final LogRecord logRecord = new LogRecord(Level.SEVERE, "An IOException was thrown while trying to wrap version {0}");
+                                logRecord.setParameters(new Object[] { version });
+                                logRecord.setThrown(ee);
+                                installerLogger.log(logRecord);
+                            } finally {
+                                IOUtils.closeQuietly(fos);
+                            }
                         } else {
-                            modifiedLaunchArgs = modifiedLaunchArgs.replace("--assetsDir ${game_assets}", "--assetsDir ${game_assets} --tweakClass com.zero.retrowrapper.RetroTweaker");
-                        }
-
-                        versionJson.set("minecraftArguments", modifiedLaunchArgs);
-                        final File wrapDir = new File(versions, versionWrapped + File.separator);
-                        wrapDir.mkdirs();
-                        final File libDir = new File(directory, "libraries" + File.separator + retroWrapperLibraryLocation);
-                        libDir.mkdirs();
-                        FileOutputStream fos = null;
-
-                        try {
-                            fos = new FileOutputStream(new File(wrapDir, versionWrapped + ".json"));
-                            FileUtils.copyFile(new File(versions, version + File.separator + version + ".jar"), new File(wrapDir, versionWrapped + ".jar"));
-                            fos.write(versionJson.toString(PrettyPrint.indentWithSpaces(4)).getBytes());
-                            FileUtils.copyFile(jar, new File(libDir, "retrowrapper-" + MetadataUtil.VERSION + ".jar"));
-                        } catch (final IOException ee) {
-                            // TODO better logging
-                            final LogRecord logRecord = new LogRecord(Level.SEVERE, "An IOException was thrown while trying to wrap version {0}");
-                            logRecord.setParameters(new Object[] { version });
-                            logRecord.setThrown(ee);
-                            installerLogger.log(logRecord);
-                        } finally {
-                            IOUtils.closeQuietly(fos);
+                            // big error
                         }
                     } catch (final IOException ee) {
                         // TODO better logging
@@ -383,8 +464,6 @@ public final class Installer {
                         logRecord.setThrown(e1);
                         installerLogger.log(logRecord);
                         e1.printStackTrace();
-                    } finally {
-                        IOUtils.closeQuietly(s);
                     }
                 }
 

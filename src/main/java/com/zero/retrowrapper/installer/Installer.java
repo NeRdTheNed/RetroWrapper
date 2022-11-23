@@ -257,9 +257,17 @@ public final class Installer {
         }
 
         try {
-            final File cacheDir = new File(workingDirectory, "retrowrapper/cache");
-            cacheDir.mkdirs();
-            SwingUtil.checkAndDisplayUpdate(cacheDir);
+            final File defaultMinecraftDir = new File(FileUtil.defaultMinecraftDirectory());
+            final File defaultCacheDir = new File(defaultMinecraftDir, "retrowrapper/cache");
+            final File currentCacheDir = new File(workingDirectory, "retrowrapper/cache");
+
+            if (defaultMinecraftDir.exists()) {
+                defaultCacheDir.mkdirs();
+                SwingUtil.checkAndDisplayUpdate(defaultCacheDir);
+            } else {
+                currentCacheDir.mkdirs();
+                SwingUtil.checkAndDisplayUpdate(currentCacheDir);
+            }
         } catch (final Exception e) {
             installerLogger.log(Level.WARNING, "Update check failed!", e);
         }

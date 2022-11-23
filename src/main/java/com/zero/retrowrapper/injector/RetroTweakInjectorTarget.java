@@ -24,6 +24,7 @@ import org.lwjgl.Sys;
 import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.hack.HackThread;
+import com.zero.retrowrapper.util.FileUtil;
 import com.zero.retrowrapper.util.MetadataUtil;
 import com.zero.retrowrapper.util.SwingUtil;
 
@@ -67,8 +68,17 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
         }
 
         try {
-            final File cacheDir = new File(Launch.minecraftHome, "retrowrapper/cache");
-            SwingUtil.checkAndDisplayUpdate(cacheDir);
+            final File defaultMinecraftDir = new File(FileUtil.defaultMinecraftDirectory());
+            final File defaultCacheDir = new File(defaultMinecraftDir, "retrowrapper/cache");
+            final File currentCacheDir = new File(Launch.minecraftHome, "retrowrapper/cache");
+
+            if (defaultMinecraftDir.exists()) {
+                defaultCacheDir.mkdirs();
+                SwingUtil.checkAndDisplayUpdate(defaultCacheDir);
+            } else {
+                currentCacheDir.mkdirs();
+                SwingUtil.checkAndDisplayUpdate(currentCacheDir);
+            }
         } catch (final Exception e) {
             LogWrapper.warning("Update check failed: " + ExceptionUtils.getStackTrace(e));
         }

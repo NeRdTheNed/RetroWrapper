@@ -205,6 +205,8 @@ public final class SwingUtil {
             try {
                 // Try to check the current remaining requests we can make.
                 final URLConnection urlConnection =  new URL("https://api.github.com/rate_limit").openConnection();
+                // https://docs.github.com/en/rest/overview/resources-in-the-rest-api#user-agent-required
+                urlConnection.setRequestProperty("User-Agent", "RetroWrapper-NeRd-Fork");
                 HttpURLConnection httpConnection = null;
 
                 if (urlConnection instanceof HttpURLConnection) {
@@ -253,6 +255,8 @@ public final class SwingUtil {
 
                 try {
                     final URLConnection urlConnection =  new URL("https://api.github.com/repos/NeRdTheNed/RetroWrapper/releases/latest").openConnection();
+                    // https://docs.github.com/en/rest/overview/resources-in-the-rest-api#user-agent-required
+                    urlConnection.setRequestProperty("User-Agent", "RetroWrapper-NeRd-Fork");
                     HttpURLConnection httpConnection = null;
 
                     if (urlConnection instanceof HttpURLConnection) {

@@ -297,6 +297,8 @@ public final class SwingUtil {
             if ((latestRelease != null) && !latestRelease.equals(MetadataUtil.VERSION)) {
                 JOptionPane.showMessageDialog(null, "A new version of RetroWrapper (" + latestRelease + ") has been released!\nYou can download it from https://github.com/NeRdTheNed/RetroWrapper/releases", "Update available!", JOptionPane.INFORMATION_MESSAGE);
             }
+        } else {
+            JOptionPane.showMessageDialog(null, "The update checker doesn't work on snapshot versions!\nPlease check for the latest release manually!", "Info", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 

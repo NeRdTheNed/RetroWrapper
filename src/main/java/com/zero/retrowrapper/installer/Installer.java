@@ -186,17 +186,14 @@ public final class Installer {
         if (outdatedVersionsCount != 0) {
             final String[] versions = new String[outdatedVersionsList.size()];
             final int[] versionIndex = new int[outdatedVersionsList.size()];
-            final StringBuilder versionsNewline = new StringBuilder();
 
             for (int i = 0; i < outdatedVersionsList.size(); ++i) {
                 final Pair<String, Integer> pair = outdatedVersionsList.get(i);
-                final String version = pair.getLeft();
                 versions[i] = pair.getLeft();
                 versionIndex[i] = pair.getRight();
-                versionsNewline.append(version).append('\n');
             }
 
-            final int diagRes = JOptionPane.showConfirmDialog(null, "Some instances use an outdated version of RetroWrapper!\nWould you like to update RetroWrapper for these instance?\n" + versionsNewline, "Info", JOptionPane.YES_NO_OPTION);
+            final int diagRes = SwingUtil.showOptionScroller(JOptionPane.YES_NO_OPTION, "Info", versions, "Some instances use an outdated version of RetroWrapper!", "Would you like to update RetroWrapper for these instance?");
 
             if (diagRes == JOptionPane.YES_OPTION) {
                 wrapInstances(installerLogger, versionIndex, versions);
@@ -356,7 +353,7 @@ public final class Installer {
 
     static void wrapInstances(Logger installerLogger, int[] mapInd, String... versionsToWrap) {
         int rewrappedVersions = 0;
-        final StringBuilder finalVersions = new StringBuilder();
+        final List<String> finalVersions = new ArrayList<String>();
 
         for (int i = 0; i < versionsToWrap.length; ++i) {
             String version = versionsToWrap[i];
@@ -368,7 +365,7 @@ public final class Installer {
             }
 
             try {
-                finalVersions.append(version).append("\n");
+                finalVersions.add(version);
                 final JsonObject versionJson = getVersionJson(version, installerLogger);
 
                 if (versionJson != null) {
@@ -533,15 +530,14 @@ public final class Installer {
             }
         }
 
-        final StringBuilder resultsDialog = new StringBuilder();
-
-        if (rewrappedVersions > 0) {
-            resultsDialog.append("Please restart the Minecraft Launcher to refresh re-wrapped versions and instances!\n");
-        }
-
-        resultsDialog.append((versionsToWrap.length > 1 ? "Successfully wrapped versions\n" : "Successfully wrapped version\n"));
-        resultsDialog.append(finalVersions);
-        JOptionPane.showMessageDialog(null, resultsDialog, "Success", JOptionPane.INFORMATION_MESSAGE);
+        final String[] wrappedVersions = finalVersions.toArray(new String[0]);
+        final String[] listDiag = (rewrappedVersions > 0) ? new String[] {
+                                      "Please restart the Minecraft Launcher to refresh re-wrapped versions and instances!",
+                                      (wrappedVersions.length > 1 ? "Successfully wrapped versions" : "Successfully wrapped version")
+                                  } : new String[] {
+                                      (wrappedVersions.length > 1 ? "Successfully wrapped versions" : "Successfully wrapped version")
+                                  };
+        SwingUtil.showMessageScroller(JOptionPane.INFORMATION_MESSAGE, "Success", wrappedVersions, listDiag);
         refreshList(workingDirectory, installerLogger);
     }
 

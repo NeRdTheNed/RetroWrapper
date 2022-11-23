@@ -28,6 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -39,6 +40,7 @@ import javax.swing.event.HyperlinkListener;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.lwjgl.opengl.Display;
@@ -187,7 +189,8 @@ public final class SwingUtil {
             });
             textPane.setCaretPosition(0);
             final JScrollPane jsp = new JScrollPane(textPane);
-            jsp.setPreferredSize(new Dimension(720, 420));
+            final int pwidth = jsp.getPreferredSize().width;
+            jsp.setPreferredSize(new Dimension(pwidth > 720 ? pwidth : 720, 420));
             jsp.setBorder(null);
             JOptionPane.showMessageDialog(errorFrame, jsp, dialogTitle, JOptionPane.ERROR_MESSAGE);
         } catch (final Exception ignored) {
@@ -300,6 +303,22 @@ public final class SwingUtil {
         } else {
             JOptionPane.showMessageDialog(null, "The update checker doesn't work on snapshot versions!\nPlease check for the latest release manually!", "Info", JOptionPane.INFORMATION_MESSAGE);
         }
+    }
+
+    public static void showMessageScroller(int messageType, String title, String[] wrapArry, String... preface) {
+        final String[] listDiag = ArrayUtils.addAll(preface, wrapArry);
+        final JScrollPane jsp = new JScrollPane(new JList(listDiag));
+        final int pwidth = jsp.getPreferredSize().width;
+        jsp.setPreferredSize(new Dimension(pwidth > 500 ? pwidth : 500, jsp.getPreferredSize().height));
+        JOptionPane.showMessageDialog(null, jsp, title, messageType);
+    }
+
+    public static int showOptionScroller(int option, String title, String[] wrapArry, String... preface) {
+        final String[] listDiag = ArrayUtils.addAll(preface, wrapArry);
+        final JScrollPane jsp = new JScrollPane(new JList(listDiag));
+        final int pwidth = jsp.getPreferredSize().width;
+        jsp.setPreferredSize(new Dimension(pwidth > 500 ? pwidth : 500, jsp.getPreferredSize().height));
+        return JOptionPane.showConfirmDialog(null, jsp, title, option);
     }
 
     private SwingUtil() {

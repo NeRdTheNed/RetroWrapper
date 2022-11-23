@@ -482,7 +482,7 @@ public final class Installer {
         }
     }
 
-    private static void wrapInstances(Logger installerLogger, int[] mapInd, String... versionsToWrap) {
+    static void wrapInstances(Logger installerLogger, int[] mapInd, String... versionsToWrap) {
         int rewrappedVersions = 0;
         final StringBuilder finalVersions = new StringBuilder();
 

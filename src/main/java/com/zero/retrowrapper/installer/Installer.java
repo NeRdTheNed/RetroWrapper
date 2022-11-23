@@ -62,7 +62,7 @@ public final class Installer {
     static File directory;
     static File[] directories;
     static File versions;
-    private static JButton install;
+    static JButton install;
     private static JButton uninstall;
 
     static DefaultListModel model;
@@ -152,6 +152,7 @@ public final class Installer {
 
         // button visibility
         install.setEnabled(false);
+        install.setText("Install");
         uninstall.setEnabled(wrappedVersionCount > 0);
 
         if (givenDirectory.length() == 0) {
@@ -699,9 +700,28 @@ public final class Installer {
     }
 
     private static class VersionSelectionListener implements ListSelectionListener {
+        public VersionSelectionListener() {
+            // Empty constructor
+        }
+
         public void valueChanged(ListSelectionEvent e) {
             if (!e.getValueIsAdjusting()) {
-                install.setEnabled(!list.isSelectionEmpty());
+                final boolean areVersionsSelected = !list.isSelectionEmpty();
+                install.setEnabled(areVersionsSelected);
+
+                if (areVersionsSelected) {
+                    final Object[] versionList = list.getSelectedValues();
+                    String text = "Install";
+
+                    for (final Object version : versionList) {
+                        if (((String)version).contains("already wrapped")) {
+                            text = "Re-install";
+                            break;
+                        }
+                    }
+
+                    install.setText(text);
+                }
             }
         }
     }

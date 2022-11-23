@@ -2,6 +2,7 @@ package com.zero.retrowrapper.util;
 
 import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -167,26 +168,7 @@ public final class SwingUtil {
                              "<br><p>" + escapeHtml4(issueTitle).replace("\n", "<br>") + "</p><br>" +
                              "<br><p>" + escapeHtml4(displayIssueBody).replace("\n", "<br>") + "</p><br>" +
                              "</html>");
-            textPane.addHyperlinkListener(new HyperlinkListener() {
-                public void hyperlinkUpdate(HyperlinkEvent event) {
-                    if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                        try {
-                            final Class<?> desktopClass = Class.forName("java.awt.Desktop");
-                            final Method getDesktop = desktopClass.getMethod("getDesktop");
-                            final Object desktopObject = getDesktop.invoke(null);
-                            final Method browse = desktopClass.getMethod("browse", URI.class);
-                            browse.invoke(desktopObject, event.getURL().toURI());
-                        } catch (final Exception ignored) {
-                            if ((ignored instanceof NoSuchMethodException) || (ignored instanceof ClassNotFoundException)) {
-                                logger.log(Level.WARNING, "Are you running RetroWrapper on Java 5?");
-                            }
-
-                            logger.log(Level.WARNING, "Could not open link from hyperlinkUpdate", ignored);
-                            JOptionPane.showMessageDialog(textPane, "Your platform doesn't let Java open links.\nPlease browse to https://github.com/NeRdTheNed/RetroWrapper/issues/new to create an issue.\nPlease copy-paste the error report into the issue.\nThanks for putting up with this!", "Sorry", JOptionPane.INFORMATION_MESSAGE);
-                        }
-                    }
-                }
-            });
+            textPane.addHyperlinkListener(new NavigateToHyperlinkListener(logger, textPane));
             textPane.setCaretPosition(0);
             final JScrollPane jsp = new JScrollPane(textPane);
             final int pwidth = jsp.getPreferredSize().width;
@@ -216,6 +198,7 @@ public final class SwingUtil {
     public static void checkAndDisplayUpdate(File cacheDirectory) throws IOException {
         // Check for a new release, and inform the user if there is one
         if (MetadataUtil.IS_RELEASE) {
+            final Logger tempLogger = Logger.getLogger(SwingUtil.class.getName());
             cacheDirectory.mkdirs();
             // Cached version response from GitHub
             final File cachedGithubResponseFile = new File(cacheDirectory, "versioncheck.json");
@@ -291,14 +274,40 @@ public final class SwingUtil {
                     warning.invoke(null, "Could not complete update check: " + ExceptionUtils.getStackTrace(e), new Object[0]);
                 } catch (final Exception ignored) {
                     // LaunchWrapper isn't available
-                    Logger.getLogger(SwingUtil.class.getName()).log(Level.WARNING, "Could not complete update check", e);
+                    tempLogger.log(Level.WARNING, "Could not complete update check", e);
                 }
             } finally {
                 IOUtils.closeQuietly(connectionInputStream);
             }
 
             if ((latestRelease != null) && !latestRelease.equals(MetadataUtil.VERSION)) {
-                JOptionPane.showMessageDialog(null, "A new version of RetroWrapper (" + latestRelease + ") has been released!\nYou can download it from https://github.com/NeRdTheNed/RetroWrapper/releases", "Update available!", JOptionPane.INFORMATION_MESSAGE);
+                final JFrame updateFrame = new JFrame();
+                updateFrame.setResizable(true);
+                updateFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                updateFrame.setVisible(false);
+
+                try {
+                    final JTextPane textPane = new JTextPane();
+                    textPane.setEditable(false);
+                    textPane.setBorder(null);
+                    textPane.setContentType("text/html");
+                    textPane.setText("<html>" +
+                                     "<p>A new version of RetroWrapper (" + latestRelease + ") has been released!</p><br>" +
+                                     "<p><a href=\"https://github.com/NeRdTheNed/RetroWrapper/releases\">Click here to open the releases page!</a></p><br>" +
+                                     "</html>");
+                    textPane.addHyperlinkListener(new NavigateToHyperlinkListener(tempLogger, textPane));
+                    textPane.setCaretPosition(0);
+                    textPane.setOpaque(false);
+                    textPane.setHighlighter(null);
+                    textPane.setSelectedTextColor(new Color(0, 0, 0, 0));
+                    textPane.setBackground(new Color(0, 0, 0, 0));
+                    JOptionPane.showMessageDialog(updateFrame, textPane, "Update available!", JOptionPane.INFORMATION_MESSAGE);
+                } catch (final Exception ignored) {
+                    tempLogger.log(Level.WARNING, "An Exception was thrown while trying to display the update notifier", ignored);
+                    JOptionPane.showMessageDialog(null, "A new version of RetroWrapper (" + latestRelease + ") has been released!\nYou can download it from https://github.com/NeRdTheNed/RetroWrapper/releases", "Update available!", JOptionPane.INFORMATION_MESSAGE);
+                }
+
+                updateFrame.dispose();
             }
         } else {
             JOptionPane.showMessageDialog(null, "The update checker doesn't work on snapshot versions of RetroWrapper!\nPlease check for the latest release manually!", "Info", JOptionPane.INFORMATION_MESSAGE);
@@ -323,5 +332,34 @@ public final class SwingUtil {
 
     private SwingUtil() {
         // As this is a helper class, there should be no reason to instantiate an instance of it.
+    }
+
+    private static class NavigateToHyperlinkListener implements HyperlinkListener {
+        private final Logger logger;
+        private final JTextPane textPane;
+
+        public NavigateToHyperlinkListener(Logger logger, JTextPane textPane) {
+            this.logger = logger;
+            this.textPane = textPane;
+        }
+
+        public void hyperlinkUpdate(HyperlinkEvent event) {
+            if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                try {
+                    final Class<?> desktopClass = Class.forName("java.awt.Desktop");
+                    final Method getDesktop = desktopClass.getMethod("getDesktop");
+                    final Object desktopObject = getDesktop.invoke(null);
+                    final Method browse = desktopClass.getMethod("browse", URI.class);
+                    browse.invoke(desktopObject, event.getURL().toURI());
+                } catch (final Exception ignored) {
+                    if ((ignored instanceof NoSuchMethodException) || (ignored instanceof ClassNotFoundException)) {
+                        logger.log(Level.WARNING, "Are you running RetroWrapper on Java 5?");
+                    }
+
+                    logger.log(Level.WARNING, "Could not open link from hyperlinkUpdate", ignored);
+                    JOptionPane.showMessageDialog(textPane, "Your platform doesn't let Java open links!\nPlease browse to " + event.getURL() + " manually.\nThanks for putting up with this!", "Sorry", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        }
     }
 }

@@ -512,12 +512,14 @@ public final class Installer {
                 versionList[i] = tempVer;
             }
 
+            int rewrappedVersions = 0;
             final StringBuilder finalVersions = new StringBuilder();
 
             for (int i = 0; i < versionList.length; ++i) {
                 String version = versionList[i];
 
                 if (version.contains("already wrapped")) {
+                    rewrappedVersions++;
                     version = listInternal.get(list.getSelectedIndices()[i]);
                     FileUtils.deleteQuietly(new File(directory, "versions" + File.separator + version + "-wrapped"));
                 }
@@ -688,7 +690,15 @@ public final class Installer {
                 }
             }
 
-            JOptionPane.showMessageDialog(null, (versionList.length > 1 ? "Successfully wrapped versions\n" : "Successfully wrapped version\n") + finalVersions, "Success", JOptionPane.INFORMATION_MESSAGE);
+            final StringBuilder resultsDialog = new StringBuilder();
+
+            if (rewrappedVersions > 0) {
+                resultsDialog.append("Please restart the Minecraft Launcher to refresh re-wrapped versions and instances!\n");
+            }
+
+            resultsDialog.append((versionList.length > 1 ? "Successfully wrapped versions\n" : "Successfully wrapped version\n"));
+            resultsDialog.append(finalVersions);
+            JOptionPane.showMessageDialog(null, resultsDialog, "Success", JOptionPane.INFORMATION_MESSAGE);
             refreshList(workingDirectory, installerLogger);
         }
     }

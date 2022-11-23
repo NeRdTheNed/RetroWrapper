@@ -74,6 +74,7 @@ public final class Installer {
     static boolean refreshList(String givenDirectory, final Logger installerLogger) {
         int versionCount = 0;
         int wrappedVersionCount = 0;
+        int outdatedVersionsCount = 0;
         list.clearSelection();
         model.removeAllElements();
         listInternal.clear();
@@ -116,22 +117,27 @@ public final class Installer {
 
                                             try {
                                                 if (MetadataUtil.compareSemver(MetadataUtil.VERSION, oldVersion) > 0) {
+                                                    outdatedVersionsCount++;
                                                     tempVerNotif = "(outdated RetroWrapper version " + oldVersion + "!)";
                                                 } else if (!MetadataUtil.VERSION.equals(oldVersion) && MetadataUtil.isVersionSnapshot(oldVersion)) {
+                                                    outdatedVersionsCount++;
                                                     tempVerNotif = "(possibly outdated RetroWrapper version " + oldVersion + "!)";
                                                 } else {
                                                     tempVerNotif = "(RetroWrapper version " + oldVersion + ")";
                                                 }
                                             } catch (final NumberFormatException e) {
+                                                outdatedVersionsCount++;
                                                 installerLogger.log(Level.WARNING, "Issue parsing version number for version " + f.getPath(), e);
                                                 tempVerNotif = "(outdated RetroWrapper version " + oldVersion + "!)";
                                             }
 
                                             verNotif = tempVerNotif;
                                         } else {
+                                            outdatedVersionsCount++;
                                             verNotif = "(outdated RetroWrapper version 1.6.4 or earlier!)";
                                         }
                                     } else {
+                                        outdatedVersionsCount++;
                                         installerLogger.warning("Could not parse JSON file for instance " + f.getName() + "-wrapped");
                                         verNotif = "error parsing JSON file for wrapped instance?";
                                     }
@@ -156,7 +162,7 @@ public final class Installer {
         uninstall.setEnabled(wrappedVersionCount > 0);
 
         if (givenDirectory.length() == 0) {
-            JOptionPane.showMessageDialog(null, "No directory / minecraft directory detected!\n", "Error", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "No directory / minecraft directory detected!", "Error", JOptionPane.INFORMATION_MESSAGE);
             return false;
         }
 
@@ -170,8 +176,12 @@ public final class Installer {
             return false;
         }
 
-        if (versionCount == 0) {
-            JOptionPane.showMessageDialog(null, "All detected versions have already been wrapped!", "Info", JOptionPane.INFORMATION_MESSAGE);
+        if (outdatedVersionsCount != 0) {
+            JOptionPane.showMessageDialog(null, "Some instances use an outdated version of RetroWrapper!\nIt is recommended to re-install RetroWrapper for these versions.", "Info", JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        if ((versionCount == 0) && (outdatedVersionsCount == 0)) {
+            JOptionPane.showMessageDialog(null, "All wrapped versions are up to date!", "Info", JOptionPane.INFORMATION_MESSAGE);
         }
 
         return true;

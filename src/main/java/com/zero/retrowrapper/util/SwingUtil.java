@@ -282,7 +282,14 @@ public final class SwingUtil {
                     httpConnection.disconnect();
                 }
             } catch (final Exception e) {
-                Logger.getLogger(SwingUtil.class.getName()).log(Level.WARNING, "Could not complete update check", e);
+                try {
+                    final Class<?> logWrapper = Class.forName("net.minecraft.launchwrapper.LogWrapper");
+                    final Method warning = logWrapper.getMethod("warning", String.class, Object[].class);
+                    warning.invoke(null, "Could not complete update check: " + ExceptionUtils.getStackTrace(e), new Object[0]);
+                } catch (final Exception ignored) {
+                    // LaunchWrapper isn't available
+                    Logger.getLogger(SwingUtil.class.getName()).log(Level.WARNING, "Could not complete update check", e);
+                }
             } finally {
                 IOUtils.closeQuietly(connectionInputStream);
             }

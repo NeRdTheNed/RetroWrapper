@@ -65,18 +65,7 @@ public final class HackThread extends Thread {
         frame.add(z);
         final JButton b = new JButton("Teleport");
         b.setBounds(50, 202, 200, 40);
-        b.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    final float dx = Float.parseFloat(x.getText().replace(",", "").replace(" ", ""));
-                    final float dy = Float.parseFloat(y.getText().replace(",", "").replace(" ", ""));
-                    final float dz = Float.parseFloat(z.getText().replace(",", "").replace(" ", ""));
-                    player.teleport(dx, dy, dz);
-                } catch (final Exception ee) {
-                    JOptionPane.showMessageDialog(null, "Exception occurred!\n" + ee.getClass().getName() + "\n" + ee.getMessage());
-                }
-            }
-        });
+        b.addActionListener(new TeleportActionListener(x, y, z));
         frame.add(b);
         frame.setVisible(true);
     }
@@ -85,11 +74,7 @@ public final class HackThread extends Thread {
         player = new RetroPlayer(this);
 
         try {
-            SwingUtilities.invokeAndWait(new Runnable() {
-                public void run() {
-                    setupSwingGUI();
-                }
-            });
+            SwingUtilities.invokeAndWait(new SetupSwingRunnable());
         } catch (final Exception e) {
             // TODO Better error handling
             LogWrapper.warning("Something went wrong with starting the hack thread: " + ExceptionUtils.getStackTrace(e));
@@ -135,14 +120,51 @@ public final class HackThread extends Thread {
 
     void setLabelText(final String text) {
         try {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    label.setText(text);
-                }
-            });
+            SwingUtilities.invokeLater(new LabelRunnable(text));
         } catch (final Exception e) {
             // TODO Better error handling
             LogWrapper.warning("Something went wrong with setting the label text in the hack thread: " + ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    private class TeleportActionListener implements ActionListener {
+        private final JTextField x;
+        private final JTextField y;
+        private final JTextField z;
+
+        public TeleportActionListener(JTextField x, JTextField y, JTextField z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            try {
+                final float dx = Float.parseFloat(x.getText().replace(",", "").replace(" ", ""));
+                final float dy = Float.parseFloat(y.getText().replace(",", "").replace(" ", ""));
+                final float dz = Float.parseFloat(z.getText().replace(",", "").replace(" ", ""));
+                player.teleport(dx, dy, dz);
+            } catch (final Exception ee) {
+                JOptionPane.showMessageDialog(null, "Exception occurred!\n" + ee.getClass().getName() + "\n" + ee.getMessage());
+            }
+        }
+    }
+
+    private class SetupSwingRunnable implements Runnable {
+        public void run() {
+            setupSwingGUI();
+        }
+    }
+
+    private class LabelRunnable implements Runnable {
+        private final String text;
+
+        public LabelRunnable(String text) {
+            this.text = text;
+        }
+
+        public void run() {
+            label.setText(text);
         }
     }
 }

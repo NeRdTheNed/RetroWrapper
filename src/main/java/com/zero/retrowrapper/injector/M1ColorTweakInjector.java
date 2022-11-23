@@ -109,10 +109,10 @@ public final class M1ColorTweakInjector implements IClassTransformer {
 
                     if ("()V".equals(methodNode.desc) && ((methodNode.access & Opcodes.ACC_PUBLIC) != 0)) {
                         if (opcode == Opcodes.LDC) {
-                            final LdcInsnNode ldc = (LdcInsnNode)instruction;
+                            final LdcInsnNode ldc = (LdcInsnNode) instruction;
 
                             if (ldc.cst instanceof String) {
-                                final String string = (String)ldc.cst;
+                                final String string = (String) ldc.cst;
 
                                 if ("##".equals(string)) {
                                     hasHashes = true;
@@ -672,7 +672,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 final AbstractInsnNode l3 = JavaUtil.cloneLoadInsOrNull(from[2]);
 
                 if (l3 != null) {
-                    return new AbstractInsnNode[] { l3, l2, l1 };
+                    return new AbstractInsnNode[] {l3, l2, l1};
                 }
             }
         }
@@ -684,7 +684,9 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         final int[] adaptedFormat = image.getRGB(startX, startY, w, h, rgbArray, offset, scansize);
 
         if (!isMinecraftFullscreen || (RetroTweaker.m1PatchMode == M1PatchMode.ForceEnable)) {
-            for (int i = 0; i < adaptedFormat.length; i++) {
+            final int length = adaptedFormat.length;
+
+            for (int i = 0; i < length; i++) {
                 final int color = adaptedFormat[i];
                 adaptedFormat[i] =
                     (color & 0xFF00FF00)   |

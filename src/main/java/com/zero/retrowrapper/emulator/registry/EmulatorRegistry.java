@@ -69,8 +69,8 @@ public final class EmulatorRegistry {
 
     static {
         moveInvalidFiles(RetroEmulator.getInstance().getCacheDirectory(), null);
-        moveInvalidFiles(new File(Launch.minecraftHome, "resources"), new String[] { "ogg" });
-        moveInvalidFiles(new File(Launch.minecraftHome + "/assets/virtual/legacy/"), new String[] { "ogg" });
+        moveInvalidFiles(new File(Launch.minecraftHome, "resources"), new String[] {"ogg"});
+        moveInvalidFiles(new File(Launch.minecraftHome + "/assets/virtual/legacy/"), new String[] {"ogg"});
         handlers = new ArrayList<IHandler>();
         handlers.add(new SingleResponseHandler("login/session.jsp", "ok"));
         handlers.add(new SingleResponseHandler("session?name=", "ok"));

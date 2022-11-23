@@ -128,7 +128,7 @@ dependencies {
     api "org.ow2.asm:asm-all:${project.asmVersion}"
 
     // launchwrapper + dependencies
-    api ("net.minecraft:launchwrapper:${project.launchwrapperVersion}") {
+    api("net.minecraft:launchwrapper:${project.launchwrapperVersion}") {
         transitive = false
     }
 
@@ -136,7 +136,7 @@ dependencies {
     //api "net.sf.jopt-simple:jopt-simple:${project.joptSimpleVersion}"
 
     // lwjgl
-    api ("org.lwjgl.lwjgl:lwjgl:${project.lwjglVersion}") {
+    api("org.lwjgl.lwjgl:lwjgl:${project.lwjglVersion}") {
         transitive = false
     }
 
@@ -193,8 +193,8 @@ task proguard(dependsOn: shadowJar, type: proguard.gradle.ProGuardTask) {
 
 jar {
     manifest {
-        attributes (
-            'Main-Class': 'com.zero.retrowrapper.installer.Installer'
+        attributes(
+                'Main-Class': 'com.zero.retrowrapper.installer.Installer'
         )
     }
     enabled = false
@@ -220,7 +220,7 @@ task createMultiMCInstance(dependsOn: proguard, type: Zip) {
         filesMatching(['mmc-pack.json', 'patches/RetroWrapper-J6.json']) {
             filter(ReplaceTokens, tokens: [rrVersion: project.version])
         }
-        rename ('RetroWrapper-J6.json', 'RetroWrapper.json')
+        rename('RetroWrapper-J6.json', 'RetroWrapper.json')
     }
 
     from(proguard.outputs.files.singleFile) {
@@ -241,7 +241,7 @@ task createJ9MultiMCInstance(dependsOn: proguard, type: Zip) {
         filesMatching(['mmc-pack.json', 'patches/RetroWrapper-J9.json']) {
             filter(ReplaceTokens, tokens: [rrVersion: project.version])
         }
-        rename ('RetroWrapper-J9.json', 'RetroWrapper.json')
+        rename('RetroWrapper-J9.json', 'RetroWrapper.json')
     }
 
     from(proguard.outputs.files.singleFile) {
@@ -259,11 +259,12 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             // Shadowed .jar
-            final publication -> project.shadow.component(publication)
-            // Source code in a .jar
-            artifact(sourcesJar) {
-                builtBy sourcesJar
-            }
+            final publication ->
+                project.shadow.component(publication)
+                // Source code in a .jar
+                artifact(sourcesJar) {
+                    builtBy sourcesJar
+                }
         }
     }
 }

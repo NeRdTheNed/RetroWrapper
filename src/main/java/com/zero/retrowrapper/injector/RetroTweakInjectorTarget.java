@@ -5,8 +5,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -107,7 +105,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             params.put("sessionid", sessionId);
             params.put("haspaid", "true");
             final Constructor<?> constructor = clazz.getConstructor();
-            final Applet object = (Applet)constructor.newInstance();
+            final Applet object = (Applet) constructor.newInstance();
             final LauncherFake fakeLauncher = new LauncherFake(params, object);
             object.setStub(fakeLauncher);
             object.setSize(854, 480);
@@ -172,11 +170,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
         launcherFrameFake.pack();
         launcherFrameFake.setLocationRelativeTo(null);
         launcherFrameFake.setVisible(true);
-        launcherFrameFake.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                System.exit(0);
-            }
-        });
+        launcherFrameFake.addWindowListener(new WindowClosingAdapter());
         fakeLauncher.setLayout(new BorderLayout());
         fakeLauncher.add(applet, BorderLayout.CENTER);
         fakeLauncher.validate();
@@ -185,11 +179,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
         launcherFrameFake.add(fakeLauncher, BorderLayout.CENTER);
         launcherFrameFake.validate();
         applet.start();
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                applet.stop();
-            }
-        });
+        Runtime.getRuntime().addShutdownHook(new ShutdownAppletThread(applet));
         SwingUtil.loadIconsOnFrames();
     }
 

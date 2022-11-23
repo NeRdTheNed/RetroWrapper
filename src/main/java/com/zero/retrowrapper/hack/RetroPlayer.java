@@ -130,7 +130,7 @@ public final class RetroPlayer {
 
     private double getVariable(Field f, Object o) throws IllegalArgumentException, IllegalAccessException {
         if (modeFloat) {
-            return ((Float)f.getFloat(o)).doubleValue();
+            return ((Float) f.getFloat(o)).doubleValue();
         }
 
         return f.getDouble(o);
@@ -138,9 +138,9 @@ public final class RetroPlayer {
 
     public void teleport(double dx, double dy, double dz) throws IllegalArgumentException, IllegalAccessException {
         if (modeFloat) {
-            x.set(aabb, (float)dx);
-            y.set(aabb, (float)dy);
-            z.set(aabb, (float)dz);
+            x.set(aabb, (float) dx);
+            y.set(aabb, (float) dy);
+            z.set(aabb, (float) dz);
             x2.set(aabb, (float)(dx + ax));
             y2.set(aabb, (float)(dy + ay));
             z2.set(aabb, (float)(dz + az));

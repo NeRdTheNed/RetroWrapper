@@ -9,7 +9,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 public final class JavaUtil {
 
     // TODO proper generic usage
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <T extends Object> Class<? super Object> getMostSuper(final Class<T> toGet) {
         Class toReturn = toGet;
 
@@ -63,20 +63,20 @@ public final class JavaUtil {
 
         if ((opcode == load2.getOpcode()) && isOpcodeLoadIns(opcode)) {
             if (opcode == Opcodes.LDC) {
-                final LdcInsnNode ldc1 = (LdcInsnNode)load1;
-                final LdcInsnNode ldc2 = (LdcInsnNode)load2;
+                final LdcInsnNode ldc1 = (LdcInsnNode) load1;
+                final LdcInsnNode ldc2 = (LdcInsnNode) load2;
                 return ldc1.cst.equals(ldc2.cst);
             }
 
             if ((opcode == Opcodes.BIPUSH) || (opcode == Opcodes.SIPUSH)) {
-                final IntInsnNode ldi1 = (IntInsnNode)load1;
-                final IntInsnNode ldi2 = (IntInsnNode)load2;
+                final IntInsnNode ldi1 = (IntInsnNode) load1;
+                final IntInsnNode ldi2 = (IntInsnNode) load2;
                 return ldi1.operand == ldi2.operand;
             }
 
             if ((opcode >= Opcodes.ILOAD) && (opcode <= Opcodes.ALOAD)) {
-                final VarInsnNode ldv1 = (VarInsnNode)load1;
-                final VarInsnNode ldv2 = (VarInsnNode)load2;
+                final VarInsnNode ldv1 = (VarInsnNode) load1;
+                final VarInsnNode ldv2 = (VarInsnNode) load2;
                 return ldv1.var == ldv2.var;
             }
 

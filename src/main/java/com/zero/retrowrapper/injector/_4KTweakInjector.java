@@ -5,8 +5,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -51,11 +49,7 @@ public final class _4KTweakInjector implements IClassTransformer {
         launcherFrameFake.pack();
         launcherFrameFake.setLocationRelativeTo(null);
         launcherFrameFake.setVisible(true);
-        launcherFrameFake.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                System.exit(0);
-            }
-        });
+        launcherFrameFake.addWindowListener(new WindowClosingAdapter());
         final LauncherFake fakeLauncher = new LauncherFake(new HashMap<String, String>(), applet);
         applet.setStub(fakeLauncher);
         fakeLauncher.setLayout(new BorderLayout());
@@ -67,11 +61,7 @@ public final class _4KTweakInjector implements IClassTransformer {
         launcherFrameFake.validate();
         applet.init();
         applet.start();
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                applet.stop();
-            }
-        });
+        Runtime.getRuntime().addShutdownHook(new ShutdownAppletThread(applet));
         SwingUtil.loadIconsOnFrames();
     }
 

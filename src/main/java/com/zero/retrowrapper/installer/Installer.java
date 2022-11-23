@@ -184,19 +184,19 @@ public final class Installer {
         }
 
         if (outdatedVersionsCount != 0) {
-            final String[] versions = new String[outdatedVersionsList.size()];
+            final String[] outdatedVersions = new String[outdatedVersionsList.size()];
             final int[] versionIndex = new int[outdatedVersionsList.size()];
 
             for (int i = 0; i < outdatedVersionsList.size(); ++i) {
                 final Pair<String, Integer> pair = outdatedVersionsList.get(i);
-                versions[i] = pair.getLeft();
+                outdatedVersions[i] = pair.getLeft();
                 versionIndex[i] = pair.getRight();
             }
 
-            final int diagRes = SwingUtil.showOptionScroller(JOptionPane.YES_NO_OPTION, "Info", versions, "Some instances use an outdated version of RetroWrapper!", "Would you like to update RetroWrapper for these instance?");
+            final int diagRes = SwingUtil.showOptionScroller(JOptionPane.YES_NO_OPTION, "Info", outdatedVersions, "Some instances use an outdated version of RetroWrapper!", "Would you like to update RetroWrapper for these instance?");
 
             if (diagRes == JOptionPane.YES_OPTION) {
-                wrapInstances(installerLogger, versionIndex, versions);
+                wrapInstances(installerLogger, versionIndex, outdatedVersions);
             }
         }
 
@@ -217,7 +217,7 @@ public final class Installer {
         } catch (final IOException ee) {
             // TODO better logging
             final LogRecord logRecord = new LogRecord(Level.SEVERE, "An IOException was thrown while trying to wrap version {0}");
-            logRecord.setParameters(new Object[] { version });
+            logRecord.setParameters(new Object[] {version});
             logRecord.setThrown(ee);
             installerLogger.log(logRecord);
         } finally {
@@ -362,8 +362,9 @@ public final class Installer {
     static void wrapInstances(Logger installerLogger, int[] mapInd, String... versionsToWrap) {
         int rewrappedVersions = 0;
         final List<String> finalVersions = new ArrayList<String>();
+        final int length = versionsToWrap.length;
 
-        for (int i = 0; i < versionsToWrap.length; ++i) {
+        for (int i = 0; i < length; ++i) {
             String version = versionsToWrap[i];
 
             if (version.contains("already wrapped")) {
@@ -482,7 +483,7 @@ public final class Installer {
                         JOptionPane.showMessageDialog(null, "The version ID " + versionJson.getString("id", "null") + " found in the JSON file " + version + File.separator + version + ".json did not match the expected version ID " + version + ". Things will not go as planned!", "Error", JOptionPane.ERROR_MESSAGE);
                     }
 
-                    versionJson.set("id",  versionWrapped);
+                    versionJson.set("id", versionWrapped);
                     // Replace any of Mojang's tweakers with RetroWrapper tweakers
                     String modifiedLaunchArgs = versionJson.getString("minecraftArguments", "null");
 
@@ -514,7 +515,7 @@ public final class Installer {
                     } catch (final IOException ee) {
                         // TODO better logging
                         final LogRecord logRecord = new LogRecord(Level.SEVERE, "An IOException was thrown while trying to wrap version {0}");
-                        logRecord.setParameters(new Object[] { version });
+                        logRecord.setParameters(new Object[] {version});
                         logRecord.setThrown(ee);
                         installerLogger.log(logRecord);
                     } finally {
@@ -526,13 +527,13 @@ public final class Installer {
             } catch (final IOException ee) {
                 // TODO better logging
                 final LogRecord logRecord = new LogRecord(Level.SEVERE, "An IOException was thrown while trying to wrap version {0}");
-                logRecord.setParameters(new Object[] { version });
+                logRecord.setParameters(new Object[] {version});
                 logRecord.setThrown(ee);
                 installerLogger.log(logRecord);
             } catch (final URISyntaxException e1) {
                 // TODO better logging
                 final LogRecord logRecord = new LogRecord(Level.SEVERE, "An URISyntaxException was thrown while trying to wrap version {0}");
-                logRecord.setParameters(new Object[] { version });
+                logRecord.setParameters(new Object[] {version});
                 logRecord.setThrown(e1);
                 installerLogger.log(logRecord);
             }
@@ -602,9 +603,10 @@ public final class Installer {
         public void actionPerformed(ActionEvent e) {
             final Object[] versionListO = list.getSelectedValues();
             final String[] versionList = new String[versionListO.length];
+            final int length = versionListO.length;
 
-            for (int i = 0; i < versionListO.length; i++) {
-                final String tempVer = (String)versionListO[i];
+            for (int i = 0; i < length; i++) {
+                final String tempVer = (String) versionListO[i];
                 versionList[i] = tempVer;
             }
 
@@ -627,7 +629,7 @@ public final class Installer {
                     String text = "Install";
 
                     for (final Object version : versionList) {
-                        if (((String)version).contains("already wrapped")) {
+                        if (((String) version).contains("already wrapped")) {
                             text = "Re-install";
                             break;
                         }
@@ -748,7 +750,7 @@ public final class Installer {
                 final StringBuilder selectedBuilder = new StringBuilder();
 
                 for (final Object selectedO : list.getSelectedValues()) {
-                    final String selected = (String)selectedO;
+                    final String selected = (String) selectedO;
                     selectedBuilder.append("\n").append(selected);
                 }
 

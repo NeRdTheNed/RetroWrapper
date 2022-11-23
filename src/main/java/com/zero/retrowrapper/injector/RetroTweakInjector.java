@@ -50,7 +50,7 @@ public final class RetroTweakInjector implements IClassTransformer {
             cr.accept(classNodeOld, ClassReader.EXPAND_FRAMES);
             final RetroTweakClassWriter cw = new RetroTweakClassWriter(0, classNodeOld.name.replace('/', '.'));
             // TODO The linter doesn't like this for some reason
-            final ClassVisitor s = new EmptyClassVisitor(cw);
+            final ClassVisitor s = new NoOpClassVisitor(cw);
             cr.accept(s, 0);
             final byte[] bytes = cw.toByteArray();
             final ClassReader classReader = new ClassReader(bytes);
@@ -129,8 +129,8 @@ public final class RetroTweakInjector implements IClassTransformer {
         return Launch.minecraftHome;
     }
 
-    private static class EmptyClassVisitor extends ClassVisitor {
-        public EmptyClassVisitor(RetroTweakClassWriter cw) {
+    private static class NoOpClassVisitor extends ClassVisitor {
+        public NoOpClassVisitor(RetroTweakClassWriter cw) {
             super(Opcodes.ASM4, cw);
         }
     }

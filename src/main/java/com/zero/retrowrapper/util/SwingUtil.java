@@ -144,7 +144,7 @@ public final class SwingUtil {
 
     public static void showExceptionHandler(final Logger logger, final String context, final Exception toShow) {
         final String exceptText = ExceptionUtils.getStackTrace(toShow);
-        logger.log(Level.FINE, "Displaying exception handler with context \"{0}\" and stacktrace \"{1}\"", new Object[] { context, exceptText });
+        logger.log(Level.FINE, "Displaying exception handler with context \"{0}\" and stacktrace \"{1}\"", new Object[] {context, exceptText});
         final String dialogTitle = "RetroWrapper error report: " + context;
         final String issueTitle = toShow.getClass().getSimpleName() + " thrown when running RetroWrapper " + MetadataUtil.VERSION;
         final String githubIssueTitle = issueTitle + " (modify to add context)";
@@ -172,7 +172,7 @@ public final class SwingUtil {
             textPane.setCaretPosition(0);
             final JScrollPane jsp = new JScrollPane(textPane);
             final int pwidth = jsp.getPreferredSize().width;
-            jsp.setPreferredSize(new Dimension(pwidth > 720 ? pwidth : 720, 420));
+            jsp.setPreferredSize(new Dimension(Math.max(pwidth, 720), 420));
             jsp.setBorder(null);
             JOptionPane.showMessageDialog(errorFrame, jsp, dialogTitle, JOptionPane.ERROR_MESSAGE);
         } catch (final Exception ignored) {
@@ -205,13 +205,13 @@ public final class SwingUtil {
 
             try {
                 // Try to check the current remaining requests we can make.
-                final URLConnection urlConnection =  new URL("https://api.github.com/rate_limit").openConnection();
+                final URLConnection urlConnection = new URL("https://api.github.com/rate_limit").openConnection();
                 // https://docs.github.com/en/rest/overview/resources-in-the-rest-api#user-agent-required
                 urlConnection.setRequestProperty("User-Agent", "RetroWrapper-NeRd-Fork");
                 HttpURLConnection httpConnection = null;
 
                 if (urlConnection instanceof HttpURLConnection) {
-                    httpConnection = (HttpURLConnection)urlConnection;
+                    httpConnection = (HttpURLConnection) urlConnection;
                     //httpConnection.setRequestMethod("HEAD"); // Not supported?
                 }
 
@@ -255,13 +255,13 @@ public final class SwingUtil {
                 InputStream connectionInputStream = null;
 
                 try {
-                    final URLConnection urlConnection =  new URL("https://api.github.com/repos/NeRdTheNed/RetroWrapper/releases/latest").openConnection();
+                    final URLConnection urlConnection = new URL("https://api.github.com/repos/NeRdTheNed/RetroWrapper/releases/latest").openConnection();
                     // https://docs.github.com/en/rest/overview/resources-in-the-rest-api#user-agent-required
                     urlConnection.setRequestProperty("User-Agent", "RetroWrapper-NeRd-Fork");
                     HttpURLConnection httpConnection = null;
 
                     if (urlConnection instanceof HttpURLConnection) {
-                        httpConnection = (HttpURLConnection)urlConnection;
+                        httpConnection = (HttpURLConnection) urlConnection;
                     }
 
                     if (cachedGithubResponseFile.isFile()) {
@@ -374,19 +374,19 @@ public final class SwingUtil {
         }
     }
 
-    public static void showMessageScroller(int messageType, String title, String[] wrapArry, String... preface) {
-        final String[] listDiag = ArrayUtils.addAll(preface, wrapArry);
+    public static void showMessageScroller(int messageType, String title, String[] wrapArray, String... preface) {
+        final String[] listDiag = ArrayUtils.addAll(preface, wrapArray);
         final JScrollPane jsp = new JScrollPane(new JList(listDiag));
         final int pwidth = jsp.getPreferredSize().width;
-        jsp.setPreferredSize(new Dimension(pwidth > 500 ? pwidth : 500, jsp.getPreferredSize().height));
+        jsp.setPreferredSize(new Dimension(Math.max(pwidth, 500), jsp.getPreferredSize().height));
         JOptionPane.showMessageDialog(null, jsp, title, messageType);
     }
 
-    public static int showOptionScroller(int option, String title, String[] wrapArry, String... preface) {
-        final String[] listDiag = ArrayUtils.addAll(preface, wrapArry);
+    public static int showOptionScroller(int option, String title, String[] wrapArray, String... preface) {
+        final String[] listDiag = ArrayUtils.addAll(preface, wrapArray);
         final JScrollPane jsp = new JScrollPane(new JList(listDiag));
         final int pwidth = jsp.getPreferredSize().width;
-        jsp.setPreferredSize(new Dimension(pwidth > 500 ? pwidth : 500, jsp.getPreferredSize().height));
+        jsp.setPreferredSize(new Dimension(Math.max(pwidth, 500), jsp.getPreferredSize().height));
         return JOptionPane.showConfirmDialog(null, jsp, title, option);
     }
 

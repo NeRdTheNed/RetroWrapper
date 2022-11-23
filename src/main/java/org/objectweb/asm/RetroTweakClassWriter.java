@@ -142,7 +142,7 @@ public final class RetroTweakClassWriter extends ClassWriter {
                 break;
 
             case INDY:
-                writer.d.putByte(INDY).putShort((int)item.d).putShort(writer.newNameType(item.g, item.h));
+                writer.d.putByte(INDY).putShort((int) item.d).putShort(writer.newNameType(item.g, item.h));
                 break;
             }
 

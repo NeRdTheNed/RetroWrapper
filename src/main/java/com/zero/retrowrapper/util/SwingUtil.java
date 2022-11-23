@@ -281,8 +281,8 @@ public final class SwingUtil {
                 if (httpConnection != null) {
                     httpConnection.disconnect();
                 }
-            } catch (final Exception ignored) {
-                // Ignored
+            } catch (final Exception e) {
+                Logger.getLogger(SwingUtil.class.getName()).log(Level.WARNING, "Could not complete update check", e);
             } finally {
                 IOUtils.closeQuietly(connectionInputStream);
             }

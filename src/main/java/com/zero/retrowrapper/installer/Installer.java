@@ -348,137 +348,9 @@ public final class Installer {
     private static void setupDebugKeyCombos(final Logger logger) {
         try {
             final KeyboardFocusManager keyboardFocusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
-            keyboardFocusManager.addKeyEventDispatcher(new KeyEventDispatcher() {
-                boolean f3Pressed = false;
-                boolean cPressed = false;
-                boolean hPressed = false;
-                boolean qPressed = false;
-                boolean tPressed = false;
-                boolean openDebug = false;
-                public boolean dispatchKeyEvent(KeyEvent e) {
-                    switch (e.getID()) {
-                    case KeyEvent.KEY_PRESSED:
-                        switch (e.getKeyCode()) {
-                        case KeyEvent.VK_C:
-                            cPressed = true;
-                            break;
-
-                        case KeyEvent.VK_H:
-                            hPressed = true;
-                            break;
-
-                        case KeyEvent.VK_Q:
-                            qPressed = true;
-                            break;
-
-                        case KeyEvent.VK_T:
-                            tPressed = true;
-                            break;
-
-                        case KeyEvent.VK_F3:
-                            f3Pressed = true;
-                            break;
-
-                        default:
-                            break;
-                        }
-
-                        break;
-
-                    case KeyEvent.KEY_RELEASED:
-                        switch (e.getKeyCode()) {
-                        case KeyEvent.VK_C:
-                            cPressed = false;
-                            openDebug = false;
-                            break;
-
-                        case KeyEvent.VK_H:
-                            hPressed = false;
-                            openDebug = false;
-                            break;
-
-                        case KeyEvent.VK_Q:
-                            qPressed = false;
-                            openDebug = false;
-                            break;
-
-                        case KeyEvent.VK_T:
-                            tPressed = false;
-                            openDebug = false;
-                            break;
-
-                        case KeyEvent.VK_F3:
-                            f3Pressed = false;
-                            openDebug = false;
-                            break;
-
-                        default:
-                            break;
-                        }
-
-                        break;
-
-                    default:
-                        break;
-                    }
-
-                    if (f3Pressed && cPressed && !openDebug) {
-                        openDebug = true;
-                        JOptionPane.showMessageDialog(null, "Debug F3 + C: Test exception handler (not a real crash)", "Debug", JOptionPane.QUESTION_MESSAGE);
-                        SwingUtil.showExceptionHandler(logger, "Debug exception handler test (not a real crash)", new Exception("Debug exception (not a real exception)"));
-                    }
-
-                    if (f3Pressed && hPressed && !openDebug) {
-                        openDebug = true;
-                        final StringBuilder tempDirBuilder = new StringBuilder();
-
-                        for (final File tempDir : directories) {
-                            tempDirBuilder.append("\n").append(tempDir);
-                        }
-
-                        final StringBuilder wrappableBuilder = new StringBuilder();
-
-                        for (final Object wrappable : model.toArray()) {
-                            wrappableBuilder.append("\n").append(wrappable);
-                        }
-
-                        final StringBuilder selectedBuilder = new StringBuilder();
-
-                        for (final Object selectedO : list.getSelectedValues()) {
-                            final String selected = (String)selectedO;
-                            selectedBuilder.append("\n").append(selected);
-                        }
-
-                        final String toShow = "\nWorking directory " + workingDirectory +
-                                              "\nDirectory " + directory +
-                                              "\nVersions folder " + versions +
-                                              "\nCurrently selected Minecraft versions in list " + selectedBuilder +
-                                              "\nWrappable versions of Minecraft in versions folder " + wrappableBuilder +
-                                              "\nAll versions of Minecraft in versions folder " + tempDirBuilder;
-                        final JTextPane textPane = new JTextPane();
-                        textPane.setText("Debug F3 + H: Show variable info: " + toShow);
-                        textPane.setCaretPosition(0);
-                        final JScrollPane jsp = new JScrollPane(textPane);
-                        jsp.setPreferredSize(new Dimension(654, 420));
-                        JOptionPane.showMessageDialog(null, jsp, "Debug", JOptionPane.QUESTION_MESSAGE);
-                    }
-
-                    if (f3Pressed && qPressed && !openDebug) {
-                        openDebug = true;
-                        JOptionPane.showMessageDialog(null, "Debug F3 + Q: Show key combos. Combos:\nF3 + C: Test exception handler (not a real crash)\nF3 + H: Show variable info\nF3 + Q: Show key combos\nF3 + T: Reload folders", "Debug", JOptionPane.QUESTION_MESSAGE);
-                    }
-
-                    if (f3Pressed && tPressed && !openDebug) {
-                        openDebug = true;
-                        JOptionPane.showMessageDialog(null, "Debug F3 + T: Reloading folders", "Debug", JOptionPane.QUESTION_MESSAGE);
-                        refreshList(workingDirectory, logger);
-                    }
-
-                    return false;
-                }
-            });
+            keyboardFocusManager.addKeyEventDispatcher(new DebugKeyDispatcher(logger));
         } catch (final Exception ignored) {
-            logger.log(Level.WARNING, "Could not add KeyEventDispatcher, debug key combinations will not work", ignored);
+            logger.log(Level.WARNING, "Could not add DebugKeyDispatcher, debug key combinations will not work", ignored);
         }
     }
 
@@ -760,6 +632,148 @@ public final class Installer {
                     install.setText(text);
                 }
             }
+        }
+    }
+
+    private static class DebugKeyDispatcher implements KeyEventDispatcher {
+        private final Logger logger;
+        boolean f3Pressed;
+        boolean cPressed;
+        boolean hPressed;
+        boolean qPressed;
+        boolean tPressed;
+        boolean openDebug;
+
+        public DebugKeyDispatcher(Logger logger) {
+            this.logger = logger;
+            f3Pressed = false;
+            cPressed = false;
+            hPressed = false;
+            qPressed = false;
+            tPressed = false;
+            openDebug = false;
+        }
+
+        public boolean dispatchKeyEvent(KeyEvent e) {
+            switch (e.getID()) {
+            case KeyEvent.KEY_PRESSED:
+                switch (e.getKeyCode()) {
+                case KeyEvent.VK_C:
+                    cPressed = true;
+                    break;
+
+                case KeyEvent.VK_H:
+                    hPressed = true;
+                    break;
+
+                case KeyEvent.VK_Q:
+                    qPressed = true;
+                    break;
+
+                case KeyEvent.VK_T:
+                    tPressed = true;
+                    break;
+
+                case KeyEvent.VK_F3:
+                    f3Pressed = true;
+                    break;
+
+                default:
+                    break;
+                }
+
+                break;
+
+            case KeyEvent.KEY_RELEASED:
+                switch (e.getKeyCode()) {
+                case KeyEvent.VK_C:
+                    cPressed = false;
+                    openDebug = false;
+                    break;
+
+                case KeyEvent.VK_H:
+                    hPressed = false;
+                    openDebug = false;
+                    break;
+
+                case KeyEvent.VK_Q:
+                    qPressed = false;
+                    openDebug = false;
+                    break;
+
+                case KeyEvent.VK_T:
+                    tPressed = false;
+                    openDebug = false;
+                    break;
+
+                case KeyEvent.VK_F3:
+                    f3Pressed = false;
+                    openDebug = false;
+                    break;
+
+                default:
+                    break;
+                }
+
+                break;
+
+            default:
+                break;
+            }
+
+            if (f3Pressed && cPressed && !openDebug) {
+                openDebug = true;
+                JOptionPane.showMessageDialog(null, "Debug F3 + C: Test exception handler (not a real crash)", "Debug", JOptionPane.QUESTION_MESSAGE);
+                SwingUtil.showExceptionHandler(logger, "Debug exception handler test (not a real crash)", new Exception("Debug exception (not a real exception)"));
+            }
+
+            if (f3Pressed && hPressed && !openDebug) {
+                openDebug = true;
+                final StringBuilder tempDirBuilder = new StringBuilder();
+
+                for (final File tempDir : directories) {
+                    tempDirBuilder.append("\n").append(tempDir);
+                }
+
+                final StringBuilder wrappableBuilder = new StringBuilder();
+
+                for (final Object wrappable : model.toArray()) {
+                    wrappableBuilder.append("\n").append(wrappable);
+                }
+
+                final StringBuilder selectedBuilder = new StringBuilder();
+
+                for (final Object selectedO : list.getSelectedValues()) {
+                    final String selected = (String)selectedO;
+                    selectedBuilder.append("\n").append(selected);
+                }
+
+                final String toShow = "\nWorking directory " + workingDirectory +
+                                      "\nDirectory " + directory +
+                                      "\nVersions folder " + versions +
+                                      "\nCurrently selected Minecraft versions in list " + selectedBuilder +
+                                      "\nWrappable versions of Minecraft in versions folder " + wrappableBuilder +
+                                      "\nAll versions of Minecraft in versions folder " + tempDirBuilder;
+                final JTextPane textPane = new JTextPane();
+                textPane.setText("Debug F3 + H: Show variable info: " + toShow);
+                textPane.setCaretPosition(0);
+                final JScrollPane jsp = new JScrollPane(textPane);
+                jsp.setPreferredSize(new Dimension(654, 420));
+                JOptionPane.showMessageDialog(null, jsp, "Debug", JOptionPane.QUESTION_MESSAGE);
+            }
+
+            if (f3Pressed && qPressed && !openDebug) {
+                openDebug = true;
+                JOptionPane.showMessageDialog(null, "Debug F3 + Q: Show key combos. Combos:\nF3 + C: Test exception handler (not a real crash)\nF3 + H: Show variable info\nF3 + Q: Show key combos\nF3 + T: Reload folders", "Debug", JOptionPane.QUESTION_MESSAGE);
+            }
+
+            if (f3Pressed && tPressed && !openDebug) {
+                openDebug = true;
+                JOptionPane.showMessageDialog(null, "Debug F3 + T: Reloading folders", "Debug", JOptionPane.QUESTION_MESSAGE);
+                refreshList(workingDirectory, logger);
+            }
+
+            return false;
         }
     }
 }

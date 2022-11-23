@@ -91,6 +91,7 @@ shadowJar {
     // Hacky exclusions to minimise file size.
     exclude 'org/**/*.txt'
     exclude 'META-INF/maven/**/*.*'
+    exclude 'templates/release-notes.vm'
 
     // Currently, this merges all licences from each library into one file, as well as the same for notices.
     // TODO: Come up with a better way to do this. Ideally I'd rename the file based on the library.

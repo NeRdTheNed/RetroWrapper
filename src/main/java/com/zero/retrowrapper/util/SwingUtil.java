@@ -197,8 +197,9 @@ public final class SwingUtil {
 
     public static void checkAndDisplayUpdate(File cacheDirectory) throws IOException {
         // Check for a new release, and inform the user if there is one
+        final Logger tempLogger = Logger.getLogger(SwingUtil.class.getName());
+
         if (MetadataUtil.IS_RELEASE) {
-            final Logger tempLogger = Logger.getLogger(SwingUtil.class.getName());
             InputStream rateAPIStream = null;
             int remainingRateLimit = 1;
 
@@ -328,6 +329,7 @@ public final class SwingUtil {
                 }
 
                 if ((latestRelease != null) && !latestRelease.equals(MetadataUtil.VERSION)) {
+                    tempLogger.log(Level.INFO, "Found new update " + latestRelease);
                     final JFrame updateFrame = new JFrame();
                     updateFrame.setResizable(true);
                     updateFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -367,6 +369,7 @@ public final class SwingUtil {
                 }
             }
         } else {
+            tempLogger.log(Level.INFO, "Update checking not enabled for RetroWrapper snapshots.");
             JOptionPane.showMessageDialog(null, "The update checker doesn't work on snapshot versions of RetroWrapper!\nPlease check for the latest release manually!", "Info", JOptionPane.INFORMATION_MESSAGE);
         }
     }

@@ -201,7 +201,7 @@ public final class SwingUtil {
 
         if (MetadataUtil.IS_RELEASE) {
             InputStream rateAPIStream = null;
-            int remainingRateLimit = 1;
+            int remainingRateLimit = 0;
 
             try {
                 // Try to check the current remaining requests we can make.

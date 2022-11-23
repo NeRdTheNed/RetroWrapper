@@ -36,6 +36,8 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.text.JTextComponent;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -72,6 +74,7 @@ public final class Installer {
     static boolean refreshList(String givenDirectory, final Logger installerLogger) {
         int versionCount = 0;
         int wrappedVersionCount = 0;
+        list.clearSelection();
         model.removeAllElements();
         listInternal.clear();
 
@@ -148,35 +151,26 @@ public final class Installer {
         }
 
         // button visibility
+        install.setEnabled(false);
+        uninstall.setEnabled(wrappedVersionCount > 0);
 
         if (givenDirectory.length() == 0) {
-            install.setEnabled(false);
-            uninstall.setEnabled(false);
             JOptionPane.showMessageDialog(null, "No directory / minecraft directory detected!\n", "Error", JOptionPane.INFORMATION_MESSAGE);
             return false;
         }
 
         if (!versions.exists()) {
-            install.setEnabled(false);
-            uninstall.setEnabled(false);
             JOptionPane.showMessageDialog(null, "No Minecraft versions folder found!", "Error", JOptionPane.INFORMATION_MESSAGE);
             return false;
         }
 
         if ((versionCount == 0) && (wrappedVersionCount == 0)) {
-            install.setEnabled(false);
-            uninstall.setEnabled(true);
             JOptionPane.showMessageDialog(null, "No wrappable versions found!", "Error", JOptionPane.INFORMATION_MESSAGE);
             return false;
         }
 
         if (versionCount == 0) {
-            install.setEnabled(true);
-            uninstall.setEnabled(true);
             JOptionPane.showMessageDialog(null, "All detected versions have already been wrapped!", "Info", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            install.setEnabled(true);
-            uninstall.setEnabled(true);
         }
 
         return true;
@@ -263,11 +257,12 @@ public final class Installer {
         SwingUtil.addJTextFieldCentered(frame, workDir);
         // List of versions that can be wrapper
         final JScrollPane scrollList = new JScrollPane(list);
+        list.addListSelectionListener(new VersionSelectionListener());
         SwingUtil.addJComponentCentered(frame, scrollList);
         // Install button
         install = new JButton("Install"); //installation code
         // TODO Refactor
-        install.addActionListener(new WrappInstanceListener(installerLogger));
+        install.addActionListener(new WrapInstanceListener(installerLogger));
         SwingUtil.addJButtonCentered(frame, install);
         // Uninstall button
         uninstall = new JButton("Uninstall ALL versions"); //uninstaller code
@@ -496,10 +491,10 @@ public final class Installer {
         }
     }
 
-    private static class WrappInstanceListener implements ActionListener {
+    private static class WrapInstanceListener implements ActionListener {
         private final Logger installerLogger;
 
-        public WrappInstanceListener(Logger installerLogger) {
+        public WrapInstanceListener(Logger installerLogger) {
             this.installerLogger = installerLogger;
         }
 
@@ -700,6 +695,14 @@ public final class Installer {
             resultsDialog.append(finalVersions);
             JOptionPane.showMessageDialog(null, resultsDialog, "Success", JOptionPane.INFORMATION_MESSAGE);
             refreshList(workingDirectory, installerLogger);
+        }
+    }
+
+    private static class VersionSelectionListener implements ListSelectionListener {
+        public void valueChanged(ListSelectionEvent e) {
+            if (!e.getValueIsAdjusting()) {
+                install.setEnabled(!list.isSelectionEmpty());
+            }
         }
     }
 }

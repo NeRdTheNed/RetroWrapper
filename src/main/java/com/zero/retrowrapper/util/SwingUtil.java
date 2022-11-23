@@ -199,68 +199,27 @@ public final class SwingUtil {
         // Check for a new release, and inform the user if there is one
         if (MetadataUtil.IS_RELEASE) {
             final Logger tempLogger = Logger.getLogger(SwingUtil.class.getName());
-            cacheDirectory.mkdirs();
-            // Cached version response from GitHub
-            final File cachedGithubResponseFile = new File(cacheDirectory, "versioncheck.json");
-            // Cached ETag for the version response from GitHub
-            final File ETagFile = new File(cacheDirectory, "versionchecketag.txt");
-            // The returned latest release tag
-            String latestRelease = null;
-            InputStream connectionInputStream = null;
+            InputStream rateAPIStream = null;
+            int remainingRateLimit = 1;
 
             try {
-                final URLConnection urlConnection =  new URL("https://api.github.com/repos/NeRdTheNed/RetroWrapper/releases/latest").openConnection();
+                // Try to check the current remaining requests we can make.
+                final URLConnection urlConnection =  new URL("https://api.github.com/rate_limit").openConnection();
                 HttpURLConnection httpConnection = null;
 
                 if (urlConnection instanceof HttpURLConnection) {
                     httpConnection = (HttpURLConnection)urlConnection;
+                    //httpConnection.setRequestMethod("HEAD"); // Not supported?
                 }
 
-                if (cachedGithubResponseFile.isFile()) {
-                    final JsonValue json = FileUtil.readFileAsJsonOrNull(cachedGithubResponseFile);
-                    latestRelease = getReleaseTagFromGithubJson(json);
+                rateAPIStream = urlConnection.getInputStream();
+                final String ratelimit = urlConnection.getHeaderField("x-ratelimit-remaining");
 
-                    if (latestRelease == null) {
-                        // Invalid version file
-                        cachedGithubResponseFile.delete();
-
-                        if (ETagFile.isFile()) {
-                            ETagFile.delete();
-                        }
-                    } else if (ETagFile.isFile()) {
-                        final String etag = FileUtils.readFileToString(ETagFile);
-                        // Use the cached ETag to prevent excessive requests.
-                        // Setting the "If-None-Match" to the previously returned ETag means that
-                        // if the data hasn't changed, GitHub will return a response code of return 304
-                        // and not count the request towards the API rate limit.
-                        urlConnection.setRequestProperty("If-None-Match", etag);
-                    }
-                }
-
-                connectionInputStream = urlConnection.getInputStream();
-                final int responseCode;
-
-                if (httpConnection != null) {
-                    responseCode = httpConnection.getResponseCode();
-                } else {
-                    responseCode = HttpURLConnection.HTTP_OK;
-                }
-
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    // The cached file is out of date, or we don't have a cached file.
-                    final String jsonString = IOUtils.toString(connectionInputStream);
-                    final JsonValue json = Json.parse(jsonString);
-                    latestRelease = getReleaseTagFromGithubJson(json);
-
-                    if (latestRelease != null) {
-                        // Cache the version file
-                        FileUtils.writeStringToFile(cachedGithubResponseFile, jsonString);
-                        // Cache the ETag to send in future requests.
-                        final String newETag = urlConnection.getHeaderField("ETag");
-
-                        if (newETag != null) {
-                            FileUtils.writeStringToFile(ETagFile, newETag);
-                        }
+                if (ratelimit != null) {
+                    try {
+                        remainingRateLimit = Integer.parseInt(ratelimit);
+                    } catch (final Exception e) {
+                        tempLogger.log(Level.WARNING, "Rate limit API doesn't work?", e);
                     }
                 }
 
@@ -271,43 +230,137 @@ public final class SwingUtil {
                 try {
                     final Class<?> logWrapper = Class.forName("net.minecraft.launchwrapper.LogWrapper");
                     final Method warning = logWrapper.getMethod("warning", String.class, Object[].class);
-                    warning.invoke(null, "Could not complete update check: " + ExceptionUtils.getStackTrace(e), new Object[0]);
+                    warning.invoke(null, "Could not connect to rate limit API: " + ExceptionUtils.getStackTrace(e), new Object[0]);
                 } catch (final Exception ignored) {
                     // LaunchWrapper isn't available
-                    tempLogger.log(Level.WARNING, "Could not complete update check", e);
+                    tempLogger.log(Level.WARNING, "Could not connect to rate limit API", e);
                 }
             } finally {
-                IOUtils.closeQuietly(connectionInputStream);
+                IOUtils.closeQuietly(rateAPIStream);
             }
 
-            if ((latestRelease != null) && !latestRelease.equals(MetadataUtil.VERSION)) {
-                final JFrame updateFrame = new JFrame();
-                updateFrame.setResizable(true);
-                updateFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-                updateFrame.setVisible(false);
+            tempLogger.log(Level.FINE, "GitHub rate limit remaining " + remainingRateLimit);
+
+            if (remainingRateLimit != 0) {
+                cacheDirectory.mkdirs();
+                // Cached version response from GitHub
+                final File cachedGithubResponseFile = new File(cacheDirectory, "versioncheck.json");
+                // Cached ETag for the version response from GitHub
+                final File ETagFile = new File(cacheDirectory, "versionchecketag.txt");
+                // The returned latest release tag
+                String latestRelease = null;
+                InputStream connectionInputStream = null;
 
                 try {
-                    final JTextPane textPane = new JTextPane();
-                    textPane.setEditable(false);
-                    textPane.setBorder(null);
-                    textPane.setContentType("text/html");
-                    textPane.setText("<html>" +
-                                     "<p>A new version of RetroWrapper (" + latestRelease + ") has been released!</p><br>" +
-                                     "<p><a href=\"https://github.com/NeRdTheNed/RetroWrapper/releases\">Click here to open the releases page!</a></p><br>" +
-                                     "</html>");
-                    textPane.addHyperlinkListener(new NavigateToHyperlinkListener(tempLogger, textPane));
-                    textPane.setCaretPosition(0);
-                    textPane.setOpaque(false);
-                    textPane.setHighlighter(null);
-                    textPane.setSelectedTextColor(new Color(0, 0, 0, 0));
-                    textPane.setBackground(new Color(0, 0, 0, 0));
-                    JOptionPane.showMessageDialog(updateFrame, textPane, "Update available!", JOptionPane.INFORMATION_MESSAGE);
-                } catch (final Exception ignored) {
-                    tempLogger.log(Level.WARNING, "An Exception was thrown while trying to display the update notifier", ignored);
-                    JOptionPane.showMessageDialog(null, "A new version of RetroWrapper (" + latestRelease + ") has been released!\nYou can download it from https://github.com/NeRdTheNed/RetroWrapper/releases", "Update available!", JOptionPane.INFORMATION_MESSAGE);
+                    final URLConnection urlConnection =  new URL("https://api.github.com/repos/NeRdTheNed/RetroWrapper/releases/latest").openConnection();
+                    HttpURLConnection httpConnection = null;
+
+                    if (urlConnection instanceof HttpURLConnection) {
+                        httpConnection = (HttpURLConnection)urlConnection;
+                    }
+
+                    if (cachedGithubResponseFile.isFile()) {
+                        final JsonValue json = FileUtil.readFileAsJsonOrNull(cachedGithubResponseFile);
+                        latestRelease = getReleaseTagFromGithubJson(json);
+
+                        if (latestRelease == null) {
+                            // Invalid version file
+                            cachedGithubResponseFile.delete();
+
+                            if (ETagFile.isFile()) {
+                                ETagFile.delete();
+                            }
+                        } else if (ETagFile.isFile()) {
+                            final String etag = FileUtils.readFileToString(ETagFile);
+                            // Use the cached ETag to prevent excessive requests.
+                            // Setting the "If-None-Match" to the previously returned ETag means that
+                            // if the data hasn't changed, GitHub will return a response code of return 304
+                            // and not count the request towards the API rate limit.
+                            urlConnection.setRequestProperty("If-None-Match", etag);
+                        }
+                    }
+
+                    connectionInputStream = urlConnection.getInputStream();
+                    final int responseCode;
+
+                    if (httpConnection != null) {
+                        responseCode = httpConnection.getResponseCode();
+                    } else {
+                        responseCode = HttpURLConnection.HTTP_OK;
+                    }
+
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        // The cached file is out of date, or we don't have a cached file.
+                        final String jsonString = IOUtils.toString(connectionInputStream);
+                        final JsonValue json = Json.parse(jsonString);
+                        latestRelease = getReleaseTagFromGithubJson(json);
+
+                        if (latestRelease != null) {
+                            // Cache the version file
+                            FileUtils.writeStringToFile(cachedGithubResponseFile, jsonString);
+                            // Cache the ETag to send in future requests.
+                            final String newETag = urlConnection.getHeaderField("ETag");
+
+                            if (newETag != null) {
+                                FileUtils.writeStringToFile(ETagFile, newETag);
+                            }
+                        }
+                    }
+
+                    if (httpConnection != null) {
+                        httpConnection.disconnect();
+                    }
+                } catch (final Exception e) {
+                    try {
+                        final Class<?> logWrapper = Class.forName("net.minecraft.launchwrapper.LogWrapper");
+                        final Method warning = logWrapper.getMethod("warning", String.class, Object[].class);
+                        warning.invoke(null, "Could not complete update check: " + ExceptionUtils.getStackTrace(e), new Object[0]);
+                    } catch (final Exception ignored) {
+                        // LaunchWrapper isn't available
+                        tempLogger.log(Level.WARNING, "Could not complete update check", e);
+                    }
+                } finally {
+                    IOUtils.closeQuietly(connectionInputStream);
                 }
 
-                updateFrame.dispose();
+                if ((latestRelease != null) && !latestRelease.equals(MetadataUtil.VERSION)) {
+                    final JFrame updateFrame = new JFrame();
+                    updateFrame.setResizable(true);
+                    updateFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                    updateFrame.setVisible(false);
+
+                    try {
+                        final JTextPane textPane = new JTextPane();
+                        textPane.setEditable(false);
+                        textPane.setBorder(null);
+                        textPane.setContentType("text/html");
+                        textPane.setText("<html>" +
+                                         "<p>A new version of RetroWrapper (" + latestRelease + ") has been released!</p><br>" +
+                                         "<p><a href=\"https://github.com/NeRdTheNed/RetroWrapper/releases\">Click here to open the releases page!</a></p><br>" +
+                                         "</html>");
+                        textPane.addHyperlinkListener(new NavigateToHyperlinkListener(tempLogger, textPane));
+                        textPane.setCaretPosition(0);
+                        textPane.setOpaque(false);
+                        textPane.setHighlighter(null);
+                        textPane.setSelectedTextColor(new Color(0, 0, 0, 0));
+                        textPane.setBackground(new Color(0, 0, 0, 0));
+                        JOptionPane.showMessageDialog(updateFrame, textPane, "Update available!", JOptionPane.INFORMATION_MESSAGE);
+                    } catch (final Exception ignored) {
+                        tempLogger.log(Level.WARNING, "An Exception was thrown while trying to display the update notifier", ignored);
+                        JOptionPane.showMessageDialog(null, "A new version of RetroWrapper (" + latestRelease + ") has been released!\nYou can download it from https://github.com/NeRdTheNed/RetroWrapper/releases", "Update available!", JOptionPane.INFORMATION_MESSAGE);
+                    }
+
+                    updateFrame.dispose();
+                }
+            } else {
+                try {
+                    final Class<?> logWrapper = Class.forName("net.minecraft.launchwrapper.LogWrapper");
+                    final Method warning = logWrapper.getMethod("warning", String.class, Object[].class);
+                    warning.invoke(null, "GitHub API rate limit exceeded, can't check for update!", new Object[0]);
+                } catch (final Exception ignored) {
+                    // LaunchWrapper isn't available
+                    tempLogger.log(Level.WARNING, "GitHub API rate limit exceeded, can't check for update!");
+                }
             }
         } else {
             JOptionPane.showMessageDialog(null, "The update checker doesn't work on snapshot versions of RetroWrapper!\nPlease check for the latest release manually!", "Info", JOptionPane.INFORMATION_MESSAGE);

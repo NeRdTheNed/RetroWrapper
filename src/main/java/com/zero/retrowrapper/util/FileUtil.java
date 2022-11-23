@@ -2,12 +2,17 @@ package com.zero.retrowrapper.util;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
+
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonValue;
 
 import net.minecraft.launchwrapper.Launch;
 
@@ -59,6 +64,22 @@ public final class FileUtil {
         final File defVirtualLegacyAssets = new File(defaultMinecraftDirectory(), "assets/virtual/legacy/" + file);
         final File defVirtualPreAssets = new File(defaultMinecraftDirectory(), "assets/virtual/pre-1.6/" + file);
         return tryFindFirstFile(oldLocation, resLocation, virtualLegacyAssets, virtualPreAssets, defResLocation, defVirtualLegacyAssets, defVirtualPreAssets);
+    }
+
+    public static JsonValue readFileAsJsonOrNull(File file) {
+        JsonValue toReturn = null;
+        FileReader reader = null;
+
+        try {
+            reader = new FileReader(file);
+            toReturn = Json.parse(reader);
+        } catch (final Exception ignored) {
+            // Ignored
+        } finally {
+            IOUtils.closeQuietly(reader);
+        }
+
+        return toReturn;
     }
 
     private FileUtil() {

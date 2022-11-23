@@ -8,14 +8,13 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -199,6 +198,18 @@ public final class SwingUtil {
         errorFrame.dispose();
     }
 
+    private static String getReleaseTagFromGithubJson(JsonValue json) {
+        if ((json != null) && json.isObject()) {
+            final JsonValue tag = json.asObject().get("tag_name");
+
+            if (tag.isString()) {
+                return tag.asString();
+            }
+        }
+
+        return null;
+    }
+
     public static void checkAndDisplayUpdate(File cacheDirectory) throws IOException {
         // Check for a new release, and inform the user if there is one
         if (MetadataUtil.IS_RELEASE) {
@@ -207,63 +218,77 @@ public final class SwingUtil {
             final File cachedGithubResponseFile = new File(cacheDirectory, "versioncheck.json");
             // Cached ETag for the version response from GitHub
             final File ETagFile = new File(cacheDirectory, "versionchecketag.txt");
-            byte[] JSONBytes = null;
+            // The returned latest release tag
+            String latestRelease = null;
             InputStream connectionInputStream = null;
 
             try {
-                final HttpURLConnection httpConnection = (HttpURLConnection) new URL("https://api.github.com/repos/NeRdTheNed/RetroWrapper/releases/latest").openConnection();
+                final URLConnection urlConnection =  new URL("https://api.github.com/repos/NeRdTheNed/RetroWrapper/releases/latest").openConnection();
+                HttpURLConnection httpConnection = null;
 
-                if (ETagFile.isFile() && cachedGithubResponseFile.isFile()) {
-                    // Use the cached ETag to prevent excessive requests.
-                    // Setting the "If-None-Match" to the previously returned ETag means that
-                    // if the data hasn't changed, GitHub will return a response code of return 304
-                    // and not count the request towards the API rate limit.
-                    final String etag = FileUtils.readFileToString(ETagFile);
-                    httpConnection.setRequestProperty("If-None-Match", etag);
+                if (urlConnection instanceof HttpURLConnection) {
+                    httpConnection = (HttpURLConnection)urlConnection;
                 }
 
-                connectionInputStream = httpConnection.getInputStream();
+                if (cachedGithubResponseFile.isFile()) {
+                    final JsonValue json = FileUtil.readFileAsJsonOrNull(cachedGithubResponseFile);
+                    latestRelease = getReleaseTagFromGithubJson(json);
 
-                if ((httpConnection.getResponseCode() == HttpURLConnection.HTTP_NOT_MODIFIED) && cachedGithubResponseFile.isFile()) {
-                    // If the response code is 304 (Not Modified), use the cached file.
-                    FileInputStream fis = null;
+                    if (latestRelease == null) {
+                        // Invalid version file
+                        cachedGithubResponseFile.delete();
 
-                    try {
-                        fis = new FileInputStream(cachedGithubResponseFile);
-                        JSONBytes = IOUtils.toByteArray(fis);
-                    } finally {
-                        IOUtils.closeQuietly(fis);
+                        if (ETagFile.isFile()) {
+                            ETagFile.delete();
+                        }
+                    } else if (ETagFile.isFile()) {
+                        final String etag = FileUtils.readFileToString(ETagFile);
+                        // Use the cached ETag to prevent excessive requests.
+                        // Setting the "If-None-Match" to the previously returned ETag means that
+                        // if the data hasn't changed, GitHub will return a response code of return 304
+                        // and not count the request towards the API rate limit.
+                        urlConnection.setRequestProperty("If-None-Match", etag);
                     }
+                }
+
+                connectionInputStream = urlConnection.getInputStream();
+                final int responseCode;
+
+                if (httpConnection != null) {
+                    responseCode = httpConnection.getResponseCode();
                 } else {
-                    // The cached file is out of date, or we don't have a cached file.
-                    JSONBytes = IOUtils.toByteArray(connectionInputStream);
-                    FileOutputStream fos = null;
-
-                    try {
-                        fos = new FileOutputStream(cachedGithubResponseFile);
-                        // Cache the version file
-                        IOUtils.write(JSONBytes, fos);
-                    } finally {
-                        IOUtils.closeQuietly(fos);
-                    }
-
-                    // Cache the ETag to send in future requests.
-                    final String newETag = httpConnection.getHeaderField("ETag");
-                    FileUtils.writeStringToFile(ETagFile, newETag);
+                    responseCode = HttpURLConnection.HTTP_OK;
                 }
 
-                httpConnection.disconnect();
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    // The cached file is out of date, or we don't have a cached file.
+                    final String jsonString = IOUtils.toString(connectionInputStream);
+                    final JsonValue json = Json.parse(jsonString);
+                    latestRelease = getReleaseTagFromGithubJson(json);
+
+                    if (latestRelease != null) {
+                        // Cache the version file
+                        FileUtils.writeStringToFile(cachedGithubResponseFile, jsonString);
+                        // Cache the ETag to send in future requests.
+                        final String newETag = urlConnection.getHeaderField("ETag");
+
+                        if (newETag != null) {
+                            FileUtils.writeStringToFile(ETagFile, newETag);
+                        }
+                    }
+                }
+
+                if (httpConnection != null) {
+                    httpConnection.disconnect();
+                }
+            } catch (final Exception ignored) {
+                // Ignored
             } finally {
                 IOUtils.closeQuietly(connectionInputStream);
             }
 
-            if (JSONBytes != null) {
-                final JsonValue json = Json.parse(new String(JSONBytes));
-                final String latestRelease = json.asObject().getString("tag_name", MetadataUtil.VERSION);
-
-                if (!latestRelease.equals(MetadataUtil.VERSION)) {
-                    JOptionPane.showMessageDialog(null, "A new version of RetroWrapper (" + latestRelease + ") has been released!\nYou can download it from https://github.com/NeRdTheNed/RetroWrapper/releases", "Update available!", JOptionPane.INFORMATION_MESSAGE);
-                }
+            if ((latestRelease != null) && !latestRelease.equals(MetadataUtil.VERSION)) {
+                JOptionPane.showMessageDialog(null, "A new version of RetroWrapper (" + latestRelease + ") has been released!\nYou can download it from https://github.com/NeRdTheNed/RetroWrapper/releases", "Update available!", JOptionPane.INFORMATION_MESSAGE);
             }
         }
     }

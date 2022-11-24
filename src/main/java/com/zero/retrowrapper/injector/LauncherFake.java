@@ -53,11 +53,14 @@ public final class LauncherFake extends Applet implements AppletStub {
     }
 
     public String getParameter(String paramName) {
-        if (params.containsKey(paramName)) {
-            return params.get(paramName);
+        final String ret = params.containsKey(paramName) ? params.get(paramName) : null;
+
+        if (ret == null) {
+            LogWrapper.warning("Client asked for unknown parameter: " + paramName);
+        } else {
+            LogWrapper.info("Client asked for parameter: " + paramName + ", returned: " + ret);
         }
 
-        LogWrapper.warning("Client asked for parameter: " + paramName);
-        return null;
+        return ret;
     }
 }

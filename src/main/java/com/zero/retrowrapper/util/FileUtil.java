@@ -66,6 +66,10 @@ public final class FileUtil {
             }
         }
 
+        if (allDeleted && !dir.delete()) {
+            allDeleted = false;
+        }
+
         return allDeleted;
     }
 

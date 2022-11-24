@@ -70,11 +70,7 @@ public final class FileUtil {
             }
         }
 
-        if (allDeleted && !dir.delete()) {
-            allDeleted = false;
-        }
-
-        return allDeleted;
+        return allDeleted && dir.delete();
     }
 
     public static List<File> findFiles(File dir) {

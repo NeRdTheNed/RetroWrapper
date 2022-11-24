@@ -194,7 +194,7 @@ public final class Installer {
             final int diagRes = SwingUtil.showOptionScroller(JOptionPane.YES_NO_OPTION, "Info", outdatedVersions, "Some instances use an outdated version of RetroWrapper!", "Would you like to update RetroWrapper for these instance?");
 
             if (diagRes == JOptionPane.YES_OPTION) {
-                wrapInstances(installerLogger, versionIndex, outdatedVersions);
+                wrapInstances(installerLogger, versionIndex);
             }
         }
 
@@ -357,7 +357,15 @@ public final class Installer {
         }
     }
 
-    static void wrapInstances(Logger installerLogger, int[] mapInd, String... versionsToWrap) {
+    static void wrapInstances(Logger installerLogger, int[] mapInd) {
+        final int size = mapInd.length;
+        final String[] versionsToWrap = new String[size];
+
+        for (int i = 0; i < size; ++i) {
+            final int index = mapInd[i];
+            versionsToWrap[i] = (String) model.get(index);
+        }
+
         int rewrappedVersions = 0;
         final List<String> finalVersions = new ArrayList<String>();
         final int length = versionsToWrap.length;
@@ -599,16 +607,7 @@ public final class Installer {
         }
 
         public void actionPerformed(ActionEvent e) {
-            final Object[] versionListO = list.getSelectedValues();
-            final String[] versionList = new String[versionListO.length];
-            final int length = versionListO.length;
-
-            for (int i = 0; i < length; i++) {
-                final String tempVer = (String) versionListO[i];
-                versionList[i] = tempVer;
-            }
-
-            wrapInstances(installerLogger, list.getSelectedIndices(), versionList);
+            wrapInstances(installerLogger, list.getSelectedIndices());
         }
     }
 

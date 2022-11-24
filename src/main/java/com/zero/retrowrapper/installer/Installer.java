@@ -102,7 +102,7 @@ public final class Installer {
                         if (json.exists() && jar.exists() && !f.getName().contains("-wrapped")) {
                             final JsonObject versionJson = getVersionJson(f.getName(), installerLogger);
 
-                            if (versionJson.getString("type", "").contains("old_") && (getRetroWrapperVersionFromInstance(versionJson, installerLogger) == null)) {
+                            if ((versionJson != null) && versionJson.getString("type", "").contains("old_") && (getRetroWrapperVersionFromInstance(versionJson, installerLogger) == null)) {
                                 if (new File(versions, f.getName() + "-wrapped").exists()) {
                                     wrappedVersionCount++;
                                     final String verNotif;

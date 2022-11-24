@@ -20,6 +20,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.zero.retrowrapper.emulator.RetroEmulator;
@@ -96,7 +97,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                 is2 = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid).openStream();
                 reader2 = new InputStreamReader(is2);
                 final JsonObject profile2 = (JsonObject) Json.parse(reader2);
-                final Iterable<JsonValue> properties = (Iterable<JsonValue>) profile2.get("properties");
+                final Iterable<JsonValue> properties = (JsonArray) profile2.get("properties");
                 String base64 = "";
 
                 for (final JsonValue property : properties) {

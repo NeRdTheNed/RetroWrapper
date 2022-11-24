@@ -74,7 +74,6 @@ public final class Installer {
     static boolean refreshList(String givenDirectory, final Logger installerLogger) {
         int versionCount = 0;
         int wrappedVersionCount = 0;
-        int outdatedVersionsCount = 0;
         list.clearSelection();
         model.removeAllElements();
         listInternal.clear();
@@ -146,7 +145,6 @@ public final class Installer {
                                     model.addElement(versionName);
 
                                     if (outdated) {
-                                        outdatedVersionsCount++;
                                         outdatedVersionsIndexes.add(model.size() - 1);
                                     }
                                 } else {
@@ -200,7 +198,7 @@ public final class Installer {
             }
         }
 
-        if ((versionCount == 0) && (outdatedVersionsCount == 0)) {
+        if ((versionCount == 0) && (outdatedVersionsIndexes.isEmpty())) {
             JOptionPane.showMessageDialog(null, "All wrapped versions are up to date!", "Info", JOptionPane.INFORMATION_MESSAGE);
         }
 

@@ -61,7 +61,11 @@ public final class FileUtil {
         boolean allDeleted = true;
 
         for (final File file : dir.listFiles()) {
-            if ((file.isDirectory() && !deleteDirectory(file)) || !file.delete()) {
+            if (file.isDirectory()) {
+                if (!deleteDirectory(file)) {
+                    allDeleted = false;
+                }
+            } else if (!file.delete()) {
                 allDeleted = false;
             }
         }

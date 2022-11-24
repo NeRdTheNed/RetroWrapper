@@ -1,12 +1,8 @@
 package com.zero.retrowrapper.emulator.registry;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.emulator.registry.handlers.ListmapsHandler;
@@ -48,21 +44,21 @@ public final class EmulatorRegistry {
 
         if (directory.isDirectory()) {
             for (final File file : FileUtil.findFiles(directory, ext)) {
-                try {
-                    if (FileUtils.sizeOf(file) < smallestSize) {
-                        final String baseFile = directory.getParent() + "/_invalidFiles/" + file.getAbsolutePath().replace(directory.getAbsolutePath(), "");
-                        File newDir = new File(baseFile);
+                if (file.length() < smallestSize) {
+                    final String baseFile = directory.getParent() + "/_invalidFiles/" + file.getAbsolutePath().replace(directory.getAbsolutePath(), "");
+                    File newDir = new File(baseFile);
 
-                        for (int count = 0; newDir.exists(); count++) {
-                            newDir = new File(baseFile + "_" + count);
-                        }
-
-                        newDir.getParentFile().mkdirs();
-                        FileUtils.moveFile(file, newDir);
-                        LogWrapper.warning("Moved file " + file + " to " + newDir + ", too small to be a valid file.");
+                    for (int count = 0; newDir.exists(); count++) {
+                        newDir = new File(baseFile + "_" + count);
                     }
-                } catch (final IOException e) {
-                    LogWrapper.warning("Problem moving " + file + ": " + ExceptionUtils.getStackTrace(e));
+
+                    newDir.getParentFile().mkdirs();
+
+                    if (file.renameTo(newDir)) {
+                        LogWrapper.warning("Moved file " + file + " to " + newDir + ", too small to be a valid file.");
+                    } else {
+                        LogWrapper.warning("Problem moving " + file + " to " + newDir);
+                    }
                 }
             }
         }

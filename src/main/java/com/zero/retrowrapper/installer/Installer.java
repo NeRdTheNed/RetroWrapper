@@ -370,7 +370,7 @@ public final class Installer {
             if (version.contains("already wrapped")) {
                 rewrappedVersions++;
                 version = listInternal.get(mapInd[i]);
-                FileUtils.deleteQuietly(new File(directory, "versions" + File.separator + version + "-wrapped"));
+                FileUtil.deleteDirectory(new File(directory, "versions" + File.separator + version + "-wrapped"));
             }
 
             try {
@@ -560,7 +560,7 @@ public final class Installer {
         public void actionPerformed(ActionEvent e) {
             for (final File f : directories) {
                 if (f.isDirectory() && f.getName().contains("-wrapped")) {
-                    FileUtils.deleteQuietly(f);
+                    FileUtil.deleteDirectory(f);
                 }
             }
 

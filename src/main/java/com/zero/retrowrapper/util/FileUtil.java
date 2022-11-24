@@ -57,6 +57,18 @@ public final class FileUtil {
         return null;
     }
 
+    public static boolean deleteDirectory(File dir) {
+        boolean allDeleted = true;
+
+        for (final File file : dir.listFiles()) {
+            if ((file.isDirectory() && !deleteDirectory(file)) || !file.delete()) {
+                allDeleted = false;
+            }
+        }
+
+        return allDeleted;
+    }
+
     public static List<File> findFiles(File dir) {
         final List<File> files = new ArrayList<File>();
 

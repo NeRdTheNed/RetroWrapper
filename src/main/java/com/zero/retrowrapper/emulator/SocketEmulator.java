@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.zero.retrowrapper.emulator.registry.EmulatorRegistry;
@@ -22,66 +23,79 @@ public final class SocketEmulator {
         this.socket = socket;
     }
 
-    public void parseIncoming() throws IOException {
-        final InputStream is = socket.getInputStream();
-        final OutputStream os = socket.getOutputStream();
-        final DataInputStream dis = new DataInputStream(is);
-        int length = -1;
-        String get = "";
-        int limit = 0;
+    public void parseIncoming() {
+        InputStream is = null;
+        OutputStream os = null;
+        DataInputStream dis = null;
 
-        while (limit < 20) {
-            final String line = ByteUtil.readLine(dis).trim();
+        try {
+            is = socket.getInputStream();
+            os = socket.getOutputStream();
+            dis = new DataInputStream(is);
+            int length = -1;
+            String get = "";
+            int limit = 0;
 
-            if (limit == 0) {
-                get = line.split(" ")[1];
-            } else if (line.startsWith("Content-Length: ")) {
-                length = Integer.parseInt(line.replace("Content-Length: ", ""));
-            } else if (line.length() < 2) {
-                break;
-            }
+            while (limit < 20) {
+                final String line = ByteUtil.readLine(dis).trim();
 
-            limit++;
-        }
-
-        byte[] data = null;
-
-        if (length != -1) {
-            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            final byte[] buffer = new byte[8192];
-            int read = 0;
-            int buffered = 0;
-
-            while (read < length) {
-                final int readd = is.read(buffer, 0, Math.min(length - 8192, buffer.length));
-                read += readd;
-                bos.write(buffer, 0, readd);
-                buffered += read;
-
-                if (buffered > (1024 * 1024)) {
-                    bos.flush();
-                    buffered = 0;
+                if (limit == 0) {
+                    get = line.split(" ")[1];
+                } else if (line.startsWith("Content-Length: ")) {
+                    length = Integer.parseInt(line.replace("Content-Length: ", ""));
+                } else if (line.length() < 2) {
+                    break;
                 }
+
+                limit++;
             }
 
-            data = bos.toByteArray();
-        }
+            byte[] data = null;
 
-        final IHandler handler = EmulatorRegistry.getHandlerByUrl(get);
+            if (length != -1) {
+                final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                final byte[] buffer = new byte[8192];
+                int read = 0;
+                int buffered = 0;
 
-        if (handler != null) {
-            try {
-                LogWrapper.info("Request: " + get);
-                handler.sendHeaders(os);
-                handler.handle(os, get, data);
-            } catch (final Exception e) {
-                LogWrapper.warning("Exception in handling URL: " + ExceptionUtils.getStackTrace(e));
+                while (read < length) {
+                    final int readd = is.read(buffer, 0, Math.min(length - 8192, buffer.length));
+                    read += readd;
+                    bos.write(buffer, 0, readd);
+                    buffered += read;
+
+                    if (buffered > (1024 * 1024)) {
+                        bos.flush();
+                        buffered = 0;
+                    }
+                }
+
+                data = bos.toByteArray();
             }
-        } else {
-            LogWrapper.warning("No handler for URL: " + get);
-        }
 
-        os.flush();
-        socket.close();
+            final IHandler handler = EmulatorRegistry.getHandlerByUrl(get);
+
+            if (handler != null) {
+                try {
+                    LogWrapper.info("Request: " + get);
+                    handler.sendHeaders(os);
+                    handler.handle(os, get, data);
+                } catch (final Exception e) {
+                    LogWrapper.warning("Exception in handling URL: " + ExceptionUtils.getStackTrace(e));
+                }
+            } else {
+                LogWrapper.warning("No handler for URL: " + get);
+            }
+
+            os.flush();
+            socket.close();
+        } catch (final IOException e) {
+            LogWrapper.warning("Error in SocketEmulator when parsing incoming data for RetroWrapper local server: " + ExceptionUtils.getStackTrace(e));
+        } finally {
+            IOUtils.closeQuietly(is);
+            IOUtils.closeQuietly(os);
+            IOUtils.closeQuietly(dis);
+            IOUtils.closeQuietly(socket);
+        }
     }
 }

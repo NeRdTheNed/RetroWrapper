@@ -33,13 +33,17 @@ public final class RetroEmulator extends Thread {
             server = new ServerSocket(EmulatorConfig.getInstance().getPort());
 
             while (true) {
-                final Socket socket = server.accept();
+                Socket socket = null;
 
                 try {
+                    socket = server.accept();
                     new SocketEmulator(socket).parseIncoming();
+                    socket.close();
                 } catch (final Exception e) {
                     // TODO Better error handling
                     LogWrapper.warning("Error when parsing incoming data for RetroWrapper local server: " + ExceptionUtils.getStackTrace(e));
+                } finally {
+                    IOUtils.closeQuietly(socket);
                 }
             }
         } catch (final Exception e) {

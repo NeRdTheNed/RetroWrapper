@@ -1,5 +1,6 @@
 package com.zero.retrowrapper.util;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,26 +18,34 @@ public final class MetadataUtil {
 
     static {
         List<String> tempSplash;
+        InputStream splashesStream = null;
 
         try {
-            tempSplash = IOUtils.readLines(ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperInstallerSplashes.txt"), "UTF-8");
+            splashesStream = ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperInstallerSplashes.txt");
+            tempSplash = IOUtils.readLines(splashesStream, "UTF-8");
         } catch (final Exception e) {
             final List<String> missingno = new ArrayList<String>();
             missingno.add("missingno");
             tempSplash = missingno;
+        } finally {
+            IOUtils.closeQuietly(splashesStream);
         }
 
         INSTALLER_SPLASHES = tempSplash;
         String tempVer;
         String tempTag;
+        InputStream versionStream = null;
 
         try {
-            final List<String> versionLines = IOUtils.readLines(ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperVersion.txt"), "UTF-8");
+            versionStream = ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperVersion.txt");
+            final List<String> versionLines = IOUtils.readLines(versionStream, "UTF-8");
             tempVer = versionLines.get(0);
             tempTag = versionLines.get(1);
         } catch (final Exception e) {
             tempVer = "0.0.0-SNAPSHOT+missingno";
             tempTag = "missingno";
+        } finally {
+            IOUtils.closeQuietly(versionStream);
         }
 
         VERSION = tempVer;

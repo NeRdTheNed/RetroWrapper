@@ -358,20 +358,12 @@ public final class Installer {
     }
 
     static void wrapInstances(Logger installerLogger, int[] mapInd) {
-        final int size = mapInd.length;
-        final String[] versionsToWrap = new String[size];
-
-        for (int i = 0; i < size; ++i) {
-            final int index = mapInd[i];
-            versionsToWrap[i] = (String) model.get(index);
-        }
-
         int rewrappedVersions = 0;
         final List<String> finalVersions = new ArrayList<String>();
-        final int length = versionsToWrap.length;
+        final int length = mapInd.length;
 
         for (int i = 0; i < length; ++i) {
-            String version = versionsToWrap[i];
+            String version = (String) model.get(mapInd[i]);
 
             if (version.contains("already wrapped")) {
                 rewrappedVersions++;

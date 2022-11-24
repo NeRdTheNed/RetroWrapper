@@ -51,39 +51,34 @@ public final class JavaUtil {
     }
 
     public static AbstractInsnNode cloneLoadInsOrNull(AbstractInsnNode ins) {
-        if (isOpcodeLoadIns(ins)) {
-            return ins.clone(null);
-        }
-
-        return null;
+        return isOpcodeLoadIns(ins) ? ins.clone(null) : null;
     }
 
     public static boolean doLoadInsMatch(AbstractInsnNode load1, AbstractInsnNode load2) {
+        final boolean toReturn;
         final int opcode = load1.getOpcode();
 
         if ((opcode == load2.getOpcode()) && isOpcodeLoadIns(opcode)) {
             if (opcode == Opcodes.LDC) {
                 final LdcInsnNode ldc1 = (LdcInsnNode) load1;
                 final LdcInsnNode ldc2 = (LdcInsnNode) load2;
-                return ldc1.cst.equals(ldc2.cst);
-            }
-
-            if ((opcode == Opcodes.BIPUSH) || (opcode == Opcodes.SIPUSH)) {
+                toReturn = ldc1.cst.equals(ldc2.cst);
+            } else if ((opcode == Opcodes.BIPUSH) || (opcode == Opcodes.SIPUSH)) {
                 final IntInsnNode ldi1 = (IntInsnNode) load1;
                 final IntInsnNode ldi2 = (IntInsnNode) load2;
-                return ldi1.operand == ldi2.operand;
-            }
-
-            if ((opcode >= Opcodes.ILOAD) && (opcode <= Opcodes.ALOAD)) {
+                toReturn = ldi1.operand == ldi2.operand;
+            } else if ((opcode >= Opcodes.ILOAD) && (opcode <= Opcodes.ALOAD)) {
                 final VarInsnNode ldv1 = (VarInsnNode) load1;
                 final VarInsnNode ldv2 = (VarInsnNode) load2;
-                return ldv1.var == ldv2.var;
+                toReturn = ldv1.var == ldv2.var;
+            } else {
+                toReturn = true;
             }
-
-            return true;
+        } else {
+            toReturn = false;
         }
 
-        return false;
+        return toReturn;
     }
 
     private JavaUtil() {

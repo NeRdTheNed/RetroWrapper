@@ -62,10 +62,13 @@ public final class ResourcesHandler extends EmulatorHandler {
     }
 
     private void downloadSoundData() {
+        InputStream is = null;
         Scanner sc = null;
 
         try {
-            sc = new Scanner(new URL("https://launchermeta.mojang.com/mc/assets/legacy/c0fd82e8ce9fbc93119e40d96d5a4e62cfa3f729/legacy.json").openStream()).useDelimiter("\\A");
+            is = new URL("https://launchermeta.mojang.com/mc/assets/legacy/c0fd82e8ce9fbc93119e40d96d5a4e62cfa3f729/legacy.json").openStream();
+            sc = new Scanner(is);
+            sc.useDelimiter("\\A");
             final JsonValue json = Json.parse(sc.next());
             final JsonObject obj = json.asObject();
             jsonObjects = obj.get("objects").asObject();
@@ -84,10 +87,13 @@ public final class ResourcesHandler extends EmulatorHandler {
                                     );
 
             if (backupFile != null) {
+                FileInputStream fis = null;
                 Scanner sc2 = null;
 
                 try {
-                    sc2 = new Scanner(backupFile).useDelimiter("\\A");
+                    fis = new FileInputStream(backupFile);
+                    sc2 = new Scanner(fis);
+                    sc2.useDelimiter("\\A");
                     final JsonValue json = Json.parse(sc2.next());
                     final JsonObject obj = json.asObject();
                     jsonObjects = obj.get("objects").asObject();
@@ -95,16 +101,28 @@ public final class ResourcesHandler extends EmulatorHandler {
                 } catch (final Exception ee) {
                     LogWrapper.warning("Exception loading local legacy.json: " + ExceptionUtils.getStackTrace(ee) + "\nThe sound fix probably won't work.");
                 } finally {
-                    if (sc2 != null) {
-                        sc2.close();
+                    IOUtils.closeQuietly(fis);
+
+                    try {
+                        if (sc2 != null) {
+                            sc2.close();
+                        }
+                    } catch (final Exception ignored) {
+                        // Ignored
                     }
                 }
             } else {
                 LogWrapper.warning("Could not find local legacy.json.\nThe sound fix probably won't work.");
             }
         } finally {
-            if (sc != null) {
-                sc.close();
+            IOUtils.closeQuietly(is);
+
+            try {
+                if (sc != null) {
+                    sc.close();
+                }
+            } catch (final Exception ignored) {
+                // Ignored
             }
         }
     }

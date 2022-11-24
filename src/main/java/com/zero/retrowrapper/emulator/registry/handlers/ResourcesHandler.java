@@ -132,13 +132,17 @@ public final class ResourcesHandler extends EmulatorHandler {
             os.write(OLD_SOUNDS_LIST);
         } else if ("/MinecraftResources/".equals(get)) {
             // This URL still exists!
+            InputStream is = null;
+
             try {
                 final URL resourceURL = new URL("http://s3.amazonaws.com" + get);
-                final InputStream is = resourceURL.openStream();
+                is = resourceURL.openStream();
                 final byte[] asBytes = IOUtils.toByteArray(is);
                 os.write(asBytes);
             } catch (final Exception e) {
                 LogWrapper.warning("Error when connecting to sound data URL " + "http://s3.amazonaws.com" + get + ": " + ExceptionUtils.getStackTrace(e));
+            } finally {
+                IOUtils.closeQuietly(is);
             }
         } else {
             final String name = get.replace("/resources/", "").replace("/MinecraftResources/", "");
@@ -171,6 +175,9 @@ public final class ResourcesHandler extends EmulatorHandler {
             }
         }
 
+        InputStream is = null;
+        FileOutputStream resFile = null;
+
         try {
             if (jsonObjects == null) {
                 throw new IllegalStateException("Could not download or find legacy.json!");
@@ -183,18 +190,20 @@ public final class ResourcesHandler extends EmulatorHandler {
             final String hash = jsonObjects.get(res).asObject().get("hash").asString();
             LogWrapper.fine(res + " " + hash);
             final URL toDownload = new URL("http://resources.download.minecraft.net/" + hash.substring(0, 2) + "/" + hash);
-            final InputStream is = toDownload.openStream();
+            is = toDownload.openStream();
             final byte[] resourceBytes = IOUtils.toByteArray(is);
 
             if (resourceBytes.length > smallestSize) {
-                new File(resourceCache.getParent()).mkdirs();
-                FileOutputStream fos = null;
+                resourceCache.getParentFile().mkdirs();
 
                 try {
-                    fos = new FileOutputStream(resourceCache);
-                    fos.write(resourceBytes);
+                    resFile = new FileOutputStream(resourceCache);
+                    resFile.write(resourceBytes);
+                    resFile.close();
+                } catch (final Exception e) {
+                    LogWrapper.warning("Resource " + res + " not written to cache due to exception: " + ExceptionUtils.getStackTrace(e));
                 } finally {
-                    IOUtils.closeQuietly(fos);
+                    IOUtils.closeQuietly(resFile);
                 }
 
                 return resourceBytes;
@@ -221,6 +230,9 @@ public final class ResourcesHandler extends EmulatorHandler {
 
             LogWrapper.warning("No backup location found for resource " + res);
             return null;
+        } finally {
+            IOUtils.closeQuietly(is);
+            IOUtils.closeQuietly(resFile);
         }
     }
 }

@@ -78,17 +78,23 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
         }
 
         final File imageCache = new File(RetroEmulator.getInstance().getCacheDirectory(), username + fileNameEnd);
+        InputStream is = null;
         InputStreamReader reader = null;
 
         try {
-            reader = new InputStreamReader(new URL("https://api.mojang.com/users/profiles/minecraft/" + username + "?at=" + System.currentTimeMillis()).openStream());
+            is = new URL("https://api.mojang.com/users/profiles/minecraft/" + username + "?at=" + System.currentTimeMillis()).openStream();
+            reader = new InputStreamReader(is);
             final JsonObject profile1 = (JsonObject) Json.parse(reader);
             final String uuid = profile1.get("id").asString();
             LogWrapper.fine(uuid);
+            InputStream is2 = null;
             InputStreamReader reader2 = null;
+            InputStream is3 = null;
+            FileOutputStream fos = null;
 
             try {
-                reader2 = new InputStreamReader(new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid).openStream());
+                is2 = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid).openStream();
+                reader2 = new InputStreamReader(is2);
                 final JsonObject profile2 = (JsonObject) Json.parse(reader2);
                 final Iterable<JsonValue> properties = (Iterable<JsonValue>) profile2.get("properties");
                 String base64 = "";
@@ -123,9 +129,8 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
 
                 final String imageURL = imageLinkJSON.get("url").asString();
                 LogWrapper.fine(imageURL);
-                final InputStream is = new URL(imageURL).openStream();
-                final byte[] imageBytes = IOUtils.toByteArray(is);
-                FileOutputStream fos = null;
+                is3 = new URL(imageURL).openStream();
+                final byte[] imageBytes = IOUtils.toByteArray(is3);
 
                 try {
                     fos = new FileOutputStream(imageCache);
@@ -136,7 +141,10 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
 
                 return imageBytes;
             } finally {
+                IOUtils.closeQuietly(is2);
                 IOUtils.closeQuietly(reader2);
+                IOUtils.closeQuietly(is3);
+                IOUtils.closeQuietly(fos);
             }
         } catch (final Exception e) {
             LogWrapper.warning("Error when trying to get skin or cape for username " + username + ": " + ExceptionUtils.getStackTrace(e));
@@ -155,6 +163,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
             return null;
         } finally {
             IOUtils.closeQuietly(reader);
+            IOUtils.closeQuietly(is);
         }
     }
 }

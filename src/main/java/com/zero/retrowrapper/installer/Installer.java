@@ -43,7 +43,6 @@ import javax.swing.text.JTextComponent;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
@@ -79,7 +78,7 @@ public final class Installer {
         list.clearSelection();
         model.removeAllElements();
         listInternal.clear();
-        final List<Pair<String, Integer>> outdatedVersionsList = new ArrayList<Pair<String, Integer>>();
+        final List<Integer> outdatedVersionsIndexes = new ArrayList<Integer>();
 
         if (givenDirectory.length() != 0) {
             directory = new File(givenDirectory);
@@ -148,7 +147,7 @@ public final class Installer {
 
                                     if (outdated) {
                                         outdatedVersionsCount++;
-                                        outdatedVersionsList.add(Pair.of(versionName, model.size() - 1));
+                                        outdatedVersionsIndexes.add(model.size() - 1);
                                     }
                                 } else {
                                     versionCount++;
@@ -183,14 +182,15 @@ public final class Installer {
             return false;
         }
 
-        if (outdatedVersionsCount != 0) {
-            final String[] outdatedVersions = new String[outdatedVersionsList.size()];
-            final int[] versionIndex = new int[outdatedVersionsList.size()];
+        if (!outdatedVersionsIndexes.isEmpty()) {
+            final int size = outdatedVersionsIndexes.size();
+            final String[] outdatedVersions = new String[size];
+            final int[] versionIndex = new int[size];
 
-            for (int i = 0; i < outdatedVersionsList.size(); ++i) {
-                final Pair<String, Integer> pair = outdatedVersionsList.get(i);
-                outdatedVersions[i] = pair.getLeft();
-                versionIndex[i] = pair.getRight();
+            for (int i = 0; i < size; ++i) {
+                final int index = outdatedVersionsIndexes.get(i);
+                outdatedVersions[i] = (String) model.get(index);
+                versionIndex[i] = index;
             }
 
             final int diagRes = SwingUtil.showOptionScroller(JOptionPane.YES_NO_OPTION, "Info", outdatedVersions, "Some instances use an outdated version of RetroWrapper!", "Would you like to update RetroWrapper for these instance?");

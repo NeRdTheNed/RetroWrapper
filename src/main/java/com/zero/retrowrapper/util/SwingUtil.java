@@ -286,13 +286,7 @@ public final class SwingUtil {
                     }
 
                     connectionInputStream = urlConnection.getInputStream();
-                    final int responseCode;
-
-                    if (httpConnection != null) {
-                        responseCode = httpConnection.getResponseCode();
-                    } else {
-                        responseCode = HttpURLConnection.HTTP_OK;
-                    }
+                    final int responseCode = httpConnection != null ? httpConnection.getResponseCode() : HttpURLConnection.HTTP_OK;
 
                     if (responseCode == HttpURLConnection.HTTP_OK) {
                         // The cached file is out of date, or we don't have a cached file.

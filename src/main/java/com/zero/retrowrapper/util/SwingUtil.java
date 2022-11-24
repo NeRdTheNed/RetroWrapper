@@ -208,13 +208,8 @@ public final class SwingUtil {
                 final URLConnection urlConnection = new URL("https://api.github.com/rate_limit").openConnection();
                 // https://docs.github.com/en/rest/overview/resources-in-the-rest-api#user-agent-required
                 urlConnection.setRequestProperty("User-Agent", "RetroWrapper-NeRd-Fork");
-                HttpURLConnection httpConnection = null;
-
-                if (urlConnection instanceof HttpURLConnection) {
-                    httpConnection = (HttpURLConnection) urlConnection;
-                    //httpConnection.setRequestMethod("HEAD"); // Not supported?
-                }
-
+                final HttpURLConnection httpConnection = urlConnection instanceof HttpURLConnection ? (HttpURLConnection) urlConnection : null;
+                //httpConnection.setRequestMethod("HEAD"); // Not supported?
                 rateAPIStream = urlConnection.getInputStream();
                 final String ratelimit = urlConnection.getHeaderField("x-ratelimit-remaining");
 

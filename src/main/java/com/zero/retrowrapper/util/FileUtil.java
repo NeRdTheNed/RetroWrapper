@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
@@ -52,6 +55,46 @@ public final class FileUtil {
         }
 
         return null;
+    }
+
+    public static List<File> findFiles(File dir) {
+        final List<File> files = new ArrayList<File>();
+
+        for (final File file : dir.listFiles()) {
+            if (file.isDirectory()) {
+                files.addAll(findFiles(file));
+            } else {
+                files.add(file);
+            }
+        }
+
+        return files;
+    }
+
+    public static List<File> findFiles(File dir, String... exts) {
+        if ((exts == null) || (exts.length == 0)) {
+            return findFiles(dir);
+        }
+
+        final List<File> files = new ArrayList<File>();
+        final int length = exts.length;
+        final String[] lowercaseExts = new String[length];
+
+        for (int i = 0; i < length; ++i) {
+            lowercaseExts[i] = exts[i].toLowerCase(Locale.ENGLISH);
+        }
+
+        for (final File file : findFiles(dir)) {
+            final String fileNameCaseIns = file.getName().toLowerCase(Locale.ENGLISH);
+
+            for (final String ext : lowercaseExts) {
+                if (fileNameCaseIns.endsWith(ext)) {
+                    files.add(file);
+                }
+            }
+        }
+
+        return files;
     }
 
     // TODO @Nullable?

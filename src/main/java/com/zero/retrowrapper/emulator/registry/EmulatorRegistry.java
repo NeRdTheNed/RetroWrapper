@@ -15,6 +15,7 @@ import com.zero.retrowrapper.emulator.registry.handlers.ResourcesHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.SaveHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.SingleResponseHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.SkinOrCapeHandler;
+import com.zero.retrowrapper.util.FileUtil;
 
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LogWrapper;
@@ -27,10 +28,10 @@ public final class EmulatorRegistry {
     private static final List<IHandler> handlers;
     private static final int smallestSize = 16;
 
-    private static void moveInvalidFiles(File directory, String[] ext) {
+    private static void moveInvalidFiles(File directory, String... ext) {
         final String toPrint;
 
-        if (ext != null) {
+        if ((ext != null) && (ext.length != 0)) {
             final StringBuilder builder = new StringBuilder();
 
             for (final String s : ext) {
@@ -46,7 +47,7 @@ public final class EmulatorRegistry {
         directory.mkdirs();
 
         if (directory.isDirectory()) {
-            for (final File file : FileUtils.listFiles(directory, ext, true)) {
+            for (final File file : FileUtil.findFiles(directory, ext)) {
                 try {
                     if (FileUtils.sizeOf(file) < smallestSize) {
                         final String baseFile = directory.getParent() + "/_invalidFiles/" + file.getAbsolutePath().replace(directory.getAbsolutePath(), "");
@@ -68,9 +69,9 @@ public final class EmulatorRegistry {
     }
 
     static {
-        moveInvalidFiles(RetroEmulator.getInstance().getCacheDirectory(), null);
-        moveInvalidFiles(new File(Launch.minecraftHome, "resources"), new String[] {"ogg"});
-        moveInvalidFiles(new File(Launch.minecraftHome + "/assets/virtual/legacy/"), new String[] {"ogg"});
+        moveInvalidFiles(RetroEmulator.getInstance().getCacheDirectory());
+        moveInvalidFiles(new File(Launch.minecraftHome, "resources"), "ogg");
+        moveInvalidFiles(new File(Launch.minecraftHome + "/assets/virtual/legacy/"), "ogg");
         handlers = new ArrayList<IHandler>();
         handlers.add(new SingleResponseHandler("login/session.jsp", "ok"));
         handlers.add(new SingleResponseHandler("session?name=", "ok"));

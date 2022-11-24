@@ -25,6 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -34,6 +35,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.event.HyperlinkEvent;
@@ -365,7 +367,10 @@ public final class SwingUtil {
 
     public static void showMessageScroller(int messageType, String title, String[] wrapArray, String... preface) {
         final String[] listDiag = ArrayUtils.addAll(preface, wrapArray);
-        final JScrollPane jsp = new JScrollPane(new JList(listDiag));
+        final JList diagList = new JList(listDiag);
+        diagList.setSelectionModel(new NoSelectionModel());
+        diagList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        final JScrollPane jsp = new JScrollPane(diagList);
         final int pwidth = jsp.getPreferredSize().width;
         jsp.setPreferredSize(new Dimension(Math.max(pwidth, 500), jsp.getPreferredSize().height));
         JOptionPane.showMessageDialog(null, jsp, title, messageType);
@@ -373,7 +378,10 @@ public final class SwingUtil {
 
     public static int showOptionScroller(int option, String title, String[] wrapArray, String... preface) {
         final String[] listDiag = ArrayUtils.addAll(preface, wrapArray);
-        final JScrollPane jsp = new JScrollPane(new JList(listDiag));
+        final JList diagList = new JList(listDiag);
+        diagList.setSelectionModel(new NoSelectionModel());
+        diagList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        final JScrollPane jsp = new JScrollPane(diagList);
         final int pwidth = jsp.getPreferredSize().width;
         jsp.setPreferredSize(new Dimension(Math.max(pwidth, 500), jsp.getPreferredSize().height));
         return JOptionPane.showConfirmDialog(null, jsp, title, option);
@@ -381,6 +389,18 @@ public final class SwingUtil {
 
     private SwingUtil() {
         // As this is a helper class, there should be no reason to instantiate an instance of it.
+    }
+
+    static class NoSelectionModel extends DefaultListSelectionModel {
+        @Override
+        public void addSelectionInterval(int index0, int index1) {
+            super.addSelectionInterval(-1, -1);
+        }
+
+        @Override
+        public void setSelectionInterval(int index0, int index1) {
+            super.setSelectionInterval(-1, -1);
+        }
     }
 
     private static class NavigateToHyperlinkListener implements HyperlinkListener {

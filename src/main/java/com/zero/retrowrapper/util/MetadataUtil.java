@@ -15,6 +15,7 @@ public final class MetadataUtil {
     public static final List<String> INSTALLER_SPLASHES;
     public static final String VERSION;
     public static final String TAG;
+    public static final String RELEASE_URL;
     public static final boolean IS_RELEASE;
 
     private static final int LESS_THAN = -1;
@@ -56,6 +57,9 @@ public final class MetadataUtil {
         VERSION = tempVer;
         TAG = tempTag;
         IS_RELEASE = !isVersionSnapshot(VERSION);
+        RELEASE_URL = IS_RELEASE ?
+                      "https://github.com/NeRdTheNed/RetroWrapper/releases/download/" + TAG + "/RetroWrapper-" + VERSION + ".jar"
+                      : null;
     }
 
     public static boolean isVersionSnapshot(final String version) {

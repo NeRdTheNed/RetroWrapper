@@ -517,14 +517,19 @@ public final class Installer {
             }
         }
 
-        final String[] wrappedVersions = finalVersions.toArray(new String[0]);
-        final String[] listDiag = (rewrappedVersions > 0) ? new String[] {
-                                      "Please restart the Minecraft Launcher to refresh re-wrapped versions and instances!",
-                                      (wrappedVersions.length > 1 ? "Successfully wrapped versions" : "Successfully wrapped version")
-                                  } : new String[] {
-                                      (wrappedVersions.length > 1 ? "Successfully wrapped versions" : "Successfully wrapped version")
-                                  };
-        SwingUtil.showMessageScroller(JOptionPane.INFORMATION_MESSAGE, "Success", wrappedVersions, listDiag);
+        if (!finalVersions.isEmpty()) {
+            final String[] wrappedVersions = finalVersions.toArray(new String[0]);
+            final String[] listDiag = (rewrappedVersions > 0) ? new String[] {
+                                          "Please restart the Minecraft Launcher to refresh re-wrapped versions and instances!",
+                                          (wrappedVersions.length > 1 ? "Successfully wrapped versions" : "Successfully wrapped version")
+                                      } : new String[] {
+                                          (wrappedVersions.length > 1 ? "Successfully wrapped versions" : "Successfully wrapped version")
+                                      };
+            SwingUtil.showMessageScroller(JOptionPane.INFORMATION_MESSAGE, "Success", wrappedVersions, listDiag);
+        } else {
+            JOptionPane.showMessageDialog(null, "No instances wrapped!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
         refreshList(workingDirectory, installerLogger);
     }
 

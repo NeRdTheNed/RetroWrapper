@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -45,6 +46,7 @@ import javax.swing.text.JTextComponent;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
@@ -70,6 +72,8 @@ public final class Installer {
     static DefaultListModel model;
     static JList list;
     static List<String> listInternal;
+
+    static boolean shouldUseM1Natives = false;
 
     private static JFrame frame;
 
@@ -278,6 +282,13 @@ public final class Installer {
         // TODO Refactor
         workDir.addActionListener(new SelectMinecraftDirectoryActionListener(installerLogger));
         SwingUtil.addJTextFieldCentered(frame, workDir);
+
+        if (SystemUtils.IS_OS_MAC) {
+            final JCheckBox useM1NativesCheckbox = new JCheckBox("Patch instances to allow using Apple silicon LWJGL natives (incompatible with 32 bit Java)", shouldUseM1Natives);
+            useM1NativesCheckbox.addActionListener(new AppleSiliconPatchListener(useM1NativesCheckbox));
+            SwingUtil.addJComponentCentered(frame, useM1NativesCheckbox);
+        }
+
         // List of versions that can be wrapper
         final JScrollPane scrollList = new JScrollPane(list);
         list.addListSelectionListener(new VersionSelectionListener());
@@ -405,6 +416,9 @@ public final class Installer {
                                      "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.3.2/log4j-core-2.3.2.jar",
                                      "fcd866619df2b131be0defc4f63b09b703649031",
                                      833136);
+        // New versions of LWJGL to use
+        final JsonObject[] lwjglLibraries = MetadataUtil.getLWJGLLibraries(shouldUseM1Natives ? "com/zero/retrowrapper/lwjgl/2.9.4-nightly-20150209-M1.json" : "com/zero/retrowrapper/lwjgl/2.9.4-nightly-20150209.json");
+        final String[] lwjglLibraryNames = MetadataUtil.getLWJGLLibraryNames(lwjglLibraries);
         // Install the RetroWrapper jar file to the libraries folder
         installRetroWrapperLibrary(libDir, retroWrapperJar, installerLogger);
         // Loop through instances to wrap
@@ -455,7 +469,7 @@ public final class Installer {
                     } else {
                         final String libNameNoVersion = libName.substring(0, libName.lastIndexOf(':'));
 
-                        for (final String lwjglLibName : MetadataUtil.getLWJGLLibraryNames()) {
+                        for (final String lwjglLibName : lwjglLibraryNames) {
                             if (lwjglLibName.equals(libNameNoVersion)) {
                                 toAdd = null;
                                 break;
@@ -468,7 +482,7 @@ public final class Installer {
                     }
                 }
 
-                for (final JsonObject lwjglLib : MetadataUtil.getLWJGLLibraries()) {
+                for (final JsonObject lwjglLib : lwjglLibraries) {
                     newLibraries.add(lwjglLib);
                 }
 
@@ -785,6 +799,18 @@ public final class Installer {
             }
 
             return false;
+        }
+    }
+
+    private static class AppleSiliconPatchListener implements ActionListener {
+        private final JCheckBox useM1NativesCheckbox;
+
+        public AppleSiliconPatchListener(JCheckBox useM1NativesCheckbox) {
+            this.useM1NativesCheckbox = useM1NativesCheckbox;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            shouldUseM1Natives = useM1NativesCheckbox.isSelected();
         }
     }
 }

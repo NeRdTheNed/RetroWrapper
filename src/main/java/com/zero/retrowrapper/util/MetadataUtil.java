@@ -20,8 +20,6 @@ public final class MetadataUtil {
     public static final String TAG;
     public static final String RELEASE_URL;
     public static final boolean IS_RELEASE;
-    private static JsonObject[] LWJGL_LIBRARIES = null;
-    private static String[] LWJGL_LIBRARY_NAMES = null;
 
     private static final int LESS_THAN = -1;
     private static final int SAME = 0;
@@ -67,50 +65,41 @@ public final class MetadataUtil {
                       : null;
     }
 
-    public static JsonObject[] getLWJGLLibraries() {
-        if (LWJGL_LIBRARIES == null) {
-            final List<JsonObject> tempLwjglLibs = new ArrayList<JsonObject>();
-            InputStream lwjglLibsStream = null;
+    public static JsonObject[] getLWJGLLibraries(String jsonFile) {
+        JsonObject[] lwjglLibraries = null;
+        final List<JsonObject> tempLwjglLibs = new ArrayList<JsonObject>();
+        InputStream lwjglLibsStream = null;
 
-            try {
-                lwjglLibsStream = ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/lwjgl/2.9.4-nightly-20150209.json");
-                final JsonArray lwjgl = Json.parse(IOUtils.toString(lwjglLibsStream)).asObject().get("libraries").asArray();
-                final Iterator<JsonValue> libraryIterator = lwjgl.iterator();
+        try {
+            lwjglLibsStream = ClassLoader.getSystemResourceAsStream(jsonFile);
+            final JsonArray lwjgl = Json.parse(IOUtils.toString(lwjglLibsStream)).asObject().get("libraries").asArray();
+            final Iterator<JsonValue> libraryIterator = lwjgl.iterator();
 
-                while (libraryIterator.hasNext()) {
-                    final JsonObject library = libraryIterator.next().asObject();
-                    tempLwjglLibs.add(library);
-                }
-
-                LWJGL_LIBRARIES = tempLwjglLibs.toArray(new JsonObject[0]);
-            } catch (final Exception e) {
-                LWJGL_LIBRARIES = new JsonObject[0];
-            } finally {
-                IOUtils.closeQuietly(lwjglLibsStream);
+            while (libraryIterator.hasNext()) {
+                final JsonObject library = libraryIterator.next().asObject();
+                tempLwjglLibs.add(library);
             }
+
+            lwjglLibraries = tempLwjglLibs.toArray(new JsonObject[0]);
+        } catch (final Exception e) {
+            lwjglLibraries = new JsonObject[0];
+        } finally {
+            IOUtils.closeQuietly(lwjglLibsStream);
         }
 
-        return LWJGL_LIBRARIES;
+        return lwjglLibraries;
     }
 
-    public static String[] getLWJGLLibraryNames() {
-        if (LWJGL_LIBRARIES == null) {
-            getLWJGLLibraries();
+    public static String[] getLWJGLLibraryNames(JsonObject[] lwjglLibraries) {
+        final Set<String> names = new HashSet<String>();
+
+        for (final JsonObject lib : lwjglLibraries) {
+            final String nameWithVersion = lib.get("name").asString();
+            final String name = nameWithVersion.substring(0, nameWithVersion.lastIndexOf(':'));
+            names.add(name);
         }
 
-        if (LWJGL_LIBRARY_NAMES == null) {
-            final Set<String> names = new HashSet<String>();
-
-            for (final JsonObject lib : LWJGL_LIBRARIES) {
-                final String nameWithVersion = lib.get("name").asString();
-                final String name = nameWithVersion.substring(0, nameWithVersion.lastIndexOf(':'));
-                names.add(name);
-            }
-
-            LWJGL_LIBRARY_NAMES = names.toArray(new String[0]);
-        }
-
-        return LWJGL_LIBRARY_NAMES;
+        return names.toArray(new String[0]);
     }
 
     public static boolean isVersionSnapshot(final String version) {

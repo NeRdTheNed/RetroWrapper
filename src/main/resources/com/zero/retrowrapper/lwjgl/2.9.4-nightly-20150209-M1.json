@@ -9,8 +9,14 @@
                         "size": 10362,
                         "url": "https://libraries.minecraft.net/net/java/jinput/jinput-platform/2.0.5/jinput-platform-2.0.5-natives-linux.jar"
                     },
-                    "natives-osx": {
-                        "path": "net/java/jinput/jinput-platform/2.0.5/jinput-platform-2.0.5-natives-osx.jar",
+                    "natives-osx-32": {
+                        "path": "net/java/jinput/jinput-platform/2.0.5/jinput-platform-2.0.5-natives-osx-32.jar",
+                        "sha1": "5189eb40db3087fb11ca063b68fa4f4c20b199dd",
+                        "size": 10031,
+                        "url": "https://github.com/r58Playz/jinput-m1/raw/main/plugins/OSX/bin/jinput-platform-2.0.5.jar"
+                    },
+                    "natives-osx-64": {
+                        "path": "net/java/jinput/jinput-platform/2.0.5/jinput-platform-2.0.5-natives-osx-64.jar",
                         "sha1": "53f9c919f34d2ca9de8c51fc4e1e8282029a9232",
                         "size": 12186,
                         "url": "https://libraries.minecraft.net/net/java/jinput/jinput-platform/2.0.5/jinput-platform-2.0.5-natives-osx.jar"
@@ -31,7 +37,7 @@
             "name": "net.java.jinput:jinput-platform:2.0.5",
             "natives": {
                 "linux": "natives-linux",
-                "osx": "natives-osx",
+                "osx": "natives-osx-${arch}",
                 "windows": "natives-windows"
             }
         },
@@ -72,8 +78,14 @@
                         "size": 578680,
                         "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-linux.jar"
                     },
-                    "natives-osx": {
-                        "path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar",
+                    "natives-osx-32": {
+                        "path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx-32.jar",
+                        "sha1": "eff546c0b319d6ffc7a835652124c18089c67f36",
+                        "size": 488316,
+                        "url": "https://github.com/MinecraftMachina/lwjgl/releases/download/2.9.4-20150209-mmachina.2/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar"
+                    },
+                    "natives-osx-64": {
+                        "path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx-64.jar",
                         "sha1": "bcab850f8f487c3f4c4dbabde778bb82bd1a40ed",
                         "size": 426822,
                         "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar"
@@ -94,7 +106,7 @@
             "name": "org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209",
             "natives": {
                 "linux": "natives-linux",
-                "osx": "natives-osx",
+                "osx": "natives-osx-${arch}",
                 "windows": "natives-windows"
             }
         },

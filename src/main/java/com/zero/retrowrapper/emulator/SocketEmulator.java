@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -17,6 +18,8 @@ import com.zero.retrowrapper.util.ByteUtil;
 import net.minecraft.launchwrapper.LogWrapper;
 
 public final class SocketEmulator {
+    private static final Pattern spacePattern = Pattern.compile(" ");
+    private static final Pattern contentLengthPattern = Pattern.compile("Content-Length: ", Pattern.LITERAL);
     private final Socket socket;
 
     public SocketEmulator(Socket socket) {
@@ -40,9 +43,9 @@ public final class SocketEmulator {
                 final String line = ByteUtil.readLine(dis).trim();
 
                 if (limit == 0) {
-                    get = line.split(" ")[1];
+                    get = spacePattern.split(line)[1];
                 } else if (line.startsWith("Content-Length: ")) {
-                    length = Integer.parseInt(line.replace("Content-Length: ", ""));
+                    length = Integer.parseInt(contentLengthPattern.matcher(line).replaceAll(""));
                 } else if (line.length() < 2) {
                     break;
                 }

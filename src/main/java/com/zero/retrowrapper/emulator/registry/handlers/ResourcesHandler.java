@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLHandshakeException;
 
@@ -48,6 +49,8 @@ public final class ResourcesHandler extends EmulatorHandler {
          + "music/calm1.ogg,0,1245702004000\n").getBytes();
 
     private static final int smallestSize = 16;
+    private static final Pattern resourcesPattern = Pattern.compile("/resources/", Pattern.LITERAL);
+    private static final Pattern minecraftResourcesPattern = Pattern.compile("/MinecraftResources/", Pattern.LITERAL);
 
     private JsonObject jsonObjects;
 
@@ -145,7 +148,7 @@ public final class ResourcesHandler extends EmulatorHandler {
                 IOUtils.closeQuietly(is);
             }
         } else {
-            final String name = get.replace("/resources/", "").replace("/MinecraftResources/", "");
+            final String name = minecraftResourcesPattern.matcher(resourcesPattern.matcher(get).replaceAll("")).replaceAll("");
             final byte[] bytes = getResourceByName(name);
 
             if ((bytes != null) && (bytes.length > smallestSize)) {

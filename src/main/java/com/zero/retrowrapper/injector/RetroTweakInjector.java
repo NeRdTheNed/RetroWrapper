@@ -129,7 +129,7 @@ public final class RetroTweakInjector implements IClassTransformer {
         return Launch.minecraftHome;
     }
 
-    private static class NoOpClassVisitor extends ClassVisitor {
+    private static final class NoOpClassVisitor extends ClassVisitor {
         public NoOpClassVisitor(RetroTweakClassWriter cw) {
             super(Opcodes.ASM4, cw);
         }

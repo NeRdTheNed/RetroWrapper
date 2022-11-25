@@ -14,10 +14,11 @@ public final class EmulatorConfig {
 
     public String mobClass;
 
+    private static Random rand = new Random();
+
     private EmulatorConfig() {
-        // TODO Consider not creating new random for one-off use
         // TODO Is this a good way to determine the port?
-        port = new Random().nextInt(3000) + 25566;
+        port = rand.nextInt(3000) + 25566;
     }
 
     public int getPort() {

@@ -3,9 +3,9 @@ package com.zero.retrowrapper.util;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 
@@ -24,6 +24,10 @@ public final class MetadataUtil {
     private static final int LESS_THAN = -1;
     private static final int SAME = 0;
     private static final int GREATER_THAN = 1;
+    private static final Pattern plusPattern = Pattern.compile("\\+");
+    private static final Pattern snapshotPattern = Pattern.compile("-SNAPSHOT");
+    private static final Pattern dotPattern = Pattern.compile("\\.");
+    private static final Pattern colonPattern = Pattern.compile(":");
 
     static {
         List<String> tempSplash;
@@ -73,10 +77,9 @@ public final class MetadataUtil {
         try {
             lwjglLibsStream = ClassLoader.getSystemResourceAsStream(jsonFile);
             final JsonArray lwjgl = Json.parse(IOUtils.toString(lwjglLibsStream)).asObject().get("libraries").asArray();
-            final Iterator<JsonValue> libraryIterator = lwjgl.iterator();
 
-            while (libraryIterator.hasNext()) {
-                final JsonObject library = libraryIterator.next().asObject();
+            for (final JsonValue jsonValue : lwjgl) {
+                final JsonObject library = jsonValue.asObject();
                 tempLwjglLibs.add(library);
             }
 
@@ -108,13 +111,13 @@ public final class MetadataUtil {
 
     public static int compareSemver(String ver1, String ver2) throws NumberFormatException {
         // Ignore build metadata
-        ver1 = ver1.split("\\+")[0];
-        ver2 = ver2.split("\\+")[0];
+        ver1 = plusPattern.split(ver1)[0];
+        ver2 = plusPattern.split(ver2)[0];
         int majorVersion1 = 0;
         int minorVersion1 = 0;
         int patchVersion1 = 0;
         final boolean snapshot1 = isVersionSnapshot(ver1);
-        final String[] versionSplit1 = ver1.split("-SNAPSHOT")[0].split("\\.");
+        final String[] versionSplit1 = dotPattern.split(snapshotPattern.split(ver1)[0]);
 
         if (versionSplit1.length > 0) {
             majorVersion1 = Integer.parseInt(versionSplit1[0]);
@@ -132,7 +135,7 @@ public final class MetadataUtil {
         int minorVersion2 = 0;
         int patchVersion2 = 0;
         final boolean snapshot2 = isVersionSnapshot(ver2);
-        final String[] versionSplit2 = ver2.split("-SNAPSHOT")[0].split("\\.");
+        final String[] versionSplit2 = dotPattern.split(snapshotPattern.split(ver2)[0]);
 
         if (versionSplit2.length > 0) {
             majorVersion2 = Integer.parseInt(versionSplit2[0]);
@@ -177,7 +180,7 @@ public final class MetadataUtil {
         return returnVal;
     }
 
-    public static String getLibraryVersionFromMojangVersion(JsonObject versionJson, final String libraryName) {
+    public static String getLibraryVersionFromMojangVersion(JsonObject versionJson, final CharSequence libraryName) {
         String toReturn = null;
         final JsonArray libraries = versionJson.get("libraries").asArray();
 
@@ -186,7 +189,7 @@ public final class MetadataUtil {
             final String libName = library.get("name").asString();
 
             if (libName.contains(libraryName)) {
-                final String[] libNameSplit = libName.split(":");
+                final String[] libNameSplit = colonPattern.split(libName);
                 toReturn = libNameSplit[libNameSplit.length - 1];
             }
         }

@@ -2,6 +2,7 @@ package org.objectweb.asm;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.emulator.registry.EmulatorRegistry;
@@ -27,6 +28,9 @@ public final class RetroTweakClassWriter extends ClassWriter {
     private static final int INDY = 18;
     private static final int HANDLE_BASE = 20;
     private static final int TYPE_NORMAL = 30;
+    private static final Pattern minecraftNetPattern = Pattern.compile("www.minecraft.net", Pattern.LITERAL);
+    private static final Pattern comPattern = Pattern.compile(".com");
+    private static final Pattern netPattern = Pattern.compile(".net");
     private final String className;
 
     public RetroTweakClassWriter(int a, String className) {
@@ -80,7 +84,7 @@ public final class RetroTweakClassWriter extends ClassWriter {
                     LogWrapper.info(replacedWithTextString + transformed);
                 } else if (constant.contains("joinserver.jsp") || constant.contains("checkserver.jsp")) {
                     LogWrapper.info(foundUrlTextString + constant);
-                    transformed = constant.replace("www.minecraft.net", "session.minecraft.net");
+                    transformed = minecraftNetPattern.matcher(constant).replaceAll("session.minecraft.net");
                     LogWrapper.info(replacedWithTextString + transformed);
                 } else {
                     final boolean isNet = constant.contains(".net");
@@ -94,8 +98,8 @@ public final class RetroTweakClassWriter extends ClassWriter {
                                                    constant.contains("https://") || constant.contains("http://") ? "http://" : "" :
                                                    (constant.contains("https://") ? "https://" : "") + (constant.contains("http://") ? "http://" : "");
                             String postpend = isCom ?
-                                              constant.replace(constant.split(".com")[0] + ".com", "") :
-                                              constant.replace(constant.split(".net")[0] + ".net", "");
+                                              constant.replace(comPattern.split(constant)[0] + ".com", "") :
+                                              constant.replace(netPattern.split(constant)[0] + ".net", "");
 
                             if (constant.contains("login.minecraft.net") && (EmulatorRegistry.getHandlerByUrl(constant) == null)) {
                                 postpend += "/login/session.jsp";

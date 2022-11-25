@@ -23,9 +23,9 @@ public final class RetroEmulator extends Thread {
         LogWrapper.info("Old servers emulator is running!");
         directory = new File(Launch.minecraftHome, "retrowrapper");
         directory.mkdirs();
-        mapsDirectory = new File(RetroEmulator.getInstance().getDirectory(), "maps");
+        mapsDirectory = new File(RetroEmulator.getInstance().directory, "maps");
         mapsDirectory.mkdir();
-        cacheDirectory = new File(RetroEmulator.getInstance().getDirectory(), "cache");
+        cacheDirectory = new File(RetroEmulator.getInstance().directory, "cache");
         cacheDirectory.mkdir();
         ServerSocket server = null;
 

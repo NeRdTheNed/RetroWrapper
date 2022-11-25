@@ -25,6 +25,8 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
@@ -60,6 +62,11 @@ import com.zero.retrowrapper.util.SwingUtil;
 public final class Installer {
 
     private static final Random rand = new Random();
+
+    private static final Pattern colonPattern = Pattern.compile(":");
+    private static final Pattern alphaVanillaTweakerPattern = Pattern.compile("net.minecraft.launchwrapper.AlphaVanillaTweaker", Pattern.LITERAL);
+    private static final Pattern indevVanillaTweakerPattern = Pattern.compile("net.minecraft.launchwrapper.IndevVanillaTweaker", Pattern.LITERAL);
+    private static final Pattern assetsDirPattern = Pattern.compile("--assetsDir ${game_assets}", Pattern.LITERAL);
 
     // TODO Some of these variables should possibly be refactored to not be static
     static String workingDirectory;
@@ -431,14 +438,13 @@ public final class Installer {
         // Loop through instances to wrap
         int rewrappedVersions = 0;
         final List<String> finalVersions = new ArrayList<String>();
-        final int length = mapInd.length;
 
-        for (int i = 0; i < length; ++i) {
-            String version = (String) model.get(mapInd[i]);
+        for (final int j : mapInd) {
+            String version = (String) model.get(j);
 
             if (version.contains("already wrapped")) {
                 rewrappedVersions++;
-                version = listInternal.get(mapInd[i]);
+                version = listInternal.get(j);
                 FileUtil.deleteDirectory(new File(directory, "versions" + File.separator + version + "-wrapped"));
             }
 
@@ -462,7 +468,7 @@ public final class Installer {
                     final String libName = library.get("name").asString();
 
                     if (shouldUpdateLibraries && libName.contains("net.minecraft:launchwrapper")) {
-                        final String[] libNameSplit = libName.split(":");
+                        final String[] libNameSplit = colonPattern.split(libName);
                         final String libVersion = libNameSplit[libNameSplit.length - 1];
 
                         if (MetadataUtil.compareSemver(libVersion, "1.12") < 0) {
@@ -520,10 +526,10 @@ public final class Installer {
                 String modifiedLaunchArgs = versionJson.getString("minecraftArguments", "null");
 
                 if (modifiedLaunchArgs.contains("VanillaTweaker")) {
-                    modifiedLaunchArgs = modifiedLaunchArgs.replace("net.minecraft.launchwrapper.AlphaVanillaTweaker", "com.zero.retrowrapper.RetroTweaker");
-                    modifiedLaunchArgs = modifiedLaunchArgs.replace("net.minecraft.launchwrapper.IndevVanillaTweaker", "com.zero.retrowrapper.RetroTweaker");
+                    modifiedLaunchArgs = alphaVanillaTweakerPattern.matcher(modifiedLaunchArgs).replaceAll("com.zero.retrowrapper.RetroTweaker");
+                    modifiedLaunchArgs = indevVanillaTweakerPattern.matcher(modifiedLaunchArgs).replaceAll("com.zero.retrowrapper.RetroTweaker");
                 } else {
-                    modifiedLaunchArgs = modifiedLaunchArgs.replace("--assetsDir ${game_assets}", "--assetsDir ${game_assets} --tweakClass com.zero.retrowrapper.RetroTweaker");
+                    modifiedLaunchArgs = assetsDirPattern.matcher(modifiedLaunchArgs).replaceAll(Matcher.quoteReplacement("--assetsDir ${game_assets} --tweakClass com.zero.retrowrapper.RetroTweaker"));
                 }
 
                 versionJson.set("minecraftArguments", modifiedLaunchArgs);
@@ -587,7 +593,7 @@ public final class Installer {
         }
     }
 
-    private static class UninstallListener implements ActionListener {
+    private static final class UninstallListener implements ActionListener {
         private final Logger installerLogger;
 
         public UninstallListener(Logger installerLogger) {
@@ -606,7 +612,7 @@ public final class Installer {
         }
     }
 
-    private static class SelectMinecraftDirectoryActionListener implements ActionListener {
+    private static final class SelectMinecraftDirectoryActionListener implements ActionListener {
         private final Logger installerLogger;
 
         public SelectMinecraftDirectoryActionListener(Logger installerLogger) {
@@ -630,7 +636,7 @@ public final class Installer {
         }
     }
 
-    private static class WrapInstanceListener implements ActionListener {
+    private static final class WrapInstanceListener implements ActionListener {
         private final Logger installerLogger;
 
         public WrapInstanceListener(Logger installerLogger) {
@@ -642,7 +648,7 @@ public final class Installer {
         }
     }
 
-    private static class VersionSelectionListener implements ListSelectionListener {
+    private static final class VersionSelectionListener implements ListSelectionListener {
         public VersionSelectionListener() {
             // Empty constructor
         }
@@ -669,7 +675,7 @@ public final class Installer {
         }
     }
 
-    private static class DebugKeyDispatcher implements KeyEventDispatcher {
+    private static final class DebugKeyDispatcher implements KeyEventDispatcher {
         private final Logger logger;
         boolean f3Pressed;
         boolean cPressed;
@@ -811,7 +817,7 @@ public final class Installer {
         }
     }
 
-    private static class PatchLibrariesListener implements ActionListener {
+    private static final class PatchLibrariesListener implements ActionListener {
         public PatchLibrariesListener() {
             // This space left intentionally blank
         }
@@ -829,7 +835,7 @@ public final class Installer {
         }
     }
 
-    private static class AppleSiliconPatchListener implements ActionListener {
+    private static final class AppleSiliconPatchListener implements ActionListener {
         public AppleSiliconPatchListener() {
             // This space left intentionally blank
         }

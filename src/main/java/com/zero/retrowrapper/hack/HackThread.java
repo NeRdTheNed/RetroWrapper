@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.Field;
+import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -23,6 +24,8 @@ import com.zero.retrowrapper.util.JavaUtil;
 import net.minecraft.launchwrapper.LogWrapper;
 
 public final class HackThread extends Thread {
+    static final Pattern commaPattern = Pattern.compile(",", Pattern.LITERAL);
+    static final Pattern spacePattern = Pattern.compile(" ", Pattern.LITERAL);
     // TODO Refactor
     JLabel label;
     RetroPlayer player;
@@ -127,7 +130,7 @@ public final class HackThread extends Thread {
         }
     }
 
-    private class TeleportActionListener implements ActionListener {
+    private final class TeleportActionListener implements ActionListener {
         private final JTextField x;
         private final JTextField y;
         private final JTextField z;
@@ -140,9 +143,9 @@ public final class HackThread extends Thread {
 
         public void actionPerformed(ActionEvent e) {
             try {
-                final float dx = Float.parseFloat(x.getText().replace(",", "").replace(" ", ""));
-                final float dy = Float.parseFloat(y.getText().replace(",", "").replace(" ", ""));
-                final float dz = Float.parseFloat(z.getText().replace(",", "").replace(" ", ""));
+                final float dx = Float.parseFloat(spacePattern.matcher(commaPattern.matcher(x.getText()).replaceAll("")).replaceAll(""));
+                final float dy = Float.parseFloat(spacePattern.matcher(commaPattern.matcher(y.getText()).replaceAll("")).replaceAll(""));
+                final float dz = Float.parseFloat(spacePattern.matcher(commaPattern.matcher(z.getText()).replaceAll("")).replaceAll(""));
                 player.teleport(dx, dy, dz);
             } catch (final Exception ee) {
                 JOptionPane.showMessageDialog(null, "Exception occurred!\n" + ee.getClass().getName() + "\n" + ee.getMessage());
@@ -150,13 +153,16 @@ public final class HackThread extends Thread {
         }
     }
 
-    private class SetupSwingRunnable implements Runnable {
+    private final class SetupSwingRunnable implements Runnable {
+        SetupSwingRunnable() {
+        }
+
         public void run() {
             setupSwingGUI();
         }
     }
 
-    private class LabelRunnable implements Runnable {
+    private final class LabelRunnable implements Runnable {
         private final String text;
 
         public LabelRunnable(String text) {

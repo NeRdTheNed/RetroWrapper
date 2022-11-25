@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.swing.DefaultListSelectionModel;
@@ -54,6 +55,8 @@ import com.eclipsesource.json.JsonValue;
 import net.minecraft.launchwrapper.LogWrapper;
 
 public final class SwingUtil {
+    private static final Pattern newlinePattern = Pattern.compile("\n", Pattern.LITERAL);
+
     public static void addJButtonCentered(Container container, JButton component) {
         component.setHorizontalAlignment(SwingConstants.CENTER);
         component.setVerticalAlignment(SwingConstants.CENTER);
@@ -97,7 +100,7 @@ public final class SwingUtil {
             }
 
             Display.setIcon(iconsAsByteBufferArrayList.toArray(new ByteBuffer[0]));
-            final java.awt.Frame[] frames = java.awt.Frame.getFrames();
+            final Frame[] frames = Frame.getFrames();
 
             if (frames != null) {
                 final List<BufferedImage> bufferedImageList = new ArrayList<BufferedImage>();
@@ -164,11 +167,12 @@ public final class SwingUtil {
             textPane.setBorder(null);
             textPane.setContentType("text/html");
             textPane.setText("<html>" +
+                             "<p><i>Bad things, man.... bad things.</i></p><br>" +
                              "<p>Please report this issue on GitHub (the link will autofill this information for you):</p><br>" +
                              "<a href=\"https://github.com/NeRdTheNed/RetroWrapper/issues/new?title=" + URLEncoder.encode(githubIssueTitle, "UTF-8") + "&body=" + URLEncoder.encode(githubIssueBody, "UTF-8") + "\">Create an issue on Github!</a><br>" +
-                             "<p>" + escapeHtml4(dialogTitle).replace("\n", "<br>") + "</p><br>" +
-                             "<br><p>" + escapeHtml4(issueTitle).replace("\n", "<br>") + "</p><br>" +
-                             "<br><p>" + escapeHtml4(displayIssueBody).replace("\n", "<br>") + "</p><br>" +
+                             "<p>" + newlinePattern.matcher(escapeHtml4(dialogTitle)).replaceAll("<br>") + "</p><br>" +
+                             "<br><p>" + newlinePattern.matcher(escapeHtml4(issueTitle)).replaceAll("<br>") + "</p><br>" +
+                             "<br><p>" + newlinePattern.matcher(escapeHtml4(displayIssueBody)).replaceAll("<br>") + "</p><br>" +
                              "</html>");
             textPane.addHyperlinkListener(new NavigateToHyperlinkListener(logger, textPane));
             textPane.setCaretPosition(0);
@@ -391,7 +395,7 @@ public final class SwingUtil {
         // As this is a helper class, there should be no reason to instantiate an instance of it.
     }
 
-    static class NoSelectionModel extends DefaultListSelectionModel {
+    static final class NoSelectionModel extends DefaultListSelectionModel {
         @Override
         public void addSelectionInterval(int index0, int index1) {
             super.addSelectionInterval(-1, -1);
@@ -403,7 +407,7 @@ public final class SwingUtil {
         }
     }
 
-    private static class NavigateToHyperlinkListener implements HyperlinkListener {
+    private static final class NavigateToHyperlinkListener implements HyperlinkListener {
         private final Logger logger;
         private final JTextPane textPane;
 

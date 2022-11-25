@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
@@ -29,6 +30,7 @@ import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
 import net.minecraft.launchwrapper.LogWrapper;
 
 public final class SkinOrCapeHandler extends EmulatorHandler {
+    private static final Pattern pngPattern = Pattern.compile(".png", Pattern.LITERAL);
     private final HashMap<String, byte[]> imagesCache = new HashMap<String, byte[]>();
     // TODO Refactor
     private final boolean isCape;
@@ -40,7 +42,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
     }
 
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
-        final String username = get.replace(url, "").replace(".png", "");
+        final String username = pngPattern.matcher(get.replace(url, "")).replaceAll("");
         final String cacheName;
 
         if (isCape) {

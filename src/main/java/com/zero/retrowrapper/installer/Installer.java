@@ -452,9 +452,24 @@ public final class Installer {
                         hasLogAPI = true;
                     } else if (libName.contains("org.apache.logging.log4j:log4j-core")) {
                         hasLogCore = true;
+                    } else {
+                        final String libNameNoVersion = libName.substring(0, libName.lastIndexOf(':'));
+
+                        for (final String lwjglLibName : MetadataUtil.getLWJGLLibraryNames()) {
+                            if (lwjglLibName.equals(libNameNoVersion)) {
+                                toAdd = null;
+                                break;
+                            }
+                        }
                     }
 
-                    newLibraries.add(toAdd);
+                    if (toAdd != null) {
+                        newLibraries.add(toAdd);
+                    }
+                }
+
+                for (final JsonObject lwjglLib : MetadataUtil.getLWJGLLibraries()) {
+                    newLibraries.add(lwjglLib);
                 }
 
                 if (!hasLogAPI) {

@@ -73,7 +73,11 @@ public final class Installer {
     static JList list;
     static List<String> listInternal;
 
+    static JCheckBox patchLibrariesCheckbox;
+    static JCheckBox useM1NativesCheckbox;
+
     static boolean shouldUseM1Natives = false;
+    static boolean shouldUpdateLibraries = true;
 
     private static JFrame frame;
 
@@ -282,10 +286,13 @@ public final class Installer {
         // TODO Refactor
         workDir.addActionListener(new SelectMinecraftDirectoryActionListener(installerLogger));
         SwingUtil.addJTextFieldCentered(frame, workDir);
+        patchLibrariesCheckbox = new JCheckBox("Update LWJGL and LaunchWrapper (fixes bugs on most platforms)", shouldUpdateLibraries);
+        patchLibrariesCheckbox.addActionListener(new PatchLibrariesListener());
+        SwingUtil.addJComponentCentered(frame, patchLibrariesCheckbox);
 
         if (SystemUtils.IS_OS_MAC) {
-            final JCheckBox useM1NativesCheckbox = new JCheckBox("Patch instances to allow using Apple silicon LWJGL natives (incompatible with 32 bit Java)", shouldUseM1Natives);
-            useM1NativesCheckbox.addActionListener(new AppleSiliconPatchListener(useM1NativesCheckbox));
+            useM1NativesCheckbox = new JCheckBox("Patch instances to allow using Apple silicon LWJGL natives (incompatible with 32 bit Java)", shouldUseM1Natives);
+            useM1NativesCheckbox.addActionListener(new AppleSiliconPatchListener());
             SwingUtil.addJComponentCentered(frame, useM1NativesCheckbox);
         }
 
@@ -454,7 +461,7 @@ public final class Installer {
                     JsonObject toAdd = library;
                     final String libName = library.get("name").asString();
 
-                    if (libName.contains("net.minecraft:launchwrapper")) {
+                    if (shouldUpdateLibraries && libName.contains("net.minecraft:launchwrapper")) {
                         final String[] libNameSplit = libName.split(":");
                         final String libVersion = libNameSplit[libNameSplit.length - 1];
 
@@ -462,11 +469,11 @@ public final class Installer {
                             // Update LaunchWrapper to LaunchWrapper 1.12
                             toAdd = launchWrapperOneTwelve;
                         }
-                    } else if (libName.contains("org.apache.logging.log4j:log4j-api")) {
+                    } else if (shouldUpdateLibraries && libName.contains("org.apache.logging.log4j:log4j-api")) {
                         hasLogAPI = true;
-                    } else if (libName.contains("org.apache.logging.log4j:log4j-core")) {
+                    } else if (shouldUpdateLibraries && libName.contains("org.apache.logging.log4j:log4j-core")) {
                         hasLogCore = true;
-                    } else {
+                    } else if (shouldUpdateLibraries) {
                         final String libNameNoVersion = libName.substring(0, libName.lastIndexOf(':'));
 
                         for (final String lwjglLibName : lwjglLibraryNames) {
@@ -482,20 +489,22 @@ public final class Installer {
                     }
                 }
 
-                for (final JsonObject lwjglLib : lwjglLibraries) {
-                    newLibraries.add(lwjglLib);
-                }
+                if (shouldUpdateLibraries) {
+                    for (final JsonObject lwjglLib : lwjglLibraries) {
+                        newLibraries.add(lwjglLib);
+                    }
 
-                if (!hasLogAPI) {
-                    // Add Log4j API, LaunchWrapper 1.12 requires it.
-                    // 2.3.2 is the latest (RCE patched) version to support Java 6.
-                    newLibraries.add(log4jAPI);
-                }
+                    if (!hasLogAPI) {
+                        // Add Log4j API, LaunchWrapper 1.12 requires it.
+                        // 2.3.2 is the latest (RCE patched) version to support Java 6.
+                        newLibraries.add(log4jAPI);
+                    }
 
-                if (!hasLogCore) {
-                    // Add Log4j core, LaunchWrapper 1.12 requires it.
-                    // 2.3.2 is the latest (RCE patched) version to support Java 6.
-                    newLibraries.add(log4jCore);
+                    if (!hasLogCore) {
+                        // Add Log4j core, LaunchWrapper 1.12 requires it.
+                        // 2.3.2 is the latest (RCE patched) version to support Java 6.
+                        newLibraries.add(log4jCore);
+                    }
                 }
 
                 newLibraries.add(retrowrapperLibraryJson);
@@ -802,11 +811,27 @@ public final class Installer {
         }
     }
 
-    private static class AppleSiliconPatchListener implements ActionListener {
-        private final JCheckBox useM1NativesCheckbox;
+    private static class PatchLibrariesListener implements ActionListener {
+        public PatchLibrariesListener() {
+            // This space left intentionally blank
+        }
 
-        public AppleSiliconPatchListener(JCheckBox useM1NativesCheckbox) {
-            this.useM1NativesCheckbox = useM1NativesCheckbox;
+        public void actionPerformed(ActionEvent e) {
+            shouldUpdateLibraries = patchLibrariesCheckbox.isSelected();
+
+            if (useM1NativesCheckbox != null) {
+                useM1NativesCheckbox.setEnabled(shouldUpdateLibraries);
+
+                if (!shouldUpdateLibraries) {
+                    useM1NativesCheckbox.setSelected(false);
+                }
+            }
+        }
+    }
+
+    private static class AppleSiliconPatchListener implements ActionListener {
+        public AppleSiliconPatchListener() {
+            // This space left intentionally blank
         }
 
         public void actionPerformed(ActionEvent e) {

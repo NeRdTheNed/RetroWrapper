@@ -41,12 +41,12 @@ import javax.swing.JTextPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.lwjgl.opengl.Display;
@@ -371,20 +371,15 @@ public final class SwingUtil {
         }
     }
 
-    public static void showMessageScroller(int messageType, String title, String[] wrapArray, String... preface) {
-        final String[] listDiag = ArrayUtils.addAll(preface, wrapArray);
-        final JList diagList = new JList(listDiag);
-        diagList.setSelectionModel(new NoSelectionModel());
-        diagList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        final JScrollPane jsp = new JScrollPane(diagList);
-        final int pwidth = jsp.getPreferredSize().width;
-        jsp.setPreferredSize(new Dimension(Math.max(pwidth, 500), jsp.getPreferredSize().height));
-        JOptionPane.showMessageDialog(null, jsp, title, messageType);
-    }
-
-    public static int showOptionScroller(int option, String title, String[] wrapArray, JComponent[] additionalComponents, String... preface) {
+    private static JPanel makeScrollerPannel(String title, String[] wrapArray, JComponent[] additionalComponents, String... preface) {
         final JPanel messagePanel = new JPanel();
         messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.PAGE_AXIS));
+
+        for (final String line : preface) {
+            final JLabel lineLabel = new JLabel(line);
+            lineLabel.setBorder(new EmptyBorder(0, 0, 5, 0));
+            addJLabelCentered(messagePanel, lineLabel);
+        }
 
         if (additionalComponents != null) {
             for (final JComponent comp : additionalComponents) {
@@ -392,14 +387,23 @@ public final class SwingUtil {
             }
         }
 
-        final String[] listDiag = ArrayUtils.addAll(preface, wrapArray);
-        final JList diagList = new JList(listDiag);
+        final JList diagList = new JList(wrapArray);
         diagList.setSelectionModel(new NoSelectionModel());
         diagList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         final JScrollPane jsp = new JScrollPane(diagList);
         final int pwidth = jsp.getPreferredSize().width;
         jsp.setPreferredSize(new Dimension(Math.max(pwidth, 500), jsp.getPreferredSize().height));
         addJComponentCentered(messagePanel, jsp);
+        return messagePanel;
+    }
+
+    public static void showMessageScroller(int messageType, String title, String[] wrapArray, JComponent[] additionalComponents, String... preface) {
+        final JPanel messagePanel = makeScrollerPannel(title, wrapArray, additionalComponents, preface);
+        JOptionPane.showMessageDialog(null, messagePanel, title, messageType);
+    }
+
+    public static int showOptionScroller(int option, String title, String[] wrapArray, JComponent[] additionalComponents, String... preface) {
+        final JPanel messagePanel = makeScrollerPannel(title, wrapArray, additionalComponents, preface);
         return JOptionPane.showConfirmDialog(null, messagePanel, title, option);
     }
 

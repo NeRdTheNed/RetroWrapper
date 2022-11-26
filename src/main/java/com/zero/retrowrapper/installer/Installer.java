@@ -609,7 +609,7 @@ public final class Installer {
                                       } : new String[] {
                                           (wrappedVersions.length > 1 ? "Successfully wrapped versions" : "Successfully wrapped version")
                                       };
-            SwingUtil.showMessageScroller(JOptionPane.INFORMATION_MESSAGE, "Success", wrappedVersions, listDiag);
+            SwingUtil.showMessageScroller(JOptionPane.INFORMATION_MESSAGE, "Success", wrappedVersions, null, listDiag);
         } else {
             JOptionPane.showMessageDialog(null, "No instances wrapped!", "Error", JOptionPane.ERROR_MESSAGE);
         }

@@ -7,11 +7,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
-import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLHandshakeException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -58,76 +58,70 @@ public final class ResourcesHandler extends EmulatorHandler {
         super(handle);
 
         try {
-            downloadSoundData();
+            jsonObjects = downloadSoundData();
         } catch (final Exception e) {
             LogWrapper.warning("Error when downloading sound data: " + ExceptionUtils.getStackTrace(e));
         }
     }
 
-    private void downloadSoundData() {
+    private JsonObject downloadSoundData() {
+        final File jsonCached = new File(RetroEmulator.getInstance().getCacheDirectory(), "legacy.json");
+        final File localLegacyJson = FileUtil.tryFindFirstFile(
+                                         jsonCached,
+                                         new File(Launch.minecraftHome + "/assets/indexes/legacy.json"), new File(Launch.minecraftHome + "/assets/indexes/pre-1.6.json"),
+                                         new File(FileUtil.defaultMinecraftDirectory() + "/assets/indexes/legacy.json"), new File(FileUtil.defaultMinecraftDirectory() + "/assets/indexes/pre-1.6.json")
+                                     );
+
+        if (localLegacyJson != null) {
+            FileInputStream fis = null;
+
+            try {
+                fis = new FileInputStream(localLegacyJson);
+                final String jsonString = IOUtils.toString(fis);
+                final JsonValue json = Json.parse(jsonString);
+                final JsonObject obj = json.asObject();
+                final JsonObject resourceObjects = obj.get("objects").asObject();
+
+                if (!jsonCached.isFile()) {
+                    FileUtils.copyFile(localLegacyJson, jsonCached);
+                }
+
+                LogWrapper.info("Using local legacy.json.");
+                return resourceObjects;
+            } catch (final Exception e) {
+                LogWrapper.warning("Exception loading local legacy.json: " + ExceptionUtils.getStackTrace(e));
+            } finally {
+                IOUtils.closeQuietly(fis);
+            }
+        } else {
+            LogWrapper.warning("Could not find local legacy.json.");
+        }
+
         InputStream is = null;
-        Scanner sc = null;
 
         try {
             is = new URL("https://launchermeta.mojang.com/mc/assets/legacy/c0fd82e8ce9fbc93119e40d96d5a4e62cfa3f729/legacy.json").openStream();
-            sc = new Scanner(is);
-            sc.useDelimiter("\\A");
-            final JsonValue json = Json.parse(sc.next());
+            final String jsonString = IOUtils.toString(is);
+            final JsonValue json = Json.parse(jsonString);
             final JsonObject obj = json.asObject();
-            jsonObjects = obj.get("objects").asObject();
+            final JsonObject resourceObjects = obj.get("objects").asObject();
+            // Cache file locally
+            FileUtils.writeStringToFile(jsonCached, jsonString);
+            LogWrapper.info("Using downloaded legacy.json.");
+            return resourceObjects;
         } catch (final Exception e) {
-            LogWrapper.warning("Exception downloading legacy.json: " + ExceptionUtils.getStackTrace(e));
+            LogWrapper.warning("Exception downloading legacy.json: " + ExceptionUtils.getStackTrace(e) + "\nThe sound fix probably won't work.");
 
             if (e instanceof SSLHandshakeException) {
                 LogWrapper.warning("The Java installation that Minecraft is running on " +
                                    "(" + SystemUtils.JAVA_VERSION + " (" + SystemUtils.JAVA_VENDOR + " " + SystemUtils.JAVA_VM_VERSION + ") located at " + SystemUtils.JAVA_HOME + ")" +
                                    " may not support modern versions of TLS/SSL (e.g. TLSv1.3). Consider using a newer Java installation to fix this.");
             }
-
-            final File backupFile = FileUtil.tryFindFirstFile(
-                                        new File(Launch.minecraftHome + "/assets/indexes/legacy.json"), new File(Launch.minecraftHome + "/assets/indexes/pre-1.6.json"),
-                                        new File(FileUtil.defaultMinecraftDirectory() + "/assets/indexes/legacy.json"), new File(FileUtil.defaultMinecraftDirectory() + "/assets/indexes/pre-1.6.json")
-                                    );
-
-            if (backupFile != null) {
-                FileInputStream fis = null;
-                Scanner sc2 = null;
-
-                try {
-                    fis = new FileInputStream(backupFile);
-                    sc2 = new Scanner(fis);
-                    sc2.useDelimiter("\\A");
-                    final JsonValue json = Json.parse(sc2.next());
-                    final JsonObject obj = json.asObject();
-                    jsonObjects = obj.get("objects").asObject();
-                    LogWrapper.info("Using local legacy.json.");
-                } catch (final Exception ee) {
-                    LogWrapper.warning("Exception loading local legacy.json: " + ExceptionUtils.getStackTrace(ee) + "\nThe sound fix probably won't work.");
-                } finally {
-                    IOUtils.closeQuietly(fis);
-
-                    try {
-                        if (sc2 != null) {
-                            sc2.close();
-                        }
-                    } catch (final Exception ignored) {
-                        // Ignored
-                    }
-                }
-            } else {
-                LogWrapper.warning("Could not find local legacy.json.\nThe sound fix probably won't work.");
-            }
         } finally {
             IOUtils.closeQuietly(is);
-
-            try {
-                if (sc != null) {
-                    sc.close();
-                }
-            } catch (final Exception ignored) {
-                // Ignored
-            }
         }
+
+        return null;
     }
 
     public void handle(OutputStream os, String get, byte[] data) throws IOException {

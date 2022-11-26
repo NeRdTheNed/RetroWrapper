@@ -24,9 +24,9 @@ public final class RetroEmulator extends Thread {
         directory = new File(Launch.minecraftHome, "retrowrapper");
         directory.mkdirs();
         mapsDirectory = new File(RetroEmulator.getInstance().directory, "maps");
-        mapsDirectory.mkdir();
+        mapsDirectory.mkdirs();
         cacheDirectory = new File(RetroEmulator.getInstance().directory, "cache");
-        cacheDirectory.mkdir();
+        cacheDirectory.mkdirs();
         ServerSocket server = null;
 
         try {

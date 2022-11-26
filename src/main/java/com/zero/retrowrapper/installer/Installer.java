@@ -32,6 +32,7 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -210,11 +211,23 @@ public final class Installer {
                 versionIndex[i] = index;
             }
 
-            final int diagRes = SwingUtil.showOptionScroller(JOptionPane.YES_NO_OPTION, "Info", outdatedVersions, "Some instances use an outdated version of RetroWrapper!", "Would you like to update RetroWrapper for these instance?");
+            final JComponent[] toPass;
+
+            if (useM1NativesCheckbox != null) {
+                final JCheckBox tempUseM1NativesCheckbox = createUseM1NativesCheckbox();
+                final JCheckBox tempPatchLibrariesCheckbox = createPatchLibrariesCheckbox(tempUseM1NativesCheckbox);
+                toPass = new JComponent[] { tempPatchLibrariesCheckbox, tempUseM1NativesCheckbox};
+            } else {
+                toPass = new JComponent[] { createPatchLibrariesCheckbox(null) };
+            }
+
+            final int diagRes = SwingUtil.showOptionScroller(JOptionPane.YES_NO_OPTION, "Info", outdatedVersions, toPass, "Some instances use an outdated version of RetroWrapper!", "Would you like to update RetroWrapper for these instance?");
 
             if (diagRes == JOptionPane.YES_OPTION) {
                 wrapInstances(installerLogger, versionIndex);
             }
+
+            refreshButtonStates(patchLibrariesCheckbox, useM1NativesCheckbox);
         }
 
         if ((versionCount == 0) && (outdatedVersionsIndexes.isEmpty())) {
@@ -293,13 +306,15 @@ public final class Installer {
         // TODO Refactor
         workDir.addActionListener(new SelectMinecraftDirectoryActionListener(installerLogger));
         SwingUtil.addJTextFieldCentered(frame, workDir);
-        patchLibrariesCheckbox = new JCheckBox("Update LWJGL and LaunchWrapper (fixes bugs on most platforms)", shouldUpdateLibraries);
-        patchLibrariesCheckbox.addActionListener(new PatchLibrariesListener());
-        SwingUtil.addJComponentCentered(frame, patchLibrariesCheckbox);
 
         if (SystemUtils.IS_OS_MAC) {
-            useM1NativesCheckbox = new JCheckBox("Patch instances to allow using Apple silicon LWJGL natives (incompatible with 32 bit Java)", shouldUseM1Natives);
-            useM1NativesCheckbox.addActionListener(new AppleSiliconPatchListener());
+            useM1NativesCheckbox = createUseM1NativesCheckbox();
+        }
+
+        patchLibrariesCheckbox = createPatchLibrariesCheckbox(useM1NativesCheckbox);
+        SwingUtil.addJComponentCentered(frame, patchLibrariesCheckbox);
+
+        if (useM1NativesCheckbox != null) {
             SwingUtil.addJComponentCentered(frame, useM1NativesCheckbox);
         }
 
@@ -325,6 +340,31 @@ public final class Installer {
         frame.pack();
         frame.setVisible(true);
         frame.setLocationRelativeTo(null);
+    }
+
+    private static JCheckBox createPatchLibrariesCheckbox(JCheckBox useM1NativesCheckbox) {
+        final JCheckBox toReturn = new JCheckBox("Update LWJGL and LaunchWrapper (fixes bugs on most platforms)", shouldUpdateLibraries);
+        toReturn.addActionListener(new PatchLibrariesListener(toReturn, useM1NativesCheckbox));
+        return toReturn;
+    }
+
+    private static JCheckBox createUseM1NativesCheckbox() {
+        final JCheckBox toReturn = new JCheckBox("Patch instances to allow using Apple silicon LWJGL natives (incompatible with 32 bit Java)", shouldUseM1Natives);
+        toReturn.addActionListener(new AppleSiliconPatchListener(toReturn));
+        return toReturn;
+    }
+
+    private static void refreshButtonStates(JCheckBox patchLibrariesCheckbox, JCheckBox useM1NativesCheckbox) {
+        patchLibrariesCheckbox.setSelected(shouldUpdateLibraries);
+
+        if (useM1NativesCheckbox != null) {
+            useM1NativesCheckbox.setSelected(shouldUseM1Natives);
+            useM1NativesCheckbox.setEnabled(shouldUpdateLibraries);
+
+            if (!shouldUpdateLibraries) {
+                useM1NativesCheckbox.setSelected(false);
+            }
+        }
     }
 
     public static void main(String[] args) {
@@ -818,30 +858,37 @@ public final class Installer {
     }
 
     private static final class PatchLibrariesListener implements ActionListener {
-        public PatchLibrariesListener() {
-            // This space left intentionally blank
+        private final JCheckBox listenUseM1NativesCheckbox;
+        private final JCheckBox listenPatchLibrariesCheckbox;
+
+        public PatchLibrariesListener(JCheckBox listenPatchLibrariesCheckbox, JCheckBox listenUseM1NativesCheckbox) {
+            this.listenPatchLibrariesCheckbox = listenPatchLibrariesCheckbox;
+            this.listenUseM1NativesCheckbox = listenUseM1NativesCheckbox;
+            refreshButtonStates(listenPatchLibrariesCheckbox, listenUseM1NativesCheckbox);
         }
 
         public void actionPerformed(ActionEvent e) {
-            shouldUpdateLibraries = patchLibrariesCheckbox.isSelected();
+            shouldUpdateLibraries = listenPatchLibrariesCheckbox.isSelected();
 
-            if (useM1NativesCheckbox != null) {
-                useM1NativesCheckbox.setEnabled(shouldUpdateLibraries);
+            if (listenUseM1NativesCheckbox != null) {
+                listenUseM1NativesCheckbox.setEnabled(shouldUpdateLibraries);
 
                 if (!shouldUpdateLibraries) {
-                    useM1NativesCheckbox.setSelected(false);
+                    listenUseM1NativesCheckbox.setSelected(false);
                 }
             }
         }
     }
 
     private static final class AppleSiliconPatchListener implements ActionListener {
-        public AppleSiliconPatchListener() {
-            // This space left intentionally blank
+        private final JCheckBox listenUseM1NativesCheckbox;
+
+        public AppleSiliconPatchListener(JCheckBox listenUseM1NativesCheckbox) {
+            this.listenUseM1NativesCheckbox = listenUseM1NativesCheckbox;
         }
 
         public void actionPerformed(ActionEvent e) {
-            shouldUseM1Natives = useM1NativesCheckbox.isSelected();
+            shouldUseM1Natives = listenUseM1NativesCheckbox.isSelected();
         }
     }
 }

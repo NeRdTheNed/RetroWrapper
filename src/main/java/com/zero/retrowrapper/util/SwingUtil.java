@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -33,6 +34,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
@@ -380,7 +382,16 @@ public final class SwingUtil {
         JOptionPane.showMessageDialog(null, jsp, title, messageType);
     }
 
-    public static int showOptionScroller(int option, String title, String[] wrapArray, String... preface) {
+    public static int showOptionScroller(int option, String title, String[] wrapArray, JComponent[] additionalComponents, String... preface) {
+        final JPanel messagePanel = new JPanel();
+        messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.PAGE_AXIS));
+
+        if (additionalComponents != null) {
+            for (final JComponent comp : additionalComponents) {
+                addJComponentCentered(messagePanel, comp);
+            }
+        }
+
         final String[] listDiag = ArrayUtils.addAll(preface, wrapArray);
         final JList diagList = new JList(listDiag);
         diagList.setSelectionModel(new NoSelectionModel());
@@ -388,7 +399,8 @@ public final class SwingUtil {
         final JScrollPane jsp = new JScrollPane(diagList);
         final int pwidth = jsp.getPreferredSize().width;
         jsp.setPreferredSize(new Dimension(Math.max(pwidth, 500), jsp.getPreferredSize().height));
-        return JOptionPane.showConfirmDialog(null, jsp, title, option);
+        addJComponentCentered(messagePanel, jsp);
+        return JOptionPane.showConfirmDialog(null, messagePanel, title, option);
     }
 
     private SwingUtil() {

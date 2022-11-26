@@ -104,6 +104,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             params.put("username", username);
             params.put("sessionid", sessionId);
             params.put("haspaid", "true");
+            params.put("stand-alone", "true");
             final Constructor<?> constructor = clazz.getConstructor();
             final Applet object = (Applet) constructor.newInstance();
             final LauncherFake fakeLauncher = new LauncherFake(params, object);

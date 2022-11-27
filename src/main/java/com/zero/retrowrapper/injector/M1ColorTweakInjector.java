@@ -205,10 +205,12 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     methodNode.instructions.remove(toPatch);
                 }
 
-                int index1 = -1;
-                int index2 = -1;
-                int index3 = -1;
-                int index4 = -1;
+                // New variable indices
+                // TODO refactor
+                int newVarIndex1 = -1;
+                int newVarIndex2 = -1;
+                int newVarIndex3 = -1;
+                int newVarIndex4 = -1;
 
                 for (final MethodInsnNode toPatch : foundFogFloatBufCalls) {
                     LogWrapper.fine("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
@@ -217,95 +219,95 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
                     final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
                     // Load float values from buffer
-                    final InsnNode dup_0 = new InsnNode(Opcodes.DUP);
-                    final MethodInsnNode get_1 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "get", "()F");
-                    final InsnNode swap_1 = new InsnNode(Opcodes.SWAP);
-                    final InsnNode dup_1 = new InsnNode(Opcodes.DUP);
-                    final MethodInsnNode get_2 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "get", "()F");
-                    final InsnNode swap_2 = new InsnNode(Opcodes.SWAP);
-                    final InsnNode dup_2 = new InsnNode(Opcodes.DUP);
-                    final MethodInsnNode get_3 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "get", "()F");
-                    final InsnNode swap_3 = new InsnNode(Opcodes.SWAP);
-                    final InsnNode dup_3 = new InsnNode(Opcodes.DUP);
-                    final MethodInsnNode get_4 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "get", "()F");
-                    final InsnNode swap_4 = new InsnNode(Opcodes.SWAP);
+                    final InsnNode dupBuffer1 = new InsnNode(Opcodes.DUP);
+                    final MethodInsnNode getValue1 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "get", "()F");
+                    final InsnNode swapValue1 = new InsnNode(Opcodes.SWAP);
+                    final InsnNode dupBuffer2 = new InsnNode(Opcodes.DUP);
+                    final MethodInsnNode getValue2 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "get", "()F");
+                    final InsnNode swapValue2 = new InsnNode(Opcodes.SWAP);
+                    final InsnNode dupBuffer3 = new InsnNode(Opcodes.DUP);
+                    final MethodInsnNode getValue3 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "get", "()F");
+                    final InsnNode swapValue3 = new InsnNode(Opcodes.SWAP);
+                    final InsnNode dupBuffer4 = new InsnNode(Opcodes.DUP);
+                    final MethodInsnNode getValue4 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "get", "()F");
+                    final InsnNode swapValue4 = new InsnNode(Opcodes.SWAP);
 
-                    if (index1 == -1) {
-                        index1 = methodNode.maxLocals;
+                    if (newVarIndex1 == -1) {
+                        newVarIndex1 = methodNode.maxLocals;
                         methodNode.maxLocals++;
                     }
 
                     // Store reference to buffer
-                    final VarInsnNode storeBuffer = new VarInsnNode(Opcodes.ASTORE, index1);
+                    final VarInsnNode storeBuffer = new VarInsnNode(Opcodes.ASTORE, newVarIndex1);
                     // RGBA -> ARGB because values get consumed in reverse order when putting float values in buffer
-                    final InsnNode swap = new InsnNode(Opcodes.SWAP);
+                    final InsnNode swapBA = new InsnNode(Opcodes.SWAP);
 
-                    if (index2 == -1) {
-                        index2 = methodNode.maxLocals;
+                    if (newVarIndex2 == -1) {
+                        newVarIndex2 = methodNode.maxLocals;
                         methodNode.maxLocals++;
                     }
 
-                    final VarInsnNode storeBlue = new VarInsnNode(Opcodes.FSTORE, index2);
-                    final InsnNode dup_x2 = new InsnNode(Opcodes.DUP_X2);
-                    final InsnNode pop = new InsnNode(Opcodes.POP);
-                    final VarInsnNode loadBlue = new VarInsnNode(Opcodes.FLOAD, index2);
+                    final VarInsnNode storeB = new VarInsnNode(Opcodes.FSTORE, newVarIndex2);
+                    final InsnNode dupX2A = new InsnNode(Opcodes.DUP_X2);
+                    final InsnNode popA = new InsnNode(Opcodes.POP);
+                    final VarInsnNode loadB = new VarInsnNode(Opcodes.FLOAD, newVarIndex2);
                     // Load reference to buffer
-                    final VarInsnNode loadBuffer = new VarInsnNode(Opcodes.ALOAD, index1);
-                    final InsnNode dup = new InsnNode(Opcodes.DUP);
+                    final VarInsnNode loadBuffer1 = new VarInsnNode(Opcodes.ALOAD, newVarIndex1);
+                    final InsnNode dupBuffer5 = new InsnNode(Opcodes.DUP);
                     // Clear buffer
-                    final MethodInsnNode clear = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "clear", "()Ljava/nio/Buffer;");
-                    final InsnNode pop_return_1 = new InsnNode(Opcodes.POP);
+                    final MethodInsnNode clearBuffer = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "clear", "()Ljava/nio/Buffer;");
+                    final InsnNode popReturn1 = new InsnNode(Opcodes.POP);
                     // Put float values back in buffer
-                    final InsnNode swap_5 = new InsnNode(Opcodes.SWAP);
-                    final MethodInsnNode put_1 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "put", "(F)Ljava/nio/FloatBuffer;");
-                    final InsnNode swap_6 = new InsnNode(Opcodes.SWAP);
-                    final MethodInsnNode put_2 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "put", "(F)Ljava/nio/FloatBuffer;");
-                    final InsnNode swap_7 = new InsnNode(Opcodes.SWAP);
-                    final MethodInsnNode put_3 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "put", "(F)Ljava/nio/FloatBuffer;");
-                    final InsnNode swap_8 = new InsnNode(Opcodes.SWAP);
-                    final MethodInsnNode put_4 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "put", "(F)Ljava/nio/FloatBuffer;");
+                    final InsnNode swapBuffer1 = new InsnNode(Opcodes.SWAP);
+                    final MethodInsnNode putValue1 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "put", "(F)Ljava/nio/FloatBuffer;");
+                    final InsnNode swapBuffer2 = new InsnNode(Opcodes.SWAP);
+                    final MethodInsnNode putValue2 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "put", "(F)Ljava/nio/FloatBuffer;");
+                    final InsnNode swapBuffer3 = new InsnNode(Opcodes.SWAP);
+                    final MethodInsnNode putValue3 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "put", "(F)Ljava/nio/FloatBuffer;");
+                    final InsnNode swapBuffer4 = new InsnNode(Opcodes.SWAP);
+                    final MethodInsnNode putValue4 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "put", "(F)Ljava/nio/FloatBuffer;");
                     // Flip buffer
-                    final MethodInsnNode flip = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "flip", "()Ljava/nio/Buffer;");
-                    final InsnNode pop_return_2 = new InsnNode(Opcodes.POP);
-                    final VarInsnNode loadBuffer2 = new VarInsnNode(Opcodes.ALOAD, index1);
+                    final MethodInsnNode flipBuffer = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/FloatBuffer", "flip", "()Ljava/nio/Buffer;");
+                    final InsnNode popReturn2 = new InsnNode(Opcodes.POP);
+                    final VarInsnNode loadBuffer2 = new VarInsnNode(Opcodes.ALOAD, newVarIndex1);
 
                     if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
                         methodNode.instructions.insertBefore(toPatch, getFullscreen);
                         methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
                     }
 
-                    methodNode.instructions.insertBefore(toPatch, dup_0);
-                    methodNode.instructions.insertBefore(toPatch, get_1);
-                    methodNode.instructions.insertBefore(toPatch, swap_1);
-                    methodNode.instructions.insertBefore(toPatch, dup_1);
-                    methodNode.instructions.insertBefore(toPatch, get_2);
-                    methodNode.instructions.insertBefore(toPatch, swap_2);
-                    methodNode.instructions.insertBefore(toPatch, dup_2);
-                    methodNode.instructions.insertBefore(toPatch, get_3);
-                    methodNode.instructions.insertBefore(toPatch, swap_3);
-                    methodNode.instructions.insertBefore(toPatch, dup_3);
-                    methodNode.instructions.insertBefore(toPatch, get_4);
-                    methodNode.instructions.insertBefore(toPatch, swap_4);
+                    methodNode.instructions.insertBefore(toPatch, dupBuffer1);
+                    methodNode.instructions.insertBefore(toPatch, getValue1);
+                    methodNode.instructions.insertBefore(toPatch, swapValue1);
+                    methodNode.instructions.insertBefore(toPatch, dupBuffer2);
+                    methodNode.instructions.insertBefore(toPatch, getValue2);
+                    methodNode.instructions.insertBefore(toPatch, swapValue2);
+                    methodNode.instructions.insertBefore(toPatch, dupBuffer3);
+                    methodNode.instructions.insertBefore(toPatch, getValue3);
+                    methodNode.instructions.insertBefore(toPatch, swapValue3);
+                    methodNode.instructions.insertBefore(toPatch, dupBuffer4);
+                    methodNode.instructions.insertBefore(toPatch, getValue4);
+                    methodNode.instructions.insertBefore(toPatch, swapValue4);
                     methodNode.instructions.insertBefore(toPatch, storeBuffer);
-                    methodNode.instructions.insertBefore(toPatch, swap);
-                    methodNode.instructions.insertBefore(toPatch, storeBlue);
-                    methodNode.instructions.insertBefore(toPatch, dup_x2);
-                    methodNode.instructions.insertBefore(toPatch, pop);
-                    methodNode.instructions.insertBefore(toPatch, loadBlue);
-                    methodNode.instructions.insertBefore(toPatch, loadBuffer);
-                    methodNode.instructions.insertBefore(toPatch, dup);
-                    methodNode.instructions.insertBefore(toPatch, clear);
-                    methodNode.instructions.insertBefore(toPatch, pop_return_1);
-                    methodNode.instructions.insertBefore(toPatch, swap_5);
-                    methodNode.instructions.insertBefore(toPatch, put_1);
-                    methodNode.instructions.insertBefore(toPatch, swap_6);
-                    methodNode.instructions.insertBefore(toPatch, put_2);
-                    methodNode.instructions.insertBefore(toPatch, swap_7);
-                    methodNode.instructions.insertBefore(toPatch, put_3);
-                    methodNode.instructions.insertBefore(toPatch, swap_8);
-                    methodNode.instructions.insertBefore(toPatch, put_4);
-                    methodNode.instructions.insertBefore(toPatch, flip);
-                    methodNode.instructions.insertBefore(toPatch, pop_return_2);
+                    methodNode.instructions.insertBefore(toPatch, swapBA);
+                    methodNode.instructions.insertBefore(toPatch, storeB);
+                    methodNode.instructions.insertBefore(toPatch, dupX2A);
+                    methodNode.instructions.insertBefore(toPatch, popA);
+                    methodNode.instructions.insertBefore(toPatch, loadB);
+                    methodNode.instructions.insertBefore(toPatch, loadBuffer1);
+                    methodNode.instructions.insertBefore(toPatch, dupBuffer5);
+                    methodNode.instructions.insertBefore(toPatch, clearBuffer);
+                    methodNode.instructions.insertBefore(toPatch, popReturn1);
+                    methodNode.instructions.insertBefore(toPatch, swapBuffer1);
+                    methodNode.instructions.insertBefore(toPatch, putValue1);
+                    methodNode.instructions.insertBefore(toPatch, swapBuffer2);
+                    methodNode.instructions.insertBefore(toPatch, putValue2);
+                    methodNode.instructions.insertBefore(toPatch, swapBuffer3);
+                    methodNode.instructions.insertBefore(toPatch, putValue3);
+                    methodNode.instructions.insertBefore(toPatch, swapBuffer4);
+                    methodNode.instructions.insertBefore(toPatch, putValue4);
+                    methodNode.instructions.insertBefore(toPatch, flipBuffer);
+                    methodNode.instructions.insertBefore(toPatch, popReturn2);
                     methodNode.instructions.insertBefore(toPatch, loadBuffer2);
 
                     if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
@@ -316,16 +318,16 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 for (final MethodInsnNode toPatch : foundSwap3Calls) {
                     // RGB to BGR
                     // Non-double version, doubles require special handling.
-                    final AbstractInsnNode _p1 = toPatch.getPrevious();
-                    final AbstractInsnNode _p2 = _p1.getPrevious();
-                    final AbstractInsnNode _p3 = _p2.getPrevious();
+                    final AbstractInsnNode p1 = toPatch.getPrevious();
+                    final AbstractInsnNode p2 = p1.getPrevious();
+                    final AbstractInsnNode p3 = p2.getPrevious();
 
-                    if (!JavaUtil.isOpcodeLoadIns(_p2) || !JavaUtil.doLoadInsMatch(_p1, _p3)) {
+                    if (!JavaUtil.isOpcodeLoadIns(p2) || !JavaUtil.doLoadInsMatch(p1, p3)) {
                         LogWrapper.fine("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
-                        final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
+                        final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {p3, p2, p1});
 
                         if (reorderLoadIns != null) {
-                            reorder3LoadIns(methodNode, reorderLoadIns, toPatch, _p1, _p2, _p3);
+                            reorder3LoadIns(methodNode, reorderLoadIns, toPatch, p1, p2, p3);
                         } else {
                             swap3Type1(methodNode, toPatch);
                         }
@@ -335,28 +337,28 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 for (final MethodInsnNode toPatch : foundSwap3DoubleCalls) {
                     // RGB to BGR
                     // Double version, doubles require special handling.
-                    final AbstractInsnNode _p1 = toPatch.getPrevious();
-                    final AbstractInsnNode _p2 = _p1.getPrevious();
-                    final AbstractInsnNode _p3 = _p2.getPrevious();
+                    final AbstractInsnNode p1 = toPatch.getPrevious();
+                    final AbstractInsnNode p2 = p1.getPrevious();
+                    final AbstractInsnNode p3 = p2.getPrevious();
 
-                    if (!JavaUtil.isOpcodeLoadIns(_p2) || !JavaUtil.doLoadInsMatch(_p1, _p3)) {
+                    if (!JavaUtil.isOpcodeLoadIns(p2) || !JavaUtil.doLoadInsMatch(p1, p3)) {
                         LogWrapper.fine("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
-                        final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p3, _p2, _p1});
+                        final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {p3, p2, p1});
 
                         if (reorderLoadIns != null) {
-                            reorder3LoadIns(methodNode, reorderLoadIns, toPatch, _p1, _p2, _p3);
+                            reorder3LoadIns(methodNode, reorderLoadIns, toPatch, p1, p2, p3);
                         } else {
-                            if (index1 == -1) {
-                                index1 = methodNode.maxLocals;
+                            if (newVarIndex1 == -1) {
+                                newVarIndex1 = methodNode.maxLocals;
                                 methodNode.maxLocals++;
                             }
 
-                            if (index2 == -1) {
-                                index2 = methodNode.maxLocals;
+                            if (newVarIndex2 == -1) {
+                                newVarIndex2 = methodNode.maxLocals;
                                 methodNode.maxLocals++;
                             }
 
-                            swap3Type2(methodNode, toPatch, index1);
+                            swap3Type2(methodNode, toPatch, newVarIndex1);
                         }
                     }
                 }
@@ -364,28 +366,28 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 for (final MethodInsnNode toPatch : foundSwap4Calls) {
                     // RGBA to BRGA
                     // Non-double version, doubles require special handling.
-                    final AbstractInsnNode _p1 = toPatch.getPrevious();
-                    final AbstractInsnNode _p2 = _p1.getPrevious();
-                    final AbstractInsnNode _p3 = _p2.getPrevious();
-                    final AbstractInsnNode _p4 = _p3.getPrevious();
+                    final AbstractInsnNode p1 = toPatch.getPrevious();
+                    final AbstractInsnNode p2 = p1.getPrevious();
+                    final AbstractInsnNode p3 = p2.getPrevious();
+                    final AbstractInsnNode p4 = p3.getPrevious();
 
-                    if (!JavaUtil.areAllOpcodesLoadIns(_p1, _p3) || !JavaUtil.doLoadInsMatch(_p2, _p4)) {
+                    if (!JavaUtil.areAllOpcodesLoadIns(p1, p3) || !JavaUtil.doLoadInsMatch(p2, p4)) {
                         LogWrapper.fine("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
-                        final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p4, _p3, _p2});
-                        final boolean isP1Load = JavaUtil.isOpcodeLoadIns(_p1);
+                        final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {p4, p3, p2});
+                        final boolean isP1Load = JavaUtil.isOpcodeLoadIns(p1);
 
                         if (isP1Load && (reorderLoadIns != null)) {
-                            reorder3LoadIns(methodNode, reorderLoadIns, _p1, _p2, _p3, _p4);
+                            reorder3LoadIns(methodNode, reorderLoadIns, p1, p2, p3, p4);
                         } else if (isP1Load) {
-                            swap3Type1(methodNode, _p1);
+                            swap3Type1(methodNode, p1);
                         } else {
-                            if (index1 == -1) {
-                                index1 = methodNode.maxLocals;
+                            if (newVarIndex1 == -1) {
+                                newVarIndex1 = methodNode.maxLocals;
                                 methodNode.maxLocals++;
                             }
 
                             final Type storeType = Type.getArgumentTypes(toPatch.desc)[0];
-                            swap4Type1(methodNode, toPatch, storeType, index1);
+                            swap4Type1(methodNode, toPatch, storeType, newVarIndex1);
                         }
                     }
                 }
@@ -395,52 +397,52 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     // Never used anyways.
                     // TODO Test
                     // Double version, doubles require special handling.
-                    final AbstractInsnNode _p1 = toPatch.getPrevious();
-                    final AbstractInsnNode _p2 = _p1.getPrevious();
-                    final AbstractInsnNode _p3 = _p2.getPrevious();
-                    final AbstractInsnNode _p4 = _p3.getPrevious();
+                    final AbstractInsnNode p1 = toPatch.getPrevious();
+                    final AbstractInsnNode p2 = p1.getPrevious();
+                    final AbstractInsnNode p3 = p2.getPrevious();
+                    final AbstractInsnNode p4 = p3.getPrevious();
 
-                    if (!JavaUtil.areAllOpcodesLoadIns(_p1, _p3) || !JavaUtil.doLoadInsMatch(_p2, _p4)) {
+                    if (!JavaUtil.areAllOpcodesLoadIns(p1, p3) || !JavaUtil.doLoadInsMatch(p2, p4)) {
                         LogWrapper.fine("Patching call to " + toPatch.owner + "." + toPatch.name + toPatch.desc + " at class " + name);
-                        final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {_p4, _p3, _p2});
-                        final boolean isP1Load = JavaUtil.isOpcodeLoadIns(_p1);
+                        final AbstractInsnNode[] reorderLoadIns = convLoadInsOrNull(new AbstractInsnNode[] {p4, p3, p2});
+                        final boolean isP1Load = JavaUtil.isOpcodeLoadIns(p1);
 
                         if (isP1Load && (reorderLoadIns != null)) {
-                            reorder3LoadIns(methodNode, reorderLoadIns, _p1, _p2, _p3, _p4);
+                            reorder3LoadIns(methodNode, reorderLoadIns, p1, p2, p3, p4);
                         } else if (isP1Load) {
-                            if (index1 == -1) {
-                                index1 = methodNode.maxLocals;
+                            if (newVarIndex1 == -1) {
+                                newVarIndex1 = methodNode.maxLocals;
                                 methodNode.maxLocals++;
                             }
 
-                            if (index2 == -1) {
-                                index2 = methodNode.maxLocals;
+                            if (newVarIndex2 == -1) {
+                                newVarIndex2 = methodNode.maxLocals;
                                 methodNode.maxLocals++;
                             }
 
-                            swap3Type2(methodNode, _p1, index1);
+                            swap3Type2(methodNode, p1, newVarIndex1);
                         } else {
-                            if (index1 == -1) {
-                                index1 = methodNode.maxLocals;
+                            if (newVarIndex1 == -1) {
+                                newVarIndex1 = methodNode.maxLocals;
                                 methodNode.maxLocals++;
                             }
 
-                            if (index2 == -1) {
-                                index2 = methodNode.maxLocals;
+                            if (newVarIndex2 == -1) {
+                                newVarIndex2 = methodNode.maxLocals;
                                 methodNode.maxLocals++;
                             }
 
-                            if (index3 == -1) {
-                                index3 = methodNode.maxLocals;
+                            if (newVarIndex3 == -1) {
+                                newVarIndex3 = methodNode.maxLocals;
                                 methodNode.maxLocals++;
                             }
 
-                            if (index4 == -1) {
-                                index4 = methodNode.maxLocals;
+                            if (newVarIndex4 == -1) {
+                                newVarIndex4 = methodNode.maxLocals;
                                 methodNode.maxLocals++;
                             }
 
-                            swap4Type2(methodNode, toPatch, index1, index3);
+                            swap4Type2(methodNode, toPatch, newVarIndex1, newVarIndex3);
                         }
                     }
                 }
@@ -495,11 +497,11 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
         final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
         // RGB
-        final InsnNode dup_x2 = new InsnNode(Opcodes.DUP_X2);
+        final InsnNode dupX2B = new InsnNode(Opcodes.DUP_X2);
         // BRGB
-        final InsnNode pop = new InsnNode(Opcodes.POP);
+        final InsnNode popB = new InsnNode(Opcodes.POP);
         // BRG
-        final InsnNode swap = new InsnNode(Opcodes.SWAP);
+        final InsnNode swapRG = new InsnNode(Opcodes.SWAP);
 
         // BGR
         if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
@@ -507,9 +509,9 @@ public final class M1ColorTweakInjector implements IClassTransformer {
             methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
         }
 
-        methodNode.instructions.insertBefore(toPatch, dup_x2);
-        methodNode.instructions.insertBefore(toPatch, pop);
-        methodNode.instructions.insertBefore(toPatch, swap);
+        methodNode.instructions.insertBefore(toPatch, dupX2B);
+        methodNode.instructions.insertBefore(toPatch, popB);
+        methodNode.instructions.insertBefore(toPatch, swapRG);
 
         if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
             methodNode.instructions.insertBefore(toPatch, target);
@@ -521,21 +523,21 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
         final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
         // RGB
-        final InsnNode dup2_x2 = new InsnNode(Opcodes.DUP2_X2);
+        final InsnNode dup2X2B1 = new InsnNode(Opcodes.DUP2_X2);
         // RBGB
-        final InsnNode pop2 = new InsnNode(Opcodes.POP2);
+        final InsnNode pop2B1 = new InsnNode(Opcodes.POP2);
         // RBG
         final VarInsnNode storeG = new VarInsnNode(Opcodes.DSTORE, index);
         // RB
-        final InsnNode dup2_x2_2 = new InsnNode(Opcodes.DUP2_X2);
+        final InsnNode dup2X2B2 = new InsnNode(Opcodes.DUP2_X2);
         // BRB
-        final InsnNode pop2_2 = new InsnNode(Opcodes.POP2);
+        final InsnNode pop2B2 = new InsnNode(Opcodes.POP2);
         // BR
         final VarInsnNode loadG = new VarInsnNode(Opcodes.DLOAD, index);
         // BRG
-        final InsnNode dup2_x2_3 = new InsnNode(Opcodes.DUP2_X2);
+        final InsnNode dup2X2G = new InsnNode(Opcodes.DUP2_X2);
         // BGRG
-        final InsnNode pop2_3 = new InsnNode(Opcodes.POP2);
+        final InsnNode pop2G = new InsnNode(Opcodes.POP2);
 
         // BGR
         if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
@@ -543,14 +545,14 @@ public final class M1ColorTweakInjector implements IClassTransformer {
             methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
         }
 
-        methodNode.instructions.insertBefore(toPatch, dup2_x2);
-        methodNode.instructions.insertBefore(toPatch, pop2);
+        methodNode.instructions.insertBefore(toPatch, dup2X2B1);
+        methodNode.instructions.insertBefore(toPatch, pop2B1);
         methodNode.instructions.insertBefore(toPatch, storeG);
-        methodNode.instructions.insertBefore(toPatch, dup2_x2_2);
-        methodNode.instructions.insertBefore(toPatch, pop2_2);
+        methodNode.instructions.insertBefore(toPatch, dup2X2B2);
+        methodNode.instructions.insertBefore(toPatch, pop2B2);
         methodNode.instructions.insertBefore(toPatch, loadG);
-        methodNode.instructions.insertBefore(toPatch, dup2_x2_3);
-        methodNode.instructions.insertBefore(toPatch, pop2_3);
+        methodNode.instructions.insertBefore(toPatch, dup2X2G);
+        methodNode.instructions.insertBefore(toPatch, pop2G);
 
         if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
             methodNode.instructions.insertBefore(toPatch, target);
@@ -561,11 +563,17 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         final LabelNode target = new LabelNode();
         final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
         final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
+        // RGBA
         final VarInsnNode storeA = new VarInsnNode(storeType.getOpcode(Opcodes.ISTORE), index);
-        final InsnNode dup_x2 = new InsnNode(Opcodes.DUP_X2);
-        final InsnNode pop = new InsnNode(Opcodes.POP);
-        final InsnNode swap = new InsnNode(Opcodes.SWAP);
+        // RGB
+        final InsnNode dupX2B = new InsnNode(Opcodes.DUP_X2);
+        // BRGB
+        final InsnNode popB = new InsnNode(Opcodes.POP);
+        // BRG
+        final InsnNode swapRG = new InsnNode(Opcodes.SWAP);
+        // BGR
         final VarInsnNode loadA = new VarInsnNode(storeType.getOpcode(Opcodes.ILOAD), index);
+        // BGRA
 
         if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
             methodNode.instructions.insertBefore(toPatch, getFullscreen);
@@ -573,9 +581,9 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         }
 
         methodNode.instructions.insertBefore(toPatch, storeA);
-        methodNode.instructions.insertBefore(toPatch, dup_x2);
-        methodNode.instructions.insertBefore(toPatch, pop);
-        methodNode.instructions.insertBefore(toPatch, swap);
+        methodNode.instructions.insertBefore(toPatch, dupX2B);
+        methodNode.instructions.insertBefore(toPatch, popB);
+        methodNode.instructions.insertBefore(toPatch, swapRG);
         methodNode.instructions.insertBefore(toPatch, loadA);
 
         if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
@@ -590,21 +598,21 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         // RGBA
         final VarInsnNode storeA = new VarInsnNode(Opcodes.DSTORE, index);
         // RGB
-        final InsnNode dup2_x2 = new InsnNode(Opcodes.DUP2_X2);
+        final InsnNode dup2X2B1 = new InsnNode(Opcodes.DUP2_X2);
         // RBGB
-        final InsnNode pop2 = new InsnNode(Opcodes.POP2);
+        final InsnNode pop2B1 = new InsnNode(Opcodes.POP2);
         // RBG
         final VarInsnNode storeG = new VarInsnNode(Opcodes.DSTORE, index2);
         // RB
-        final InsnNode dup2_x2_2 = new InsnNode(Opcodes.DUP2_X2);
+        final InsnNode dup2X2B2 = new InsnNode(Opcodes.DUP2_X2);
         // BRB
-        final InsnNode pop2_2 = new InsnNode(Opcodes.POP2);
+        final InsnNode pop2B2 = new InsnNode(Opcodes.POP2);
         // BR
         final VarInsnNode loadG = new VarInsnNode(Opcodes.DLOAD, index2);
         // BRG
-        final InsnNode dup2_x2_3 = new InsnNode(Opcodes.DUP2_X2);
+        final InsnNode dup2X2G = new InsnNode(Opcodes.DUP2_X2);
         // BGRG
-        final InsnNode pop2_3 = new InsnNode(Opcodes.POP2);
+        final InsnNode pop2G = new InsnNode(Opcodes.POP2);
         // BGR
         final VarInsnNode loadA = new VarInsnNode(Opcodes.DLOAD, index);
 
@@ -615,14 +623,14 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         }
 
         methodNode.instructions.insertBefore(toPatch, storeA);
-        methodNode.instructions.insertBefore(toPatch, dup2_x2);
-        methodNode.instructions.insertBefore(toPatch, pop2);
+        methodNode.instructions.insertBefore(toPatch, dup2X2B1);
+        methodNode.instructions.insertBefore(toPatch, pop2B1);
         methodNode.instructions.insertBefore(toPatch, storeG);
-        methodNode.instructions.insertBefore(toPatch, dup2_x2_2);
-        methodNode.instructions.insertBefore(toPatch, pop2_2);
+        methodNode.instructions.insertBefore(toPatch, dup2X2B2);
+        methodNode.instructions.insertBefore(toPatch, pop2B2);
         methodNode.instructions.insertBefore(toPatch, loadG);
-        methodNode.instructions.insertBefore(toPatch, dup2_x2_3);
-        methodNode.instructions.insertBefore(toPatch, pop2_3);
+        methodNode.instructions.insertBefore(toPatch, dup2X2G);
+        methodNode.instructions.insertBefore(toPatch, pop2G);
         methodNode.instructions.insertBefore(toPatch, loadA);
 
         if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
@@ -630,7 +638,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         }
     }
 
-    private static void reorder3LoadIns(MethodNode methodNode, AbstractInsnNode[] reorderLoadIns, AbstractInsnNode toPatch, AbstractInsnNode _p1, AbstractInsnNode _p2, AbstractInsnNode _p3) {
+    private static void reorder3LoadIns(MethodNode methodNode, AbstractInsnNode[] reorderLoadIns, AbstractInsnNode toPatch, AbstractInsnNode p1, AbstractInsnNode p2, AbstractInsnNode p3) {
         final LabelNode normalLoad = new LabelNode();
         final LabelNode callMethod = new LabelNode();
         final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
@@ -638,22 +646,22 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         final JumpInsnNode jumpToCallMethod = new JumpInsnNode(Opcodes.GOTO, callMethod);
 
         if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
-            methodNode.instructions.insertBefore(_p3, getFullscreen);
-            methodNode.instructions.insertBefore(_p3, skipIfFullscreen);
+            methodNode.instructions.insertBefore(p3, getFullscreen);
+            methodNode.instructions.insertBefore(p3, skipIfFullscreen);
         }
 
-        methodNode.instructions.insertBefore(_p3, reorderLoadIns[0]);
-        methodNode.instructions.insertBefore(_p3, reorderLoadIns[1]);
-        methodNode.instructions.insertBefore(_p3, reorderLoadIns[2]);
+        methodNode.instructions.insertBefore(p3, reorderLoadIns[0]);
+        methodNode.instructions.insertBefore(p3, reorderLoadIns[1]);
+        methodNode.instructions.insertBefore(p3, reorderLoadIns[2]);
 
         if (RetroTweaker.m1PatchMode != M1PatchMode.ForceEnable) {
-            methodNode.instructions.insertBefore(_p3, jumpToCallMethod);
-            methodNode.instructions.insertBefore(_p3, normalLoad);
+            methodNode.instructions.insertBefore(p3, jumpToCallMethod);
+            methodNode.instructions.insertBefore(p3, normalLoad);
             methodNode.instructions.insertBefore(toPatch, callMethod);
         } else {
-            methodNode.instructions.remove(_p1);
-            methodNode.instructions.remove(_p2);
-            methodNode.instructions.remove(_p3);
+            methodNode.instructions.remove(p1);
+            methodNode.instructions.remove(p2);
+            methodNode.instructions.remove(p3);
         }
     }
 

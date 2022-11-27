@@ -230,7 +230,7 @@ public final class Installer {
             refreshButtonStates(patchLibrariesCheckbox, useM1NativesCheckbox);
         }
 
-        if ((versionCount == 0) && (outdatedVersionsIndexes.isEmpty())) {
+        if ((versionCount == 0) && outdatedVersionsIndexes.isEmpty()) {
             JOptionPane.showMessageDialog(null, "All wrapped versions are up to date!", "Info", JOptionPane.INFORMATION_MESSAGE);
         }
 
@@ -603,11 +603,11 @@ public final class Installer {
 
         if (!finalVersions.isEmpty()) {
             final String[] wrappedVersions = finalVersions.toArray(new String[0]);
-            final String[] listDiag = (rewrappedVersions > 0) ? new String[] {
+            final String[] listDiag = rewrappedVersions > 0 ? new String[] {
                                           "Please restart the Minecraft Launcher to refresh re-wrapped versions and instances!",
-                                          (wrappedVersions.length > 1 ? "Successfully wrapped versions" : "Successfully wrapped version")
+                                          wrappedVersions.length > 1 ? "Successfully wrapped versions" : "Successfully wrapped version"
                                       } : new String[] {
-                                          (wrappedVersions.length > 1 ? "Successfully wrapped versions" : "Successfully wrapped version")
+                                          wrappedVersions.length > 1 ? "Successfully wrapped versions" : "Successfully wrapped version"
                                       };
             SwingUtil.showMessageScroller(JOptionPane.INFORMATION_MESSAGE, "Success", wrappedVersions, null, listDiag);
         } else {

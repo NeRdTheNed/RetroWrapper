@@ -179,4 +179,8 @@ public final class NetworkUtil {
         return mppass;
     }
 
+    private NetworkUtil() {
+        // As this is a helper class, there should be no reason to instantiate an instance of it.
+    }
+
 }

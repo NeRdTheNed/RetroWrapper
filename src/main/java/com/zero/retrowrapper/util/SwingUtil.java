@@ -145,7 +145,7 @@ public final class SwingUtil {
                 System.setProperty("apple.awt.application.appearance", "system");
             }
         } catch (final Exception e) {
-            logger.log(Level.WARNING, "An Exception was thrown while trying to set system properties: " + ExceptionUtils.getStackTrace(e));
+            logger.log(Level.WARNING, "An Exception was thrown while trying to set system properties", e);
         }
     }
 
@@ -225,7 +225,7 @@ public final class SwingUtil {
                     try {
                         remainingRateLimit = Integer.parseInt(ratelimit);
                     } catch (final Exception e) {
-                        tempLogger.log(Level.WARNING, "Rate limit API doesn't work?", e);
+                        tempLogger.log(Level.WARNING, "Unknown error when trying to parse the vaule of the remaining rate limit", e);
                     }
                 }
 
@@ -245,14 +245,14 @@ public final class SwingUtil {
                 IOUtils.closeQuietly(rateAPIStream);
             }
 
-            tempLogger.log(Level.FINE, "GitHub rate limit remaining " + remainingRateLimit);
+            tempLogger.log(Level.FINE, "GitHub rate limit remaining {0}", remainingRateLimit);
 
             if (remainingRateLimit != 0) {
                 cacheDirectory.mkdirs();
                 // Cached version response from GitHub
                 final File cachedGithubResponseFile = new File(cacheDirectory, "versioncheck.json");
                 // Cached ETag for the version response from GitHub
-                final File ETagFile = new File(cacheDirectory, "versionchecketag.txt");
+                final File eTagFile = new File(cacheDirectory, "versionchecketag.txt");
                 // The returned latest release tag
                 String latestRelease = null;
                 InputStream connectionInputStream = null;
@@ -275,11 +275,11 @@ public final class SwingUtil {
                             // Invalid version file
                             cachedGithubResponseFile.delete();
 
-                            if (ETagFile.isFile()) {
-                                ETagFile.delete();
+                            if (eTagFile.isFile()) {
+                                eTagFile.delete();
                             }
-                        } else if (ETagFile.isFile()) {
-                            final String etag = FileUtils.readFileToString(ETagFile);
+                        } else if (eTagFile.isFile()) {
+                            final String etag = FileUtils.readFileToString(eTagFile);
                             // Use the cached ETag to prevent excessive requests.
                             // Setting the "If-None-Match" to the previously returned ETag means that
                             // if the data hasn't changed, GitHub will return a response code of return 304
@@ -304,7 +304,7 @@ public final class SwingUtil {
                             final String newETag = urlConnection.getHeaderField("ETag");
 
                             if (newETag != null) {
-                                FileUtils.writeStringToFile(ETagFile, newETag);
+                                FileUtils.writeStringToFile(eTagFile, newETag);
                             }
                         }
                     }
@@ -326,7 +326,7 @@ public final class SwingUtil {
                 }
 
                 if ((latestRelease != null) && !latestRelease.equals(MetadataUtil.VERSION)) {
-                    tempLogger.log(Level.INFO, "Found new update " + latestRelease);
+                    tempLogger.log(Level.INFO, "Found new update {0}", latestRelease);
                     final JFrame updateFrame = new JFrame();
                     updateFrame.setResizable(true);
                     updateFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -362,7 +362,7 @@ public final class SwingUtil {
                     warning.invoke(null, "GitHub API rate limit exceeded, can't check for update!", new Object[0]);
                 } catch (final Exception ignored) {
                     // LaunchWrapper isn't available
-                    tempLogger.log(Level.WARNING, "GitHub API rate limit exceeded, can't check for update!");
+                    tempLogger.log(Level.WARNING, "GitHub API rate limit exceeded, unable to check for update!");
                 }
             }
         } else {
@@ -371,7 +371,7 @@ public final class SwingUtil {
         }
     }
 
-    private static JPanel makeScrollerPannel(String title, String[] wrapArray, JComponent[] additionalComponents, String... preface) {
+    private static JPanel makeScrollerPannel(String[] wrapArray, JComponent[] additionalComponents, String... preface) {
         final JPanel messagePanel = new JPanel();
         messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.PAGE_AXIS));
 
@@ -398,12 +398,12 @@ public final class SwingUtil {
     }
 
     public static void showMessageScroller(int messageType, String title, String[] wrapArray, JComponent[] additionalComponents, String... preface) {
-        final JPanel messagePanel = makeScrollerPannel(title, wrapArray, additionalComponents, preface);
+        final JPanel messagePanel = makeScrollerPannel(wrapArray, additionalComponents, preface);
         JOptionPane.showMessageDialog(null, messagePanel, title, messageType);
     }
 
     public static int showOptionScroller(int option, String title, String[] wrapArray, JComponent[] additionalComponents, String... preface) {
-        final JPanel messagePanel = makeScrollerPannel(title, wrapArray, additionalComponents, preface);
+        final JPanel messagePanel = makeScrollerPannel(wrapArray, additionalComponents, preface);
         return JOptionPane.showConfirmDialog(null, messagePanel, title, option);
     }
 
@@ -412,6 +412,9 @@ public final class SwingUtil {
     }
 
     static final class NoSelectionModel extends DefaultListSelectionModel {
+        // Eclipse complains unless I add this
+        private static final long serialVersionUID = 1L;
+
         @Override
         public void addSelectionInterval(int index0, int index1) {
             super.addSelectionInterval(-1, -1);

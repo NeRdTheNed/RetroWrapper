@@ -24,8 +24,6 @@ import com.zero.retrowrapper.util.JavaUtil;
 import net.minecraft.launchwrapper.LogWrapper;
 
 public final class HackThread extends Thread {
-    static final Pattern commaPattern = Pattern.compile(",", Pattern.LITERAL);
-    static final Pattern spacePattern = Pattern.compile(" ", Pattern.LITERAL);
     // TODO Refactor
     JLabel label;
     RetroPlayer player;
@@ -131,6 +129,9 @@ public final class HackThread extends Thread {
     }
 
     private final class TeleportActionListener implements ActionListener {
+        private final Pattern commaPattern = Pattern.compile(",", Pattern.LITERAL);
+        private final Pattern spacePattern = Pattern.compile(" ", Pattern.LITERAL);
+
         private final JTextField x;
         private final JTextField y;
         private final JTextField z;

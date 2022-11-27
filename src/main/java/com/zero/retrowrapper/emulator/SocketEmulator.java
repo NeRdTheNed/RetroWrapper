@@ -1,9 +1,10 @@
 package com.zero.retrowrapper.emulator;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.regex.Pattern;
@@ -13,7 +14,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.zero.retrowrapper.emulator.registry.EmulatorRegistry;
 import com.zero.retrowrapper.emulator.registry.IHandler;
-import com.zero.retrowrapper.util.ByteUtil;
 
 import net.minecraft.launchwrapper.LogWrapper;
 
@@ -29,23 +29,29 @@ public final class SocketEmulator {
     public void parseIncoming() {
         InputStream is = null;
         OutputStream os = null;
-        DataInputStream dis = null;
+        InputStreamReader ir = null;
+        BufferedReader br = null;
 
         try {
             is = socket.getInputStream();
             os = socket.getOutputStream();
-            dis = new DataInputStream(is);
+            ir = new InputStreamReader(is);
+            br = new BufferedReader(ir);
             int length = -1;
             String get = "";
             int limit = 0;
 
             while (limit < 20) {
-                final String line = ByteUtil.readLine(dis).trim();
+                final String line = br.readLine();
 
                 if (limit == 0) {
                     get = spacePattern.split(line)[1];
                 } else if (line.startsWith("Content-Length: ")) {
-                    length = Integer.parseInt(contentLengthPattern.matcher(line).replaceAll(""));
+                    try {
+                        length = Integer.parseInt(contentLengthPattern.matcher(line).replaceAll(""));
+                    } catch (final NumberFormatException e) {
+                        LogWrapper.severe("Content-Length was not a number (header: " + line + ")", e);
+                    }
                 } else if (line.length() < 2) {
                     break;
                 }
@@ -97,7 +103,8 @@ public final class SocketEmulator {
         } finally {
             IOUtils.closeQuietly(is);
             IOUtils.closeQuietly(os);
-            IOUtils.closeQuietly(dis);
+            IOUtils.closeQuietly(ir);
+            IOUtils.closeQuietly(br);
             IOUtils.closeQuietly(socket);
         }
     }

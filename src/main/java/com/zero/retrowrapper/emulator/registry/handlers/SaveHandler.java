@@ -12,7 +12,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
-import com.zero.retrowrapper.util.ByteUtil;
 
 import net.minecraft.launchwrapper.LogWrapper;
 
@@ -24,10 +23,10 @@ public final class SaveHandler extends EmulatorHandler {
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
         final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
         // Username, not used
-        ByteUtil.readString(dis);
+        dis.readUTF();
         // Auth token, not used
-        ByteUtil.readString(dis);
-        final String levelName = ByteUtil.readString(dis);
+        dis.readUTF();
+        final String levelName = dis.readUTF();
         final byte id = dis.readByte();
         final int levelLength = dis.readInt();
         LogWrapper.fine(levelLength + ";" + data.length);

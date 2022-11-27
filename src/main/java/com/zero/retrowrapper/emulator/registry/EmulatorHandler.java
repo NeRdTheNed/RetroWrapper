@@ -19,7 +19,7 @@ public abstract class EmulatorHandler implements IHandler {
         this.url = url;
     }
 
-    public final void sendHeaders(OutputStream os) throws IOException {
+    public void sendHeaders(OutputStream os, String get) throws IOException {
         os.write(HTTP_HEADERS);
     }
 

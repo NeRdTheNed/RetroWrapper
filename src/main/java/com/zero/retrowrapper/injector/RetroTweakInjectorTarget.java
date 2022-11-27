@@ -15,6 +15,7 @@ import java.util.Map;
 
 import javax.swing.JPanel;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.lwjgl.Sys;
@@ -24,6 +25,7 @@ import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.hack.HackThread;
 import com.zero.retrowrapper.util.FileUtil;
 import com.zero.retrowrapper.util.MetadataUtil;
+import com.zero.retrowrapper.util.NetworkUtil;
 import com.zero.retrowrapper.util.SwingUtil;
 
 import net.minecraft.launchwrapper.IClassTransformer;
@@ -37,6 +39,11 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
      *   ALL RIGHTS TO MOJANG
      *
      */
+
+    public static String serverIP;
+    public static String serverPort;
+
+    public static boolean connectedToClassicServer = false;
 
     public byte[] transform(final String name, final String transformedName, final byte[] bytes) {
         return bytes;
@@ -100,11 +107,44 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
 
             final Map<String, String> params = new HashMap<String, String>();
             final String username = args.length > 0 ? args[0] : "Player" + (System.currentTimeMillis() % 1000);
-            final String sessionId = args.length > 1 ? args[1] : "-";
+            String sessionId = args.length > 1 ? args[1] : "-";
+
+            if (sessionId.startsWith("token:")) {
+                sessionId = sessionId.replace("token:", "");
+                sessionId = sessionId.split(":")[0];
+            }
+
             params.put("username", username);
             params.put("sessionid", sessionId);
             params.put("haspaid", "true");
             params.put("stand-alone", "true");
+            params.put("fullscreen", "false");
+            // Experimental
+            serverIP = System.getProperties().getProperty("retrowrapper.experimental.classicServerIP");
+            serverPort = System.getProperties().getProperty("retrowrapper.experimental.classicServerPort");
+
+            if (serverIP != null) {
+                if (serverPort == null) {
+                    serverPort = "25565";
+                }
+
+                final String uuid = NetworkUtil.getUUIDFromUsername(username);
+                final String serverID = DigestUtils.shaHex((serverIP + ":" + serverPort).getBytes());
+
+                if (NetworkUtil.joinServer(sessionId, uuid, serverID)) {
+                    connectedToClassicServer = true;
+                    params.put("server", serverIP);
+                    params.put("port", serverPort);
+                    final String mppass = NetworkUtil.getBetacraftMPPass(username, serverIP, serverPort);
+
+                    if (mppass != null) {
+                        params.put("mppass", mppass);
+                    } else {
+                        params.put("mppass", "0");
+                    }
+                }
+            }
+
             final Constructor<?> constructor = clazz.getConstructor();
             final Applet object = (Applet) constructor.newInstance();
             final LauncherFake fakeLauncher = new LauncherFake(params, object);

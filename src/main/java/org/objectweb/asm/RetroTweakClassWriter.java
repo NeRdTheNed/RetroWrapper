@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.emulator.registry.EmulatorRegistry;
+import com.zero.retrowrapper.injector.RetroTweakInjectorTarget;
 
 import net.minecraft.launchwrapper.LogWrapper;
 
@@ -76,15 +77,19 @@ public final class RetroTweakClassWriter extends ClassWriter {
 
                 final String transformed;
 
-                // 79.136.77.240 is a hardcoded URL for early multiplayer tests.
-                // TODO Allow patching 79.136.77.240 to be anything the user wants, along with the hardcoded port (5565)
-                if ("79.136.77.240".equals(constant) || "minecraft.net".equals(constant)) {
+                if ("minecraft.net".equals(constant)) {
                     LogWrapper.info(foundUrlTextString + constant);
                     transformed = "127.0.0.1";
                     LogWrapper.info(replacedWithTextString + transformed);
                 } else if (constant.contains("joinserver.jsp") || constant.contains("checkserver.jsp")) {
                     LogWrapper.info(foundUrlTextString + constant);
                     transformed = minecraftNetPattern.matcher(constant).replaceAll("session.minecraft.net");
+                    LogWrapper.info(replacedWithTextString + transformed);
+                } else if ((RetroTweakInjectorTarget.serverIP != null) && "79.136.77.240".equals(constant)) {
+                    // 79.136.77.240 is a hardcoded URL for early multiplayer tests.
+                    // TODO Allow patching the hardcoded port (5565)
+                    LogWrapper.info(foundUrlTextString + constant);
+                    transformed = RetroTweakInjectorTarget.serverIP;
                     LogWrapper.info(replacedWithTextString + transformed);
                 } else {
                     final boolean isNet = constant.contains(".net");

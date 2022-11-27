@@ -81,7 +81,7 @@ public final class SocketEmulator {
             if (handler != null) {
                 try {
                     LogWrapper.info("Request: " + get);
-                    handler.sendHeaders(os);
+                    handler.sendHeaders(os, get);
                     handler.handle(os, get, data);
                 } catch (final Exception e) {
                     LogWrapper.warning("Exception in handling URL: " + ExceptionUtils.getStackTrace(e));

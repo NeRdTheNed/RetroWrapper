@@ -136,7 +136,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
         }
 
         final File imageCache = new File(RetroEmulator.getInstance().getCacheDirectory(), username + fileNameEnd);
-        byte[] skinFileBytes = null;
+        byte[] skinFileBytes;
 
         if (RetroTweakInjectorTarget.connectedToClassicServer && !cape && username.endsWith("+")) {
             // ClassicCube user
@@ -166,7 +166,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
     private static byte[] getImageBytesFromClassicCube(String username) {
         final String classicCubeUsername = username.substring(0, username.length() - 1);
         InputStream is = null;
-        URLConnection urlConnection = null;
+        URLConnection urlConnection;
         HttpURLConnection skinUrlConnection = null;
 
         try {
@@ -199,7 +199,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
         return null;
     }
 
-    private static byte[] getImageBytesFromMojang(String username, Boolean cape) {
+    private static byte[] getImageBytesFromMojang(String username, boolean cape) {
         final String uuid = NetworkUtil.getUUIDFromUsername(username);
 
         if (uuid != null) {

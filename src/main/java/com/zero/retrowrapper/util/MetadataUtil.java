@@ -70,7 +70,7 @@ public final class MetadataUtil {
     }
 
     public static JsonObject[] getLWJGLLibraries(String jsonFile) {
-        JsonObject[] lwjglLibraries = null;
+        JsonObject[] lwjglLibraries;
         final List<JsonObject> tempLwjglLibs = new ArrayList<JsonObject>();
         InputStream lwjglLibsStream = null;
 

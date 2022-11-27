@@ -14,7 +14,7 @@ public final class EmulatorConfig {
 
     public String mobClass;
 
-    private static Random rand = new Random();
+    private static final Random rand = new Random();
 
     private EmulatorConfig() {
         // TODO Is this a good way to determine the port?

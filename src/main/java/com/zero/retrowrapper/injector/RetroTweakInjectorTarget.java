@@ -12,6 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.swing.JPanel;
 
@@ -44,6 +45,9 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
     public static String serverPort;
 
     public static boolean connectedToClassicServer = false;
+
+    private static final Pattern tokenPattern = Pattern.compile("token:", Pattern.LITERAL);
+    private static final Pattern colonPattern = Pattern.compile(":");
 
     public byte[] transform(final String name, final String transformedName, final byte[] bytes) {
         return bytes;
@@ -110,8 +114,8 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             String sessionId = args.length > 1 ? args[1] : "-";
 
             if (sessionId.startsWith("token:")) {
-                sessionId = sessionId.replace("token:", "");
-                sessionId = sessionId.split(":")[0];
+                sessionId = tokenPattern.matcher(sessionId).replaceAll("");
+                sessionId = colonPattern.split(sessionId)[0];
             }
 
             params.put("username", username);
@@ -232,7 +236,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
         final Class<?> clazz = getaClass(name);
 
         for (final Field field : clazz.getDeclaredFields()) {
-            if (Modifier.isStatic(field.getModifiers()) && field.getType().equals(java.io.File.class)) {
+            if (Modifier.isStatic(field.getModifiers()) && field.getType().equals(File.class)) {
                 return field;
             }
         }

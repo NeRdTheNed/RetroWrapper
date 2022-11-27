@@ -122,8 +122,8 @@ public final class SwingUtil {
                         try {
                             final Method setIconImages = Frame.class.getMethod("setIconImages", List.class);
                             setIconImages.invoke(frame, bufferedImageList);
-                        } catch (final Exception ignored) {
-                            LogWrapper.warning("Are you running RetroWrapper on Java 5?: " + ExceptionUtils.getStackTrace(ignored));
+                        } catch (final Exception e) {
+                            LogWrapper.warning("Are you running RetroWrapper on Java 5?: " + ExceptionUtils.getStackTrace(e));
                             frame.setIconImage(bufferedImageList.get(0));
                         }
                     }
@@ -144,8 +144,8 @@ public final class SwingUtil {
             if (System.getProperty("apple.awt.application.appearance") == null) {
                 System.setProperty("apple.awt.application.appearance", "system");
             }
-        } catch (final Exception ignored) {
-            logger.log(Level.WARNING, "An Exception was thrown while trying to set system properties: " + ExceptionUtils.getStackTrace(ignored));
+        } catch (final Exception e) {
+            logger.log(Level.WARNING, "An Exception was thrown while trying to set system properties: " + ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -183,8 +183,8 @@ public final class SwingUtil {
             jsp.setPreferredSize(new Dimension(Math.max(pwidth, 720), 420));
             jsp.setBorder(null);
             JOptionPane.showMessageDialog(errorFrame, jsp, dialogTitle, JOptionPane.ERROR_MESSAGE);
-        } catch (final Exception ignored) {
-            logger.log(Level.WARNING, "An Exception was thrown while trying to display the exception handler", ignored);
+        } catch (final Exception e) {
+            logger.log(Level.WARNING, "An Exception was thrown while trying to display the exception handler", e);
             JOptionPane.showMessageDialog(errorFrame, "Please report this issue on GitHub!\nhttps://github.com/NeRdTheNed/RetroWrapper/issues/new\nPlease take a screenshot of this message for the issue.\n" + dialogTitle + "\n" + issueTitle + "\n" + displayIssueBody, "(Backup handler) " + dialogTitle, JOptionPane.ERROR_MESSAGE);
         }
 
@@ -348,8 +348,8 @@ public final class SwingUtil {
                         textPane.setSelectedTextColor(new Color(0, 0, 0, 0));
                         textPane.setBackground(new Color(0, 0, 0, 0));
                         JOptionPane.showMessageDialog(updateFrame, textPane, "Update available!", JOptionPane.INFORMATION_MESSAGE);
-                    } catch (final Exception ignored) {
-                        tempLogger.log(Level.WARNING, "An Exception was thrown while trying to display the update notifier", ignored);
+                    } catch (final Exception e) {
+                        tempLogger.log(Level.WARNING, "An Exception was thrown while trying to display the update notifier", e);
                         JOptionPane.showMessageDialog(null, "A new version of RetroWrapper (" + latestRelease + ") has been released!\nYou can download it from https://github.com/NeRdTheNed/RetroWrapper/releases", "Update available!", JOptionPane.INFORMATION_MESSAGE);
                     }
 
@@ -440,12 +440,12 @@ public final class SwingUtil {
                     final Object desktopObject = getDesktop.invoke(null);
                     final Method browse = desktopClass.getMethod("browse", URI.class);
                     browse.invoke(desktopObject, event.getURL().toURI());
-                } catch (final Exception ignored) {
-                    if ((ignored instanceof NoSuchMethodException) || (ignored instanceof ClassNotFoundException)) {
+                } catch (final Exception e) {
+                    if ((e instanceof NoSuchMethodException) || (e instanceof ClassNotFoundException)) {
                         logger.log(Level.WARNING, "Are you running RetroWrapper on Java 5?");
                     }
 
-                    logger.log(Level.WARNING, "Could not open link from hyperlinkUpdate", ignored);
+                    logger.log(Level.WARNING, "Could not open link from hyperlinkUpdate", e);
                     JOptionPane.showMessageDialog(textPane, "Your platform doesn't let Java open links!\nPlease browse to " + event.getURL() + " manually.\nThanks for putting up with this!", "Sorry", JOptionPane.INFORMATION_MESSAGE);
                 }
             }

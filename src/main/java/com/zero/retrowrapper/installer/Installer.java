@@ -354,7 +354,7 @@ public final class Installer {
         return toReturn;
     }
 
-    private static void refreshButtonStates(JCheckBox patchLibrariesCheckbox, JCheckBox useM1NativesCheckbox) {
+    static void refreshButtonStates(JCheckBox patchLibrariesCheckbox, JCheckBox useM1NativesCheckbox) {
         patchLibrariesCheckbox.setSelected(shouldUpdateLibraries);
 
         if (useM1NativesCheckbox != null) {
@@ -403,8 +403,8 @@ public final class Installer {
         try {
             final KeyboardFocusManager keyboardFocusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
             keyboardFocusManager.addKeyEventDispatcher(new DebugKeyDispatcher(logger));
-        } catch (final Exception ignored) {
-            logger.log(Level.WARNING, "Could not add DebugKeyDispatcher, debug key combinations will not work", ignored);
+        } catch (final Exception e) {
+            logger.log(Level.WARNING, "Could not add DebugKeyDispatcher, debug key combinations will not work", e);
         }
     }
 
@@ -414,7 +414,7 @@ public final class Installer {
         final String retroWrapperLibraryLocation = "com" + File.separator + "zero" + File.separator + "retrowrapper" + File.separator + MetadataUtil.VERSION;
         final File libDir = new File(directory, "libraries" + File.separator + retroWrapperLibraryLocation);
         libDir.mkdirs();
-        File retroWrapperJar = null;
+        File retroWrapperJar;
 
         try {
             retroWrapperJar = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation().toURI());

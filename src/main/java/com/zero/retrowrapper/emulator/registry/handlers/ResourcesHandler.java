@@ -64,7 +64,7 @@ public final class ResourcesHandler extends EmulatorHandler {
         }
     }
 
-    private JsonObject downloadSoundData() {
+    private static JsonObject downloadSoundData() {
         final File jsonCached = new File(RetroEmulator.getInstance().getCacheDirectory(), "legacy.json");
         final File localLegacyJson = FileUtil.tryFindFirstFile(
                                          jsonCached,

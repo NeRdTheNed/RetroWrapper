@@ -49,7 +49,7 @@ public final class NetworkUtil {
     // https://wiki.vg/Protocol_Encryption#Authentication
     public static boolean joinServer(String sessionId, String profileUUID, String serverId) {
         boolean authenticated = false;
-        URLConnection urlConnection = null;
+        URLConnection urlConnection;
         HttpURLConnection joinSeverConnection = null;
         OutputStream askJoinStream = null;
         InputStream responseStream = null;
@@ -94,8 +94,7 @@ public final class NetworkUtil {
 
                     try {
                         failedResponseMessage = IOUtils.toString(responseStream);
-                        final String failedResponseMessageFormatted = Json.parse(failedResponseMessage).toString(PrettyPrint.indentWithSpaces(4));
-                        failedResponseMessage = failedResponseMessageFormatted;
+                        failedResponseMessage = Json.parse(failedResponseMessage).toString(PrettyPrint.indentWithSpaces(4));
                     } catch (final Exception e) {
                         // This should always be JSON, but it's possible that it'll be changed in the future
                         LogWrapper.warning("Response wasn't JSON?: " + ExceptionUtils.getStackTrace(e));
@@ -125,7 +124,7 @@ public final class NetworkUtil {
 
     public static String getBetacraftMPPass(String username, String serverIP, String serverPort) {
         String mppass = null;
-        URLConnection urlConnection = null;
+        URLConnection urlConnection;
         HttpURLConnection getMPPassUrlConnection = null;
         InputStream responseStream = null;
 

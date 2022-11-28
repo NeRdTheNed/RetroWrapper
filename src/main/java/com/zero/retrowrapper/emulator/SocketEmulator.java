@@ -1,7 +1,6 @@
 package com.zero.retrowrapper.emulator;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -28,18 +27,16 @@ public final class SocketEmulator {
     public void parseIncoming() {
         InputStream is = null;
         OutputStream os = null;
-        DataInputStream dis = null;
 
         try {
             is = socket.getInputStream();
             os = socket.getOutputStream();
-            dis = new DataInputStream(is);
             int length = -1;
             String get = "";
             int limit = 0;
 
             while (limit < 20) {
-                final String line = dis.readLine();
+                final String line = readLine(is).trim();
 
                 if (limit == 0) {
                     get = spacePattern.split(line)[1];
@@ -47,7 +44,7 @@ public final class SocketEmulator {
                     try {
                         length = Integer.parseInt(contentLengthPattern.matcher(line).replaceAll(""));
                     } catch (final NumberFormatException e) {
-                        LogWrapper.severe("Content-Length was not a number (header: " + line + ")", e);
+                        LogWrapper.severe("Content-Length was not a number (header: " + line + "): " + ExceptionUtils.getStackTrace(e));
                     }
                 } else if (line.length() < 2) {
                     break;
@@ -100,8 +97,23 @@ public final class SocketEmulator {
         } finally {
             IOUtils.closeQuietly(is);
             IOUtils.closeQuietly(os);
-            IOUtils.closeQuietly(dis);
             IOUtils.closeQuietly(socket);
         }
+    }
+
+    private static String readLine(InputStream is) throws IOException {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        while (true) {
+            final int b = is.read();
+
+            if (b == '\n') {
+                break;
+            }
+
+            bos.write(b);
+        }
+
+        return bos.toString();
     }
 }

@@ -46,8 +46,39 @@ public final class NetworkUtil {
         return uuid;
     }
 
+    public static boolean joinServer(String sessionId, String username, String serverId) {
+        final String profileUUID = NetworkUtil.getUUIDFromUsername(username);
+        return joinServerModern(sessionId, profileUUID, serverId) || joinServerLegacy(sessionId, username, serverId);
+    }
+
+    private static boolean joinServerLegacy(String sessionId, String username, String serverId) {
+        if ((sessionId == null) || (username == null) || (serverId == null)) {
+            LogWrapper.warning("Can't connect to a server if a param is null!");
+            return false;
+        }
+
+        InputStream responseStream = null;
+
+        try {
+            responseStream = new URL("http://session.minecraft.net/game/joinserver.jsp?user=" + username + "&sessionId=" + sessionId + "&serverId=" + serverId).openStream();
+            final String response = IOUtils.toString(responseStream);
+            return "ok".equalsIgnoreCase(response);
+        } catch (final Exception e) {
+            LogWrapper.warning("Exception thrown while trying to connect to session.minecraft.net to authenticate server connection: " + ExceptionUtils.getStackTrace(e));
+        } finally {
+            IOUtils.closeQuietly(responseStream);
+        }
+
+        return false;
+    }
+
     // https://wiki.vg/Protocol_Encryption#Authentication
-    public static boolean joinServer(String sessionId, String profileUUID, String serverId) {
+    private static boolean joinServerModern(String sessionId, String profileUUID, String serverId) {
+        if ((sessionId == null) || (profileUUID == null) || (serverId == null)) {
+            LogWrapper.warning("Can't connect to a server if a param is null!");
+            return false;
+        }
+
         boolean authenticated = false;
         URLConnection urlConnection;
         HttpURLConnection joinSeverConnection = null;

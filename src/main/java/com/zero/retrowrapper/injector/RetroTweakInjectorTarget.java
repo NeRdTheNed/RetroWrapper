@@ -42,6 +42,9 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
      *
      */
 
+    public static String username;
+    public static String sessionId;
+
     public static String serverIP;
     public static String serverPort;
 
@@ -118,8 +121,8 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             }
 
             final Map<String, String> params = new HashMap<String, String>();
-            final String username = args.length > 0 ? args[0] : "Player" + (System.currentTimeMillis() % 1000);
-            String sessionId = args.length > 1 ? args[1] : "-";
+            username = args.length > 0 ? args[0] : "Player" + (System.currentTimeMillis() % 1000);
+            sessionId = args.length > 1 ? args[1] : "-";
 
             if (sessionId.startsWith("token:")) {
                 sessionId = tokenPattern.matcher(sessionId).replaceAll("");
@@ -140,10 +143,9 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
                     serverPort = "25565";
                 }
 
-                final String uuid = NetworkUtil.getUUIDFromUsername(username);
                 final String serverID = DigestUtils.shaHex((serverIP + ":" + serverPort).getBytes());
 
-                if (NetworkUtil.joinServer(sessionId, uuid, serverID)) {
+                if (NetworkUtil.joinServer(sessionId, username, serverID)) {
                     connectedToClassicServer = true;
                     params.put("server", serverIP);
                     params.put("port", serverPort);

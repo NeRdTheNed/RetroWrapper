@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.zero.retrowrapper.emulator.RetroEmulator;
+import com.zero.retrowrapper.emulator.registry.handlers.JoinServerHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.ListmapsHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.LoadHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.ResourcesHandler;
@@ -69,6 +70,7 @@ public final class EmulatorRegistry {
         moveInvalidFiles(new File(Launch.minecraftHome, "resources"), "ogg");
         moveInvalidFiles(new File(Launch.minecraftHome + "/assets/virtual/legacy/"), "ogg");
         handlers = new ArrayList<IHandler>();
+        handlers.add(new JoinServerHandler("joinserver.jsp"));
         handlers.add(new SingleResponseHandler("login/session.jsp", "ok".getBytes()));
         handlers.add(new SingleResponseHandler("session?name=", "ok".getBytes()));
         handlers.add(new SingleResponseHandler("/game/?n=", "0".getBytes()));

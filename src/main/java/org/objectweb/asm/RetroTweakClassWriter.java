@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.regex.Pattern;
 
 import com.zero.retrowrapper.emulator.registry.EmulatorRegistry;
+import com.zero.retrowrapper.emulator.registry.IHandler;
 import com.zero.retrowrapper.injector.RetroTweakInjectorTarget;
 
 import net.minecraft.launchwrapper.LogWrapper;
@@ -82,10 +83,6 @@ public final class RetroTweakClassWriter extends ClassWriter {
                     LogWrapper.info(foundUrlTextString + constant);
                     transformed = "127.0.0.1";
                     LogWrapper.info(replacedWithTextString + transformed);
-                } else if (constant.contains("joinserver.jsp") || constant.contains("checkserver.jsp")) {
-                    LogWrapper.info(foundUrlTextString + constant);
-                    transformed = minecraftNetPattern.matcher(constant).replaceAll("session.minecraft.net");
-                    LogWrapper.info(replacedWithTextString + transformed);
                 } else if ((RetroTweakInjectorTarget.serverIP != null) && "79.136.77.240".equals(constant)) {
                     // 79.136.77.240 is a hardcoded URL for early multiplayer tests.
                     // TODO Allow patching the hardcoded port (5565)
@@ -98,8 +95,13 @@ public final class RetroTweakClassWriter extends ClassWriter {
 
                     if (isNet || isCom) {
                         LogWrapper.info(foundUrlTextString + constant);
+                        final IHandler handler = EmulatorRegistry.getHandlerByUrl(constant);
 
-                        if (constant.contains("minecraft.net") || (EmulatorRegistry.getHandlerByUrl(constant) != null)) {
+                        if ((handler == null) && (constant.contains("joinserver.jsp") || constant.contains("checkserver.jsp"))) {
+                            LogWrapper.info(foundUrlTextString + constant);
+                            transformed = minecraftNetPattern.matcher(constant).replaceAll("session.minecraft.net");
+                            LogWrapper.info(replacedWithTextString + transformed);
+                        } else if (constant.contains("minecraft.net") || (handler != null)) {
                             final String prepend = isCom ?
                                                    constant.contains("https://") || constant.contains("http://") ? "http://" : "" :
                                                    (constant.contains("https://") ? "https://" : "") + (constant.contains("http://") ? "http://" : "");

@@ -1,10 +1,9 @@
 package com.zero.retrowrapper.emulator;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.regex.Pattern;
@@ -29,20 +28,18 @@ public final class SocketEmulator {
     public void parseIncoming() {
         InputStream is = null;
         OutputStream os = null;
-        InputStreamReader ir = null;
-        BufferedReader br = null;
+        DataInputStream dis = null;
 
         try {
             is = socket.getInputStream();
             os = socket.getOutputStream();
-            ir = new InputStreamReader(is);
-            br = new BufferedReader(ir);
+            dis = new DataInputStream(is);
             int length = -1;
             String get = "";
             int limit = 0;
 
             while (limit < 20) {
-                final String line = br.readLine();
+                final String line = dis.readLine();
 
                 if (limit == 0) {
                     get = spacePattern.split(line)[1];
@@ -103,8 +100,7 @@ public final class SocketEmulator {
         } finally {
             IOUtils.closeQuietly(is);
             IOUtils.closeQuietly(os);
-            IOUtils.closeQuietly(ir);
-            IOUtils.closeQuietly(br);
+            IOUtils.closeQuietly(dis);
             IOUtils.closeQuietly(socket);
         }
     }

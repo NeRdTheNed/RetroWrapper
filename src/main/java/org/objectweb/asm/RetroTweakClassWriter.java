@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
-import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.emulator.registry.EmulatorRegistry;
 import com.zero.retrowrapper.injector.RetroTweakInjectorTarget;
 
 import net.minecraft.launchwrapper.LogWrapper;
 
 public final class RetroTweakClassWriter extends ClassWriter {
+    public static String mobClass;
+
     private static final String foundUrlTextString = "Found URL!: ";
     private static final String replacedWithTextString = "Replaced with: ";
     private static final int CLASS = 7;
@@ -71,8 +72,8 @@ public final class RetroTweakClassWriter extends ClassWriter {
             case UTF8:
                 final String constant = item.g;
 
-                if ((constant.contains("random.splash") || constant.contains("char.png")) && (EmulatorConfig.getInstance().mobClass == null)) {
-                    EmulatorConfig.getInstance().mobClass = className;
+                if ((constant.contains("random.splash") || constant.contains("char.png")) && (mobClass == null)) {
+                    mobClass = className;
                 }
 
                 final String transformed;
@@ -110,7 +111,7 @@ public final class RetroTweakClassWriter extends ClassWriter {
                                 postpend += "/login/session.jsp";
                             }
 
-                            transformed = prepend + "127.0.0.1:" + EmulatorConfig.getInstance().getPort() + postpend;
+                            transformed = prepend + "127.0.0.1:" + RetroTweakInjectorTarget.localServerPort + postpend;
                             LogWrapper.info(replacedWithTextString + transformed);
                         } else {
                             transformed = constant;

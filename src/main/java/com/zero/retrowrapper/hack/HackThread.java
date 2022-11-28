@@ -16,8 +16,8 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.objectweb.asm.RetroTweakClassWriter;
 
-import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.injector.RetroTweakInjectorTarget;
 import com.zero.retrowrapper.util.JavaUtil;
 
@@ -82,14 +82,21 @@ public final class HackThread extends Thread {
         }
 
         try {
-            final EmulatorConfig config = EmulatorConfig.getInstance();
-            config.minecraftField.setAccessible(true);
-            player.minecraft = config.minecraftField.get(config.applet);
+            RetroTweakInjectorTarget.minecraftField.setAccessible(true);
+            player.minecraft = RetroTweakInjectorTarget.minecraftField.get(RetroTweakInjectorTarget.applet);
             final Class<?> mcClass = JavaUtil.getMostSuper(player.minecraft.getClass());
             LogWrapper.fine("Minecraft class: " + mcClass.getName());
-            LogWrapper.fine("Mob class: " + config.mobClass);
+
+            // TODO Is this safe?
+            while (true) {
+                if (RetroTweakClassWriter.mobClass != null) {
+                    break;
+                }
+            }
+
+            LogWrapper.fine("Mob class: " + RetroTweakClassWriter.mobClass);
             player.playerObj = null;
-            final Class<?> mobClass = RetroTweakInjectorTarget.getaClass(config.mobClass);
+            final Class<?> mobClass = RetroTweakInjectorTarget.getaClass(RetroTweakClassWriter.mobClass);
 
             while (player.playerObj == null) {
                 for (final Field f : mcClass.getDeclaredFields()) {

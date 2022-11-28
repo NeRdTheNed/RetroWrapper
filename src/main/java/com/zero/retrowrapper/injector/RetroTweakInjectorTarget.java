@@ -6,10 +6,12 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -21,7 +23,6 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.lwjgl.Sys;
 
-import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.hack.HackThread;
 import com.zero.retrowrapper.util.FileUtil;
@@ -46,6 +47,11 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
 
     public static boolean connectedToClassicServer = false;
 
+    public static Field minecraftField;
+    public static Applet applet;
+
+    public static int localServerPort;
+
     private static final Pattern tokenPattern = Pattern.compile("token:", Pattern.LITERAL);
     private static final Pattern colonPattern = Pattern.compile(":");
 
@@ -54,7 +60,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
     }
 
     // TODO can the throws be removed?
-    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, IOException {
         LogWrapper.info(
             "\n******************************" +
             "\n*     old mojang servers     *" +
@@ -92,7 +98,9 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             LogWrapper.warning("Update check failed: " + ExceptionUtils.getStackTrace(e));
         }
 
-        new RetroEmulator().start();
+        final ServerSocket server = new ServerSocket(0);
+        localServerPort = server.getLocalPort();
+        new RetroEmulator(server).start();
 
         try {
             Class<?> clazz;
@@ -161,7 +169,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
 
                 if (!name.contains("awt") && !name.contains("java") && !field.getType().equals(Long.TYPE)) {
                     LogWrapper.fine("Found likely Minecraft candidate: " + field);
-                    EmulatorConfig.getInstance().minecraftField = field;
+                    minecraftField = field;
                     final Field fileField = getWorkingDirField(name);
 
                     if (veryOld) {
@@ -192,7 +200,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
                 }
             }
 
-            EmulatorConfig.getInstance().applet = object;
+            applet = object;
             startMinecraft(fakeLauncher, object, args);
 
             if (System.getProperties().getProperty("retrowrapper.hack") != null) {

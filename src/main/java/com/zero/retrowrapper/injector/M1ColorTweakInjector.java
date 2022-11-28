@@ -29,7 +29,6 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 import com.zero.retrowrapper.RetroTweaker;
 import com.zero.retrowrapper.RetroTweaker.M1PatchMode;
-import com.zero.retrowrapper.emulator.EmulatorConfig;
 import com.zero.retrowrapper.util.JavaUtil;
 
 import net.minecraft.launchwrapper.IClassTransformer;
@@ -465,9 +464,8 @@ public final class M1ColorTweakInjector implements IClassTransformer {
             try {
                 final Class<?> classWithReloadTextureMethod = RetroTweakInjectorTarget.getaClass(reloadTexturesClassName);
                 reloadTexturesMethod = classWithReloadTextureMethod.getMethod(reloadTexturesMethodName);
-                final EmulatorConfig config = EmulatorConfig.getInstance();
-                config.minecraftField.setAccessible(true);
-                final Object minecraft = config.minecraftField.get(config.applet);
+                RetroTweakInjectorTarget.minecraftField.setAccessible(true);
+                final Object minecraft = RetroTweakInjectorTarget.minecraftField.get(RetroTweakInjectorTarget.applet);
                 final Class<?> mcClass = JavaUtil.getMostSuper(minecraft.getClass());
 
                 for (final Field field : mcClass.getDeclaredFields()) {

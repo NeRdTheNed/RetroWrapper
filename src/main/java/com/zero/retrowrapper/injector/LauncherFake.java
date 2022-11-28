@@ -8,8 +8,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
-import com.zero.retrowrapper.emulator.EmulatorConfig;
-
 import net.minecraft.launchwrapper.LogWrapper;
 
 public final class LauncherFake extends Applet implements AppletStub {
@@ -44,7 +42,7 @@ public final class LauncherFake extends Applet implements AppletStub {
 
     private static URL getBase() {
         try {
-            return new URL("http://127.0.0.1:" + EmulatorConfig.getInstance().getPort() + "/game/");
+            return new URL("http://127.0.0.1:" + RetroTweakInjectorTarget.localServerPort + "/game/");
         } catch (final MalformedURLException e) {
             LogWrapper.severe("Local server URL was malformed?: " + ExceptionUtils.getStackTrace(e));
         }

@@ -11,11 +11,18 @@ import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LogWrapper;
 
 public final class RetroEmulator extends Thread {
+    ServerSocket server;
+
     private static RetroEmulator instance;
 
     private File directory;
     private File mapsDirectory;
     private File cacheDirectory;
+
+
+    public RetroEmulator(ServerSocket server) {
+        this.server = server;
+    }
 
     public void run() {
         // TODO Is this threadsafe, and does it need to be?
@@ -23,15 +30,12 @@ public final class RetroEmulator extends Thread {
         LogWrapper.info("Old servers emulator is running!");
         directory = new File(Launch.minecraftHome, "retrowrapper");
         directory.mkdirs();
-        mapsDirectory = new File(RetroEmulator.getInstance().directory, "maps");
+        mapsDirectory = new File(directory, "maps");
         mapsDirectory.mkdirs();
-        cacheDirectory = new File(RetroEmulator.getInstance().directory, "cache");
+        cacheDirectory = new File(directory, "cache");
         cacheDirectory.mkdirs();
-        ServerSocket server = null;
 
         try {
-            server = new ServerSocket(EmulatorConfig.getInstance().getPort());
-
             while (true) {
                 Socket socket = null;
 

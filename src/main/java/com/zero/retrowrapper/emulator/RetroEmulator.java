@@ -3,6 +3,8 @@ package com.zero.retrowrapper.emulator;
 import java.io.File;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -18,7 +20,6 @@ public final class RetroEmulator extends Thread {
     private File directory;
     private File mapsDirectory;
     private File cacheDirectory;
-
 
     public RetroEmulator(ServerSocket server) {
         this.server = server;
@@ -36,18 +37,18 @@ public final class RetroEmulator extends Thread {
         cacheDirectory.mkdirs();
 
         try {
+            final ExecutorService threadPool = Executors.newCachedThreadPool();
+
             while (true) {
                 Socket socket = null;
 
                 try {
                     socket = server.accept();
-                    new SocketEmulator(socket).parseIncoming();
-                    socket.close();
+                    final SocketEmulator emulator = new SocketEmulator(socket);
+                    threadPool.execute(emulator);
                 } catch (final Exception e) {
                     // TODO Better error handling
                     LogWrapper.warning("Error when parsing incoming data for RetroWrapper local server: " + ExceptionUtils.getStackTrace(e));
-                } finally {
-                    IOUtils.closeQuietly(socket);
                 }
             }
         } catch (final Exception e) {

@@ -15,7 +15,7 @@ import com.zero.retrowrapper.emulator.registry.IHandler;
 
 import net.minecraft.launchwrapper.LogWrapper;
 
-public final class SocketEmulator {
+public final class SocketEmulator implements Runnable {
     private static final Pattern spacePattern = Pattern.compile(" ");
     private static final Pattern contentLengthPattern = Pattern.compile("Content-Length: ", Pattern.LITERAL);
     private final Socket socket;
@@ -24,7 +24,7 @@ public final class SocketEmulator {
         this.socket = socket;
     }
 
-    public void parseIncoming() {
+    public void run() {
         InputStream is = null;
         OutputStream os = null;
 
@@ -92,7 +92,7 @@ public final class SocketEmulator {
 
             os.flush();
             socket.close();
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             LogWrapper.warning("Error in SocketEmulator when parsing incoming data for RetroWrapper local server: " + ExceptionUtils.getStackTrace(e));
         } finally {
             IOUtils.closeQuietly(is);

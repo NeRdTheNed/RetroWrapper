@@ -69,10 +69,10 @@ public final class EmulatorRegistry {
         moveInvalidFiles(new File(Launch.minecraftHome, "resources"), "ogg");
         moveInvalidFiles(new File(Launch.minecraftHome + "/assets/virtual/legacy/"), "ogg");
         handlers = new ArrayList<IHandler>();
-        handlers.add(new SingleResponseHandler("login/session.jsp", "ok"));
-        handlers.add(new SingleResponseHandler("session?name=", "ok"));
-        handlers.add(new SingleResponseHandler("/game/?n=", "0"));
-        handlers.add(new SingleResponseHandler("haspaid.jsp", "true"));
+        handlers.add(new SingleResponseHandler("login/session.jsp", "ok".getBytes()));
+        handlers.add(new SingleResponseHandler("session?name=", "ok".getBytes()));
+        handlers.add(new SingleResponseHandler("/game/?n=", "0".getBytes()));
+        handlers.add(new SingleResponseHandler("haspaid.jsp", "true".getBytes()));
         handlers.add(new SaveHandler());
         handlers.add(new LoadHandler());
         handlers.add(new ListmapsHandler());

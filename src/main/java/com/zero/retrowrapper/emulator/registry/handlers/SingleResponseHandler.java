@@ -6,14 +6,14 @@ import java.io.OutputStream;
 import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
 
 public final class SingleResponseHandler extends EmulatorHandler {
-    private final String toWrite;
+    private final byte[] toWrite;
 
-    public SingleResponseHandler(String url, String toWrite) {
+    public SingleResponseHandler(String url, byte[] toWrite) {
         super(url);
         this.toWrite = toWrite;
     }
 
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
-        os.write(toWrite.getBytes());
+        os.write(toWrite);
     }
 }

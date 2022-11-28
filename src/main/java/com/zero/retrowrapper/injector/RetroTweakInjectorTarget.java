@@ -50,6 +50,8 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
 
     public static boolean connectedToClassicServer = false;
 
+    public static boolean showClassiCubeUserDefaultSkin = false;
+
     public static Field minecraftField;
     public static Applet applet;
 
@@ -137,6 +139,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             // Experimental
             serverIP = System.getProperties().getProperty("retrowrapper.experimental.classicServerIP");
             serverPort = System.getProperties().getProperty("retrowrapper.experimental.classicServerPort");
+            showClassiCubeUserDefaultSkin = System.getProperties().getProperty("retrowrapper.showClassiCubeDefaultSkin") != null;
 
             if (serverIP != null) {
                 if (serverPort == null) {

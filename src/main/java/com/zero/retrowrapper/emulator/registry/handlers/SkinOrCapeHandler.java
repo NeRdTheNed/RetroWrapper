@@ -15,10 +15,13 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.imageio.ImageIO;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -46,9 +49,55 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
          + "Content-Length: 0\n"
          + "Connection: Closed\r\n\n").getBytes();
 
+    private static final File classiCubeDefaultChar = new File(RetroEmulator.getInstance().getCacheDirectory(), "/classicube/char.png");
+
     // TODO Detect supported skin sizes
     private static final int SKIN_WIDTH = 64;
     private static final int SKIN_HEIGHT = 32;
+
+    static {
+        if (RetroTweakInjectorTarget.showClassiCubeUserDefaultSkin && !classiCubeDefaultChar.isFile()) {
+            InputStream is = null;
+            ZipInputStream zis = null;
+            URLConnection urlConnection;
+            HttpURLConnection skinUrlConnection = null;
+
+            try {
+                urlConnection = new URL("https://classicube.net/static/default.zip").openConnection();
+
+                if (urlConnection instanceof HttpURLConnection) {
+                    skinUrlConnection = (HttpURLConnection) urlConnection;
+                    skinUrlConnection.connect();
+                    final int respCode = skinUrlConnection.getResponseCode();
+
+                    if (respCode == HttpURLConnection.HTTP_OK) {
+                        is = skinUrlConnection.getInputStream();
+                        zis = new ZipInputStream(is);
+
+                        for (ZipEntry entry = zis.getNextEntry(); !"char.png".equals(entry.getName()); entry = zis.getNextEntry()) {
+                            zis.closeEntry();
+                        }
+
+                        final byte[] charBytes = IOUtils.toByteArray(zis);
+                        FileUtils.writeByteArrayToFile(classiCubeDefaultChar, charBytes);
+                    } else {
+                        LogWrapper.warning("Response code " + respCode + " given while trying to get ClassiCube default resources");
+                    }
+                } else {
+                    LogWrapper.severe("URL.openConnection() didn't return instance of HttpURLConnection");
+                }
+            } catch (final Exception e) {
+                LogWrapper.warning("Exception thrown while trying to get ClassiCube skin: " + ExceptionUtils.getStackTrace(e));
+            } finally {
+                IOUtils.closeQuietly(is);
+                IOUtils.closeQuietly(zis);
+
+                if (skinUrlConnection != null) {
+                    skinUrlConnection.disconnect();
+                }
+            }
+        }
+    }
 
     public SkinOrCapeHandler(String url, boolean isCape) {
         super(url);
@@ -103,7 +152,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                 if (imgRaw.getWidth() == SKIN_WIDTH) {
                     imgRawCorrectRes = imgRaw;
                 } else {
-                    // Scale any non-standard sized images (e.g. ClassicCube skins) to have a width of 64
+                    // Scale any non-standard sized images (e.g. ClassiCube skins) to have a width of 64
                     imgRawCorrectRes = imgRaw.getScaledInstance(SKIN_WIDTH, -1, Image.SCALE_SMOOTH);
                 }
 
@@ -137,10 +186,11 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
 
         final File imageCache = new File(RetroEmulator.getInstance().getCacheDirectory(), username + fileNameEnd);
         byte[] skinFileBytes;
+        final boolean isClassiCubeUser = RetroTweakInjectorTarget.connectedToClassicServer && !cape && username.endsWith("+");
 
-        if (RetroTweakInjectorTarget.connectedToClassicServer && !cape && username.endsWith("+")) {
-            // ClassicCube user
-            skinFileBytes = getImageBytesFromClassicCube(username);
+        if (isClassiCubeUser) {
+            // ClassiCube user
+            skinFileBytes = getImageBytesFromClassiCube(username);
         } else {
             skinFileBytes = getImageBytesFromMojang(username, cape);
         }
@@ -160,17 +210,23 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
             return skinFileBytes;
         }
 
-        return getImageBytesFromFile(imageCache);
+        skinFileBytes = getImageBytesFromFile(imageCache);
+
+        if (skinFileBytes != null) {
+            return skinFileBytes;
+        }
+
+        return isClassiCubeUser && RetroTweakInjectorTarget.showClassiCubeUserDefaultSkin && classiCubeDefaultChar.exists() ? getImageBytesFromFile(classiCubeDefaultChar) : null;
     }
 
-    private static byte[] getImageBytesFromClassicCube(String username) {
-        final String classicCubeUsername = username.substring(0, username.length() - 1);
+    private static byte[] getImageBytesFromClassiCube(String username) {
+        final String classiCubeUsername = username.substring(0, username.length() - 1);
         InputStream is = null;
         URLConnection urlConnection;
         HttpURLConnection skinUrlConnection = null;
 
         try {
-            urlConnection = new URL("https://classicube.s3.amazonaws.com/skin/" + classicCubeUsername + ".png").openConnection();
+            urlConnection = new URL("https://classicube.s3.amazonaws.com/skin/" + classiCubeUsername + ".png").openConnection();
 
             if (urlConnection instanceof HttpURLConnection) {
                 skinUrlConnection = (HttpURLConnection) urlConnection;
@@ -182,12 +238,12 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                     return IOUtils.toByteArray(is);
                 }
 
-                LogWrapper.warning("Response code " + respCode + " given while trying to get ClassicCube skin");
+                LogWrapper.warning("Response code " + respCode + " given while trying to get ClassiCube skin");
             } else {
                 LogWrapper.severe("URL.openConnection() didn't return instance of HttpURLConnection");
             }
         } catch (final Exception e) {
-            LogWrapper.warning("Exception thrown while trying to get ClassicCube skin: " + ExceptionUtils.getStackTrace(e));
+            LogWrapper.warning("Exception thrown while trying to get ClassiCube skin: " + ExceptionUtils.getStackTrace(e));
         } finally {
             IOUtils.closeQuietly(is);
 

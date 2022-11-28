@@ -74,12 +74,22 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                         is = skinUrlConnection.getInputStream();
                         zis = new ZipInputStream(is);
 
-                        for (ZipEntry entry = zis.getNextEntry(); !"char.png".equals(entry.getName()); entry = zis.getNextEntry()) {
+                        while (true) {
+                            final ZipEntry entry = zis.getNextEntry();
+
+                            if (entry == null) {
+                                LogWrapper.warning("Could not find char.png in ClassiCube default resources");
+                                break;
+                            }
+
+                            if ("char.png".equals(entry.getName())) {
+                                final byte[] charBytes = IOUtils.toByteArray(zis);
+                                FileUtils.writeByteArrayToFile(classiCubeDefaultChar, charBytes);
+                                break;
+                            }
+
                             zis.closeEntry();
                         }
-
-                        final byte[] charBytes = IOUtils.toByteArray(zis);
-                        FileUtils.writeByteArrayToFile(classiCubeDefaultChar, charBytes);
                     } else {
                         LogWrapper.warning("Response code " + respCode + " given while trying to get ClassiCube default resources");
                     }

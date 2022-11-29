@@ -20,6 +20,13 @@ public final class SocketEmulator implements Runnable {
     private static final Pattern contentLengthPattern = Pattern.compile("Content-Length: ", Pattern.LITERAL);
     private final Socket socket;
 
+    private static final byte[] HTTP_404_HEADERS =
+        ("HTTP/1.1 404 Not Found\n"
+         + "Date: Mon, 27 Jul 2009 12:28:53 GMT\n"
+         + "Server: Apache/2.2.14 (Win32)\n"
+         + "Content-Length: 0\n"
+         + "Connection: Closed\r\n\n").getBytes();
+
     public SocketEmulator(Socket socket) {
         this.socket = socket;
     }
@@ -88,6 +95,7 @@ public final class SocketEmulator implements Runnable {
                 }
             } else {
                 LogWrapper.warning("No handler for URL: " + get);
+                os.write(HTTP_404_HEADERS);
             }
 
             os.flush();

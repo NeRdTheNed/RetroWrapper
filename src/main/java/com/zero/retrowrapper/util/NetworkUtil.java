@@ -80,7 +80,7 @@ public final class NetworkUtil {
         }
 
         boolean authenticated = false;
-        URLConnection urlConnection;
+        final URLConnection urlConnection;
         HttpURLConnection joinSeverConnection = null;
         OutputStream askJoinStream = null;
         InputStream responseStream = null;
@@ -155,7 +155,7 @@ public final class NetworkUtil {
 
     public static String getBetacraftMPPass(String username, String serverIP, String serverPort) {
         String mppass = null;
-        URLConnection urlConnection;
+        final URLConnection urlConnection;
         HttpURLConnection getMPPassUrlConnection = null;
         InputStream responseStream = null;
 

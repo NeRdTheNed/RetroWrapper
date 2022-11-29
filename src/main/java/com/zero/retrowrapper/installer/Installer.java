@@ -306,11 +306,10 @@ public final class Installer {
         // TODO Refactor
         workDir.addActionListener(new SelectMinecraftDirectoryActionListener(installerLogger));
         SwingUtil.addJTextFieldCentered(frame, workDir);
-
-        if (SystemUtils.IS_OS_MAC) {
+        // TODO Re-add when the Launcher officially supports this
+        /*if (SystemUtils.IS_OS_MAC) {
             useM1NativesCheckbox = createUseM1NativesCheckbox();
-        }
-
+        }*/
         patchLibrariesCheckbox = createPatchLibrariesCheckbox(useM1NativesCheckbox);
         SwingUtil.addJComponentCentered(frame, patchLibrariesCheckbox);
 
@@ -470,7 +469,7 @@ public final class Installer {
                                      "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.3.2/log4j-core-2.3.2.jar",
                                      "fcd866619df2b131be0defc4f63b09b703649031",
                                      833136);
-        // New versions of LWJGL to use
+        // New versions of LWJGL to use.
         final JsonObject[] lwjglLibraries = MetadataUtil.getLWJGLLibraries(shouldUseM1Natives ? "com/zero/retrowrapper/lwjgl/2.9.4-nightly-20150209-M1.json" : "com/zero/retrowrapper/lwjgl/2.9.4-nightly-20150209.json");
         final String[] lwjglLibraryNames = MetadataUtil.getLWJGLLibraryNames(lwjglLibraries);
         // Install the RetroWrapper jar file to the libraries folder
@@ -492,6 +491,19 @@ public final class Installer {
 
             if (versionJson != null) {
                 final String versionWrapped = version + "-wrapped";
+                // This is a hack to get around the launcher claiming that the Java version is "incompatible"
+                // TODO Replace with something official
+                /*final JsonValue javaVersionG = versionJson.get("javaVersion");
+
+                if ((javaVersionG != null) && javaVersionG.isObject()) {
+                    final JsonObject javaVersion = javaVersionG.asObject();
+                    final JsonValue majorVersion = javaVersion.get("majorVersion");
+
+                    if (majorVersion != null) {
+                        javaVersion.set("majorVersion", 1);
+                        versionJson.set("javaVersion", javaVersion);
+                    }
+                }*/
                 // RetroWrapper adds and changes a few libraries.
                 // A library is a JSON object, and libraries are stored in an array of JSON objects.
                 final JsonArray libraries = versionJson.get("libraries").asArray();

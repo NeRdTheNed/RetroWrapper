@@ -371,7 +371,7 @@ public final class SwingUtil {
         }
     }
 
-    private static JPanel makeScrollerPannel(String[] wrapArray, JComponent[] additionalComponents, String... preface) {
+    private static JPanel makeScrollerPanel(String[] wrapArray, JComponent[] additionalComponents, String... preface) {
         final JPanel messagePanel = new JPanel();
         messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.PAGE_AXIS));
 
@@ -398,12 +398,12 @@ public final class SwingUtil {
     }
 
     public static void showMessageScroller(int messageType, String title, String[] wrapArray, JComponent[] additionalComponents, String... preface) {
-        final JPanel messagePanel = makeScrollerPannel(wrapArray, additionalComponents, preface);
+        final JPanel messagePanel = makeScrollerPanel(wrapArray, additionalComponents, preface);
         JOptionPane.showMessageDialog(null, messagePanel, title, messageType);
     }
 
     public static int showOptionScroller(int option, String title, String[] wrapArray, JComponent[] additionalComponents, String... preface) {
-        final JPanel messagePanel = makeScrollerPannel(wrapArray, additionalComponents, preface);
+        final JPanel messagePanel = makeScrollerPanel(wrapArray, additionalComponents, preface);
         return JOptionPane.showConfirmDialog(null, messagePanel, title, option);
     }
 

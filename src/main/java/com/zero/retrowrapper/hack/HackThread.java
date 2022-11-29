@@ -35,7 +35,7 @@ public final class HackThread extends Thread {
             LogWrapper.warning("Could not set look and feel: " + ExceptionUtils.getStackTrace(e));
         }
 
-        final JFrame frame = new JFrame("Retrowrapper");
+        final JFrame frame = new JFrame("RetroWrapper");
         final Dimension dim = new Dimension(654, 310);
         frame.setPreferredSize(dim);
         frame.setMinimumSize(dim);

@@ -49,7 +49,6 @@ import javax.swing.text.JTextComponent;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.SystemUtils;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
@@ -413,7 +412,7 @@ public final class Installer {
         final String retroWrapperLibraryLocation = "com" + File.separator + "zero" + File.separator + "retrowrapper" + File.separator + MetadataUtil.VERSION;
         final File libDir = new File(directory, "libraries" + File.separator + retroWrapperLibraryLocation);
         libDir.mkdirs();
-        File retroWrapperJar;
+        final File retroWrapperJar;
 
         try {
             retroWrapperJar = new File(Installer.class.getProtectionDomain().getCodeSource().getLocation().toURI());

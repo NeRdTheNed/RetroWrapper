@@ -2,6 +2,7 @@ package com.zero.retrowrapper.emulator.registry.handlers;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.regex.Pattern;
 
 import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
 import com.zero.retrowrapper.injector.RetroTweakInjectorTarget;
@@ -11,8 +12,12 @@ import net.minecraft.launchwrapper.LogWrapper;
 
 public final class JoinServerHandler extends EmulatorHandler {
 
-    private static byte[] OK = "OK".getBytes();
-    private static byte[] NOT_OK = "Bad login".getBytes();
+    private static final byte[] OK = "OK".getBytes();
+    private static final byte[] NOT_OK = "Bad login".getBytes();
+
+    private static final Pattern questionMarkPattern = Pattern.compile("\\?");
+    private static final Pattern andPattern = Pattern.compile("&");
+    private static final Pattern equalsPattern = Pattern.compile("=");
 
     public JoinServerHandler(String url) {
         super(url);
@@ -22,10 +27,10 @@ public final class JoinServerHandler extends EmulatorHandler {
         String username = RetroTweakInjectorTarget.username;
         String sessionId = RetroTweakInjectorTarget.sessionId;
         String serverId = "";
-        final String urlParams = get.split("\\?")[1];
+        final String urlParams = questionMarkPattern.split(get)[1];
 
-        for (final String param : urlParams.split("&")) {
-            final String[] split = param.split("=");
+        for (final String param : andPattern.split(urlParams)) {
+            final String[] split = equalsPattern.split(param);
             final String key = split[0];
             final String value = split[1];
 

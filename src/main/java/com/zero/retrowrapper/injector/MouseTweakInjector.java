@@ -1,7 +1,5 @@
 package com.zero.retrowrapper.injector;
 
-import static org.objectweb.asm.Opcodes.INVOKESTATIC;
-
 import java.awt.Canvas;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -101,7 +99,7 @@ public final class MouseTweakInjector implements IClassTransformer {
 
                 for (final MethodInsnNode toPatch : foundMouseMoveMethodCalls) {
                     LogWrapper.fine("Patching call to mouseMove at class " + name);
-                    final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/MouseTweakInjector", "mouseMovePatch", "(II)V");
+                    final MethodInsnNode methodInsNode = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/MouseTweakInjector", "mouseMovePatch", "(II)V");
                     final InsnNode pop = new InsnNode(Opcodes.POP);
                     methodNode.instructions.insertBefore(toPatch, methodInsNode);
                     methodNode.instructions.insertBefore(toPatch, pop);
@@ -117,7 +115,7 @@ public final class MouseTweakInjector implements IClassTransformer {
                         // Patch the call to MouseInfo.getPointerInfo().getLocation().
                         if ("java/awt/MouseInfo".equals(prevCall.owner) && "()Ljava/awt/PointerInfo;".equals(prevCall.desc) && "getPointerInfo".equals(prevCall.name)) {
                             LogWrapper.fine("Patching call to getLocation at class " + name);
-                            final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/MouseTweakInjector", "getLocationPatch", "()Ljava/awt/Point;");
+                            final MethodInsnNode methodInsNode = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/MouseTweakInjector", "getLocationPatch", "()Ljava/awt/Point;");
                             methodNode.instructions.insertBefore(toPatch.getNext(), methodInsNode);
                             methodNode.instructions.remove(prev);
                             methodNode.instructions.remove(toPatch);
@@ -157,7 +155,7 @@ public final class MouseTweakInjector implements IClassTransformer {
                     }
 
                     final LdcInsnNode loadShouldHide = new LdcInsnNode(shouldHide);
-                    final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/MouseTweakInjector", "setNativeCursorPatch", "(Lorg/lwjgl/input/Cursor;Z)Lorg/lwjgl/input/Cursor;");
+                    final MethodInsnNode methodInsNode = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/MouseTweakInjector", "setNativeCursorPatch", "(Lorg/lwjgl/input/Cursor;Z)Lorg/lwjgl/input/Cursor;");
                     methodNode.instructions.insertBefore(toPatch, loadShouldHide);
                     methodNode.instructions.insertBefore(toPatch, methodInsNode);
                     methodNode.instructions.remove(toPatch);

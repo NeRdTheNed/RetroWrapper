@@ -59,7 +59,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
         if (RetroTweakInjectorTarget.showClassiCubeUserDefaultSkin && !classiCubeDefaultChar.isFile()) {
             InputStream is = null;
             ZipInputStream zis = null;
-            URLConnection urlConnection;
+            final URLConnection urlConnection;
             HttpURLConnection skinUrlConnection = null;
 
             try {
@@ -232,7 +232,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
     private static byte[] getImageBytesFromClassiCube(String username) {
         final String classiCubeUsername = username.substring(0, username.length() - 1);
         InputStream is = null;
-        URLConnection urlConnection;
+        final URLConnection urlConnection;
         HttpURLConnection skinUrlConnection = null;
 
         try {

@@ -40,11 +40,9 @@ public final class RetroEmulator extends Thread {
             final ExecutorService threadPool = Executors.newCachedThreadPool();
 
             while (true) {
-                Socket socket = null;
-
                 try {
-                    socket = server.accept();
-                    final SocketEmulator emulator = new SocketEmulator(socket);
+                    final Socket socket = server.accept();
+                    final Runnable emulator = new SocketEmulator(socket);
                     threadPool.execute(emulator);
                 } catch (final Exception e) {
                     // TODO Better error handling

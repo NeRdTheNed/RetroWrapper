@@ -1,10 +1,5 @@
 package com.zero.retrowrapper.injector;
 
-import static org.objectweb.asm.Opcodes.ASTORE;
-import static org.objectweb.asm.Opcodes.GOTO;
-import static org.objectweb.asm.Opcodes.INVOKESTATIC;
-import static org.objectweb.asm.Opcodes.TABLESWITCH;
-
 import java.io.File;
 import java.util.ListIterator;
 
@@ -84,7 +79,7 @@ public final class RetroTweakInjector implements IClassTransformer {
             while (iterator.hasNext()) {
                 AbstractInsnNode instruction = iterator.next();
 
-                if (instruction.getOpcode() == TABLESWITCH) {
+                if (instruction.getOpcode() == Opcodes.TABLESWITCH) {
                     final TableSwitchInsnNode tableSwitchInsnNode = (TableSwitchInsnNode) instruction;
                     firstSwitchJump = runMethod.instructions.indexOf((AbstractInsnNode) tableSwitchInsnNode.labels.get(0));
                 } else if ((firstSwitchJump >= 0) && (runMethod.instructions.indexOf(instruction) == firstSwitchJump)) {
@@ -93,7 +88,7 @@ public final class RetroTweakInjector implements IClassTransformer {
                     while (iterator.hasNext()) {
                         instruction = iterator.next();
 
-                        if (instruction.getOpcode() == GOTO) {
+                        if (instruction.getOpcode() == Opcodes.GOTO) {
                             endOfSwitch = runMethod.instructions.indexOf(((JumpInsnNode) instruction).label);
                             break;
                         }
@@ -105,9 +100,9 @@ public final class RetroTweakInjector implements IClassTransformer {
                         }
 
                         instruction = iterator.next();
-                        final MethodInsnNode methodInsNode = new MethodInsnNode(INVOKESTATIC, "com/zero/retrowrapper/injector/RetroTweakInjector", "inject", "()Ljava/io/File;");
+                        final MethodInsnNode methodInsNode = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/RetroTweakInjector", "inject", "()Ljava/io/File;");
                         runMethod.instructions.insertBefore(instruction, methodInsNode);
-                        runMethod.instructions.insertBefore(instruction, new VarInsnNode(ASTORE, 2));
+                        runMethod.instructions.insertBefore(instruction, new VarInsnNode(Opcodes.ASTORE, 2));
                     }
                 }
             }

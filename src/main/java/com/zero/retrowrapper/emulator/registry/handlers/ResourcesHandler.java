@@ -73,6 +73,7 @@ public final class ResourcesHandler extends EmulatorHandler {
     private final JsonObject jsonObjects;
     private final byte[] soundsList;
     private final String indexName;
+    private final ResourcesFormat resourcesFormat;
 
     private final Pattern resourcesPattern;
 
@@ -84,6 +85,7 @@ public final class ResourcesHandler extends EmulatorHandler {
 
     public ResourcesHandler(String handle, ResourcesFormat resourcesFormat, String indexName, String indexURL) {
         super(handle);
+        this.resourcesFormat = resourcesFormat;
         this.indexName = indexName;
         final JsonObject tempObjects = downloadSoundData(indexName, indexURL);
         jsonObjects = tempObjects != null ? tempObjects : Json.object();
@@ -184,10 +186,12 @@ public final class ResourcesHandler extends EmulatorHandler {
 
     // TODO @Nullable?
     private byte[] getResourceByName(String res) throws IOException {
-        final String checkAlias = CLASSIC_ALIAS_MAP.get(res);
+        if (resourcesFormat == ResourcesFormat.CLASSIC) {
+            final String checkAlias = CLASSIC_ALIAS_MAP.get(res);
 
-        if (checkAlias != null) {
-            res = checkAlias;
+            if (checkAlias != null) {
+                res = checkAlias;
+            }
         }
 
         RetroEmulator.getInstance().getCacheDirectory().mkdir();

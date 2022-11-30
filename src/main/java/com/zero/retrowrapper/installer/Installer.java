@@ -490,10 +490,10 @@ public final class Installer {
 
             if (versionJson != null) {
                 final String versionWrapped = version + "-wrapped";
+                final JsonValue javaVersionG = versionJson.get("javaVersion");
+
                 // This is a hack to get around the launcher claiming that the Java version is "incompatible"
                 // TODO Replace with something official
-                /*final JsonValue javaVersionG = versionJson.get("javaVersion");
-
                 if ((javaVersionG != null) && javaVersionG.isObject()) {
                     final JsonObject javaVersion = javaVersionG.asObject();
                     final JsonValue majorVersion = javaVersion.get("majorVersion");
@@ -502,7 +502,13 @@ public final class Installer {
                         javaVersion.set("majorVersion", 1);
                         versionJson.set("javaVersion", javaVersion);
                     }
-                }*/
+                } else if (javaVersionG == null) {
+                    // The official launcher seems to require the existence of javaVersion to launch an instance
+                    versionJson.set("javaVersion", Json.object()
+                                    .add("component", "jre-legacy")
+                                    .add("majorVersion", 1));
+                }
+
                 // RetroWrapper adds and changes a few libraries.
                 // A library is a JSON object, and libraries are stored in an array of JSON objects.
                 final JsonArray libraries = versionJson.get("libraries").asArray();

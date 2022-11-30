@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
@@ -46,7 +47,7 @@ public final class SocketEmulator implements Runnable {
                 final String line = readLine(is).trim();
 
                 if (limit == 0) {
-                    get = spacePattern.split(line)[1];
+                    get = URLDecoder.decode(spacePattern.split(line)[1], "UTF-8");
                 } else if (line.startsWith("Content-Length: ")) {
                     try {
                         length = Integer.parseInt(contentLengthPattern.matcher(line).replaceAll(""));

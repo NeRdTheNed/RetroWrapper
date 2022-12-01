@@ -125,7 +125,7 @@ public final class RetroTweakInjector implements IClassTransformer {
     }
 
     private static final class NoOpClassVisitor extends ClassVisitor {
-        public NoOpClassVisitor(RetroTweakClassWriter cw) {
+        NoOpClassVisitor(RetroTweakClassWriter cw) {
             super(Opcodes.ASM4, cw);
         }
     }

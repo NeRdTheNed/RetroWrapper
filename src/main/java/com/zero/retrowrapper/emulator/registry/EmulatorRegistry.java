@@ -9,7 +9,6 @@ import com.zero.retrowrapper.emulator.registry.handlers.JoinServerHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.ListmapsHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.LoadHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.ResourcesHandler;
-import com.zero.retrowrapper.emulator.registry.handlers.ResourcesHandler.ResourcesFormat;
 import com.zero.retrowrapper.emulator.registry.handlers.SaveHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.SingleResponseHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.SkinOrCapeHandler;
@@ -24,7 +23,7 @@ public final class EmulatorRegistry {
     }
 
     private static final List<IHandler> handlers;
-    private static final long smallestSize = 16;
+    private static final long smallestSize = 16L;
 
     private static void moveInvalidFiles(File directory, String... ext) {
         final String toPrint;
@@ -79,8 +78,8 @@ public final class EmulatorRegistry {
         handlers.add(new SaveHandler());
         handlers.add(new LoadHandler());
         handlers.add(new ListmapsHandler());
-        handlers.add(new ResourcesHandler("/resources/", ResourcesFormat.CLASSIC, "legacy", "https://launchermeta.mojang.com/v1/packages/770572e819335b6c0a053f8378ad88eda189fc14/legacy.json"));
-        handlers.add(new ResourcesHandler("/MinecraftResources/", ResourcesFormat.AWS, "pre-1.6", "https://launchermeta.mojang.com/v1/packages/3d8e55480977e32acd9844e545177e69a52f594b/pre-1.6.json"));
+        handlers.add(new ResourcesHandler("/resources/", ResourcesHandler.ResourcesFormat.CLASSIC, "legacy", "https://launchermeta.mojang.com/v1/packages/770572e819335b6c0a053f8378ad88eda189fc14/legacy.json"));
+        handlers.add(new ResourcesHandler("/MinecraftResources/", ResourcesHandler.ResourcesFormat.AWS, "pre-1.6", "https://launchermeta.mojang.com/v1/packages/3d8e55480977e32acd9844e545177e69a52f594b/pre-1.6.json"));
         handlers.add(new SkinOrCapeHandler("/skin/", false));
         handlers.add(new SkinOrCapeHandler("/MinecraftSkins/", false));
         handlers.add(new SkinOrCapeHandler("/cloak/get.jsp?user=", true));

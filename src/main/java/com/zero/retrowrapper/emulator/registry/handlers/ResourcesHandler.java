@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -185,7 +184,9 @@ public final class ResourcesHandler extends EmulatorHandler {
     }
 
     // TODO @Nullable?
-    private byte[] getResourceByName(String res) throws IOException {
+    private byte[] getResourceByName(final String resParam) throws IOException {
+        String res = resParam;
+
         if (resourcesFormat == ResourcesFormat.CLASSIC) {
             final String checkAlias = CLASSIC_ALIAS_MAP.get(res);
 
@@ -303,7 +304,7 @@ public final class ResourcesHandler extends EmulatorHandler {
                 final JsonObject.Member member = libraryIterator.next();
                 String tempname = member.getName();
 
-                for (final Entry<String, String> entry : CLASSIC_ALIAS_MAP.entrySet()) {
+                for (final Map.Entry<String, String> entry : CLASSIC_ALIAS_MAP.entrySet()) {
                     if (tempname.equals(entry.getValue())) {
                         tempname = entry.getKey();
                         break;
@@ -424,9 +425,9 @@ public final class ResourcesHandler extends EmulatorHandler {
     }
 
     private static class ResourceEntry {
-        public final String name;
-        public final String size;
-        public final String etag;
+        final String name;
+        final String size;
+        final String etag;
 
         ResourceEntry(String name, String size, String etag) {
             this.name = name;

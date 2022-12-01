@@ -7,23 +7,23 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import net.minecraft.launchwrapper.LogWrapper;
 
-public final class RetroPlayer {
+final class RetroPlayer {
     private Field x, y, z, x2, y2, z2;
     private double ax, ay, az;
     private Object aabb;
-    public Class<?> entityClass;
-    public Object playerObj;
+    Class<?> entityClass;
+    Object playerObj;
 
-    private final HackThread thread;
-    public Field playerField;
-    public Object minecraft;
+    private final HackRunnable thread;
+    Field playerField;
+    Object minecraft;
     private boolean modeFloat;
 
-    public RetroPlayer(HackThread thread) {
+    RetroPlayer(HackRunnable thread) {
         this.thread = thread;
     }
 
-    public void tick() throws IllegalArgumentException, IllegalAccessException, InterruptedException {
+    void tick() throws IllegalArgumentException, IllegalAccessException, InterruptedException {
         try {
             playerObj = playerField.get(minecraft);
 
@@ -36,7 +36,7 @@ public final class RetroPlayer {
             }
         } catch (final Exception e) {
             LogWrapper.warning("Something went wrong with RetroPlayer on tick: " + ExceptionUtils.getStackTrace(e));
-            Thread.sleep(1000);
+            Thread.sleep(1000L);
         }
     }
 
@@ -44,9 +44,9 @@ public final class RetroPlayer {
         Double tempX = null, tempY = null, tempZ = null;
 
         try {
-            tempX = Math.floor(getX() * 10) / 10;
-            tempY = Math.floor(getY() * 10) / 10;
-            tempZ = Math.floor(getZ() * 10) / 10;
+            tempX = Math.floor(getX() * 10.0) / 10.0;
+            tempY = Math.floor(getY() * 10.0) / 10.0;
+            tempZ = Math.floor(getZ() * 10.0) / 10.0;
         } catch (final Exception e) {
             LogWrapper.warning("Something went wrong with getting the label text from RetroPlayer: " + ExceptionUtils.getStackTrace(e));
         }
@@ -54,7 +54,7 @@ public final class RetroPlayer {
         return "<html>Position:<br>&nbsp&nbsp&nbsp;x: " + tempX + "<br>&nbsp&nbsp&nbsp;y: " + tempY + "<br>&nbsp&nbsp&nbsp;z: " + tempZ + "</html>";
     }
 
-    public void setAABB() throws IllegalArgumentException, IllegalAccessException {
+    void setAABB() throws IllegalArgumentException, IllegalAccessException {
         boolean flag2 = false;
 
         for (final Field f : entityClass.getDeclaredFields()) {
@@ -130,13 +130,13 @@ public final class RetroPlayer {
 
     private double getVariable(Field f, Object o) throws IllegalArgumentException, IllegalAccessException {
         if (modeFloat) {
-            return ((Float) f.getFloat(o)).doubleValue();
+            return f.getFloat(o);
         }
 
         return f.getDouble(o);
     }
 
-    public void teleport(double dx, double dy, double dz) throws IllegalArgumentException, IllegalAccessException {
+    void teleport(double dx, double dy, double dz) throws IllegalArgumentException, IllegalAccessException {
         if (modeFloat) {
             x.set(aabb, (float) dx);
             y.set(aabb, (float) dy);

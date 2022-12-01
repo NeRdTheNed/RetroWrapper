@@ -23,55 +23,11 @@ import com.zero.retrowrapper.util.JavaUtil;
 
 import net.minecraft.launchwrapper.LogWrapper;
 
-public final class HackThread extends Thread {
+public final class HackRunnable implements Runnable {
     // TODO Refactor
     JLabel label;
-    private JButton button;
+    JButton button;
     RetroPlayer player;
-
-    void setupSwingGUI() {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (final Exception e) {
-            LogWrapper.warning("Could not set look and feel: " + ExceptionUtils.getStackTrace(e));
-        }
-
-        final JFrame frame = new JFrame("RetroWrapper");
-        final Dimension dim = new Dimension(654, 310);
-        frame.setPreferredSize(dim);
-        frame.setMinimumSize(dim);
-        frame.setLayout(null);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setResizable(false);
-        frame.setLocationRelativeTo(null);
-        label = new JLabel("<html>Position:<br>&nbsp&nbsp&nbsp;x: null<br>&nbsp&nbsp&nbsp;y: null<br>&nbsp&nbsp&nbsp;z: null</html>");
-        label.setBounds(30, 10, 500, 80);
-        frame.add(label);
-        final JLabel xl = new JLabel("x:");
-        xl.setBounds(30, 103, 50, 20);
-        frame.add(xl);
-        final JLabel yl = new JLabel("y:");
-        yl.setBounds(30, 135, 50, 20);
-        frame.add(yl);
-        final JLabel zl = new JLabel("z:");
-        zl.setBounds(30, 167, 50, 20);
-        frame.add(zl);
-        final JTextField x = new JTextField();
-        x.setBounds(50, 100, 200, 30);
-        frame.add(x);
-        final JTextField y = new JTextField();
-        y.setBounds(50, 132, 200, 30);
-        frame.add(y);
-        final JTextField z = new JTextField();
-        z.setBounds(50, 164, 200, 30);
-        frame.add(z);
-        button = new JButton("Setting up hacks...");
-        button.setBounds(50, 202, 200, 40);
-        button.addActionListener(new TeleportActionListener(x, y, z));
-        button.setEnabled(false);
-        frame.add(button);
-        frame.setVisible(true);
-    }
 
     public void run() {
         player = new RetroPlayer(this);
@@ -92,7 +48,7 @@ public final class HackThread extends Thread {
 
             // TODO Is this safe?
             while (RetroTweakClassWriter.mobClass == null) {
-                Thread.sleep(1000);
+                Thread.sleep(1000L);
             }
 
             LogWrapper.fine("Mob class: " + RetroTweakClassWriter.mobClass);
@@ -109,7 +65,7 @@ public final class HackThread extends Thread {
                     }
                 }
 
-                Thread.sleep(1000);
+                Thread.sleep(1000L);
             }
 
             button.setText("Teleport");
@@ -123,7 +79,7 @@ public final class HackThread extends Thread {
 
                 while (true) {
                     player.tick();
-                    Thread.sleep(100);
+                    Thread.sleep(100L);
                 }
             }
         } catch (final Exception e) {
@@ -148,7 +104,7 @@ public final class HackThread extends Thread {
         private final JTextField y;
         private final JTextField z;
 
-        public TeleportActionListener(JTextField x, JTextField y, JTextField z) {
+        TeleportActionListener(JTextField x, JTextField y, JTextField z) {
             this.x = x;
             this.y = y;
             this.z = z;
@@ -156,9 +112,9 @@ public final class HackThread extends Thread {
 
         public void actionPerformed(ActionEvent e) {
             try {
-                final float dx = Float.parseFloat(spacePattern.matcher(commaPattern.matcher(x.getText()).replaceAll("")).replaceAll(""));
-                final float dy = Float.parseFloat(spacePattern.matcher(commaPattern.matcher(y.getText()).replaceAll("")).replaceAll(""));
-                final float dz = Float.parseFloat(spacePattern.matcher(commaPattern.matcher(z.getText()).replaceAll("")).replaceAll(""));
+                final double dx = Double.parseDouble(spacePattern.matcher(commaPattern.matcher(x.getText()).replaceAll("")).replaceAll(""));
+                final double dy = Double.parseDouble(spacePattern.matcher(commaPattern.matcher(y.getText()).replaceAll("")).replaceAll(""));
+                final double dz = Double.parseDouble(spacePattern.matcher(commaPattern.matcher(z.getText()).replaceAll("")).replaceAll(""));
                 player.teleport(dx, dy, dz);
             } catch (final Exception ee) {
                 JOptionPane.showMessageDialog(null, "Exception occurred!\n" + ee.getClass().getName() + "\n" + ee.getMessage());
@@ -173,12 +129,56 @@ public final class HackThread extends Thread {
         public void run() {
             setupSwingGUI();
         }
+
+        void setupSwingGUI() {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (final Exception e) {
+                LogWrapper.warning("Could not set look and feel: " + ExceptionUtils.getStackTrace(e));
+            }
+
+            final JFrame frame = new JFrame("RetroWrapper");
+            final Dimension dim = new Dimension(654, 310);
+            frame.setPreferredSize(dim);
+            frame.setMinimumSize(dim);
+            frame.setLayout(null);
+            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            frame.setResizable(false);
+            frame.setLocationRelativeTo(null);
+            label = new JLabel("<html>Position:<br>&nbsp&nbsp&nbsp;x: null<br>&nbsp&nbsp&nbsp;y: null<br>&nbsp&nbsp&nbsp;z: null</html>");
+            label.setBounds(30, 10, 500, 80);
+            frame.add(label);
+            final JLabel xl = new JLabel("x:");
+            xl.setBounds(30, 103, 50, 20);
+            frame.add(xl);
+            final JLabel yl = new JLabel("y:");
+            yl.setBounds(30, 135, 50, 20);
+            frame.add(yl);
+            final JLabel zl = new JLabel("z:");
+            zl.setBounds(30, 167, 50, 20);
+            frame.add(zl);
+            final JTextField x = new JTextField();
+            x.setBounds(50, 100, 200, 30);
+            frame.add(x);
+            final JTextField y = new JTextField();
+            y.setBounds(50, 132, 200, 30);
+            frame.add(y);
+            final JTextField z = new JTextField();
+            z.setBounds(50, 164, 200, 30);
+            frame.add(z);
+            button = new JButton("Setting up hacks...");
+            button.setBounds(50, 202, 200, 40);
+            button.addActionListener(new TeleportActionListener(x, y, z));
+            button.setEnabled(false);
+            frame.add(button);
+            frame.setVisible(true);
+        }
     }
 
     private final class LabelRunnable implements Runnable {
         private final String text;
 
-        public LabelRunnable(String text) {
+        LabelRunnable(String text) {
             this.text = text;
         }
 

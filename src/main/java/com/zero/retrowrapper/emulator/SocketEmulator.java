@@ -16,7 +16,7 @@ import com.zero.retrowrapper.emulator.registry.IHandler;
 
 import net.minecraft.launchwrapper.LogWrapper;
 
-public final class SocketEmulator implements Runnable {
+final class SocketEmulator implements Runnable {
     private static final Pattern spacePattern = Pattern.compile(" ");
     private static final Pattern contentLengthPattern = Pattern.compile("Content-Length: ", Pattern.LITERAL);
     private final Socket socket;
@@ -28,7 +28,7 @@ public final class SocketEmulator implements Runnable {
          + "Content-Length: 0\n"
          + "Connection: Closed\r\n\n").getBytes();
 
-    public SocketEmulator(Socket socket) {
+    SocketEmulator(Socket socket) {
         this.socket = socket;
     }
 

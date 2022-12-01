@@ -33,7 +33,7 @@ public final class FileUtil {
     }
 
     // TODO Re-add?
-    public static ByteBuffer loadIcon(File iconFile) throws IOException {
+    static ByteBuffer loadIcon(File iconFile) throws IOException {
         final BufferedImage icon = ImageIO.read(iconFile);
         final int[] rgb = icon.getRGB(0, 0, icon.getWidth(), icon.getHeight(), null, 0, icon.getWidth());
         final ByteBuffer buffer = ByteBuffer.allocate(4 * rgb.length);
@@ -73,7 +73,7 @@ public final class FileUtil {
         return allDeleted && dir.delete();
     }
 
-    public static List<File> findFiles(File dir) {
+    private static List<File> findFiles(File dir) {
         final List<File> files = new ArrayList<File>();
 
         for (final File file : dir.listFiles()) {
@@ -125,7 +125,7 @@ public final class FileUtil {
         return tryFindFirstFile(oldLocation, resLocation, virtualLegacyAssets, virtualPreAssets, defResLocation, defVirtualLegacyAssets, defVirtualPreAssets);
     }
 
-    public static JsonValue readFileAsJsonOrNull(File file) {
+    static JsonValue readFileAsJsonOrNull(File file) {
         JsonValue toReturn = null;
         FileReader reader = null;
 

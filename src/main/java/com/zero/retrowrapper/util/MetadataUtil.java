@@ -17,9 +17,9 @@ import com.eclipsesource.json.JsonValue;
 public final class MetadataUtil {
     public static final List<String> INSTALLER_SPLASHES;
     public static final String VERSION;
-    public static final String TAG;
+    private static final String TAG;
     public static final String RELEASE_URL;
-    public static final boolean IS_RELEASE;
+    static final boolean IS_RELEASE;
 
     private static final int LESS_THAN = -1;
     private static final int SAME = 0;
@@ -119,10 +119,10 @@ public final class MetadataUtil {
         return version.contains("SNAPSHOT");
     }
 
-    public static int compareSemver(String ver1, String ver2) throws NumberFormatException {
+    public static int compareSemver(CharSequence ver1a, CharSequence ver2a) throws NumberFormatException {
         // Ignore build metadata
-        ver1 = plusPattern.split(ver1)[0];
-        ver2 = plusPattern.split(ver2)[0];
+        final String ver1 = plusPattern.split(ver1a)[0];
+        final String ver2 = plusPattern.split(ver2a)[0];
         int majorVersion1 = 0;
         int minorVersion1 = 0;
         int patchVersion1 = 0;
@@ -215,19 +215,19 @@ public final class MetadataUtil {
         return createMojangLibraryWithArtifact(name, createMojangLibraryDownloadsArtifact(path, url, sha1, size));
     }
 
-    public static JsonObject createMojangLibraryWithArtifact(String name, JsonObject artifact) {
+    private static JsonObject createMojangLibraryWithArtifact(String name, JsonObject artifact) {
         return createMojangLibraryWithDownloads(name, createMojangLibraryDownloadsFromArtifact(artifact));
     }
 
-    public static JsonObject createMojangLibraryWithDownloads(String name, JsonObject downloads) {
+    private static JsonObject createMojangLibraryWithDownloads(String name, JsonObject downloads) {
         return createMojangLibrary(name).add("downloads", downloads);
     }
 
-    public static JsonObject createMojangLibraryDownloadsFromArtifact(JsonObject artifact) {
+    private static JsonObject createMojangLibraryDownloadsFromArtifact(JsonObject artifact) {
         return Json.object().add("artifact", artifact);
     }
 
-    public static JsonObject createMojangLibraryDownloadsArtifact(String path, String url, String sha1, long size) {
+    private static JsonObject createMojangLibraryDownloadsArtifact(String path, String url, String sha1, long size) {
         final JsonObject artifact = Json.object();
 
         if (path != null) {
@@ -242,7 +242,7 @@ public final class MetadataUtil {
             artifact.add("sha1", sha1);
         }
 
-        if (size > 0) {
+        if (size > 0L) {
             artifact.add("size", size);
         }
 

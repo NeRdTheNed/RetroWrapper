@@ -12,7 +12,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LogWrapper;
 
-public final class RetroEmulator extends Thread {
+public final class RetroEmulator implements Runnable {
     private final ServerSocket server;
 
     private static RetroEmulator instance;

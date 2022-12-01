@@ -2,10 +2,10 @@ package com.zero.retrowrapper.injector;
 
 import java.applet.Applet;
 
-final class ShutdownAppletThread extends Thread {
+final class ShutdownAppletRunnable implements Runnable {
     private final Applet applet;
 
-    public ShutdownAppletThread(Applet applet) {
+    public ShutdownAppletRunnable(Applet applet) {
         this.applet = applet;
     }
 

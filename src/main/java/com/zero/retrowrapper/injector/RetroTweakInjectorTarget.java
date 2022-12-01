@@ -25,7 +25,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.lwjgl.Sys;
 
 import com.zero.retrowrapper.emulator.RetroEmulator;
-import com.zero.retrowrapper.hack.HackThread;
+import com.zero.retrowrapper.hack.HackRunnable;
 import com.zero.retrowrapper.util.FileUtil;
 import com.zero.retrowrapper.util.MetadataUtil;
 import com.zero.retrowrapper.util.NetworkUtil;
@@ -47,7 +47,6 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
     public static String sessionId;
 
     public static String serverIP;
-    public static String serverPort;
 
     public static boolean connectedToClassicServer = false;
 
@@ -106,7 +105,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
 
         final ServerSocket server = new ServerSocket(0);
         localServerPort = server.getLocalPort();
-        new RetroEmulator(server).start();
+        new Thread(new RetroEmulator(server)).start();
 
         try {
             Class<?> clazz;
@@ -124,7 +123,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             }
 
             final Map<String, String> params = new HashMap<String, String>();
-            username = args.length > 0 ? args[0] : "Player" + (System.currentTimeMillis() % 1000);
+            username = args.length > 0 ? args[0] : "Player" + (System.currentTimeMillis() % 1000L);
             sessionId = args.length > 1 ? args[1] : "-";
 
             if (sessionId.startsWith("token:")) {
@@ -139,7 +138,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             params.put("fullscreen", "false");
             // Experimental
             serverIP = System.getProperties().getProperty("retrowrapper.experimental.classicServerIP");
-            serverPort = System.getProperties().getProperty("retrowrapper.experimental.classicServerPort");
+            String serverPort = System.getProperties().getProperty("retrowrapper.experimental.classicServerPort");
             showClassiCubeUserDefaultSkin = System.getProperties().getProperty("retrowrapper.showClassiCubeDefaultSkin") != null;
 
             if (serverIP != null) {
@@ -210,7 +209,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             startMinecraft(fakeLauncher, object, args);
 
             if (System.getProperties().getProperty("retrowrapper.hack") != null) {
-                new HackThread().start();
+                new Thread(new HackRunnable()).start();
             }
         } catch (final Exception e) {
             final String context = "Fatal error while starting RetroWrapper";
@@ -240,7 +239,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
         launcherFrameFake.add(fakeLauncher, BorderLayout.CENTER);
         launcherFrameFake.validate();
         applet.start();
-        Runtime.getRuntime().addShutdownHook(new ShutdownAppletThread(applet));
+        Runtime.getRuntime().addShutdownHook(new Thread(new ShutdownAppletRunnable(applet)));
         SwingUtil.loadIconsOnFrames();
     }
 

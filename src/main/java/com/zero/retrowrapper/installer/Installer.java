@@ -82,10 +82,10 @@ public final class Installer {
 
     static DefaultListModel model;
     static JList list;
-    static List<String> listInternal;
+    private static List<String> listInternal;
 
-    static JCheckBox patchLibrariesCheckbox;
-    static JCheckBox useM1NativesCheckbox;
+    private static JCheckBox patchLibrariesCheckbox;
+    private static JCheckBox useM1NativesCheckbox;
 
     static boolean shouldUseM1Natives = false;
     static boolean shouldUpdateLibraries = true;
@@ -240,7 +240,7 @@ public final class Installer {
         return true;
     }
 
-    static JsonObject getVersionJson(String version, final Logger installerLogger) {
+    private static JsonObject getVersionJson(String version, final Logger installerLogger) {
         JsonObject versionJson = null;
         Reader s = null;
 
@@ -457,27 +457,27 @@ public final class Installer {
                 "net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar",
                 "https://libraries.minecraft.net/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar",
                 "111e7bea9c968cdb3d06ef4632bf7ff0824d0f36",
-                32999);
+                32999L);
         // ASM 5.2. This could be older, but there's no reason not to use a newer version.
         final JsonObject asmAll = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-all:5.2",
                                   "org/ow2/asm/asm-all/5.2/asm-all-5.2.jar",
                                   "https://repo1.maven.org/maven2/org/ow2/asm/asm-all/5.2/asm-all-5.2.jar",
                                   "2ea49e08b876bbd33e0a7ce75c8f371d29e1f10a",
-                                  247787);
+                                  247787L);
         // Log4j API 2.3.2 as a Mojang library JSON object
         // LaunchWrapper 1.12 requires it.
         final JsonObject log4jAPI = MetadataUtil.createMojangLibrary("org.apache.logging.log4j:log4j-api:2.3.2",
                                     "org/apache/logging/log4j/log4j-api/2.3.2/log4j-api-2.3.2.jar",
                                     "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.3.2/log4j-api-2.3.2.jar",
                                     "294fb56d66693b6f97f1a2f2c7acfb101859388a",
-                                    134942);
+                                    134942L);
         // Log4j core 2.3.2 as a Mojang library JSON object
         // LaunchWrapper 1.12 requires it.
         final JsonObject log4jCore = MetadataUtil.createMojangLibrary("org.apache.logging.log4j:log4j-core:2.3.2",
                                      "org/apache/logging/log4j/log4j-core/2.3.2/log4j-core-2.3.2.jar",
                                      "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.3.2/log4j-core-2.3.2.jar",
                                      "fcd866619df2b131be0defc4f63b09b703649031",
-                                     833136);
+                                     833136L);
         // These libraries should be replaced if RetroWrapper's versions are newer
         final JsonObject[] replaceIfNewerLibraries = {
             launchWrapperOneTwelve,
@@ -668,7 +668,7 @@ public final class Installer {
     private static final class UninstallListener implements ActionListener {
         private final Logger installerLogger;
 
-        public UninstallListener(Logger installerLogger) {
+        UninstallListener(Logger installerLogger) {
             this.installerLogger = installerLogger;
         }
 
@@ -687,7 +687,7 @@ public final class Installer {
     private static final class SelectMinecraftDirectoryActionListener implements ActionListener {
         private final Logger installerLogger;
 
-        public SelectMinecraftDirectoryActionListener(Logger installerLogger) {
+        SelectMinecraftDirectoryActionListener(Logger installerLogger) {
             this.installerLogger = installerLogger;
         }
 
@@ -711,7 +711,7 @@ public final class Installer {
     private static final class WrapInstanceListener implements ActionListener {
         private final Logger installerLogger;
 
-        public WrapInstanceListener(Logger installerLogger) {
+        WrapInstanceListener(Logger installerLogger) {
             this.installerLogger = installerLogger;
         }
 
@@ -721,7 +721,7 @@ public final class Installer {
     }
 
     private static final class VersionSelectionListener implements ListSelectionListener {
-        public VersionSelectionListener() {
+        VersionSelectionListener() {
             // Empty constructor
         }
 
@@ -756,7 +756,7 @@ public final class Installer {
         boolean tPressed;
         boolean openDebug;
 
-        public DebugKeyDispatcher(Logger logger) {
+        DebugKeyDispatcher(Logger logger) {
             this.logger = logger;
             f3Pressed = false;
             cPressed = false;
@@ -893,7 +893,7 @@ public final class Installer {
         private final JCheckBox listenUseM1NativesCheckbox;
         private final JCheckBox listenPatchLibrariesCheckbox;
 
-        public PatchLibrariesListener(JCheckBox listenPatchLibrariesCheckbox, JCheckBox listenUseM1NativesCheckbox) {
+        PatchLibrariesListener(JCheckBox listenPatchLibrariesCheckbox, JCheckBox listenUseM1NativesCheckbox) {
             this.listenPatchLibrariesCheckbox = listenPatchLibrariesCheckbox;
             this.listenUseM1NativesCheckbox = listenUseM1NativesCheckbox;
             refreshButtonStates(listenPatchLibrariesCheckbox, listenUseM1NativesCheckbox);
@@ -915,7 +915,7 @@ public final class Installer {
     private static final class AppleSiliconPatchListener implements ActionListener {
         private final JCheckBox listenUseM1NativesCheckbox;
 
-        public AppleSiliconPatchListener(JCheckBox listenUseM1NativesCheckbox) {
+        AppleSiliconPatchListener(JCheckBox listenUseM1NativesCheckbox) {
             this.listenUseM1NativesCheckbox = listenUseM1NativesCheckbox;
         }
 

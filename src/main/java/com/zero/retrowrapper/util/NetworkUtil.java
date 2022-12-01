@@ -20,7 +20,7 @@ public final class NetworkUtil {
 
     //private static final Pattern WORD = Pattern.compile("\\W");
 
-    public static boolean isHttpResponseSuccessful(int code) {
+    private static boolean isHttpResponseSuccessful(int code) {
         return (code / 100) == 2;
     }
 

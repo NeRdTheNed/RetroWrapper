@@ -61,7 +61,7 @@ public final class IsomTweakInjector implements IClassTransformer {
         launcherFrameFake.validate();
         applet.init();
         applet.start();
-        Runtime.getRuntime().addShutdownHook(new ShutdownAppletThread(applet));
+        Runtime.getRuntime().addShutdownHook(new Thread(new ShutdownAppletRunnable(applet)));
         SwingUtil.loadIconsOnFrames();
     }
 

@@ -245,7 +245,7 @@ public final class SwingUtil {
                 IOUtils.closeQuietly(rateAPIStream);
             }
 
-            tempLogger.log(Level.FINE, "GitHub rate limit remaining {0}", remainingRateLimit);
+            tempLogger.log(Level.FINE, "GitHub rate limit remaining {0}", Integer.valueOf(remainingRateLimit));
 
             if (remainingRateLimit != 0) {
                 cacheDirectory.mkdirs();
@@ -411,9 +411,13 @@ public final class SwingUtil {
         // As this is a helper class, there should be no reason to instantiate an instance of it.
     }
 
-    static final class NoSelectionModel extends DefaultListSelectionModel {
+    private static final class NoSelectionModel extends DefaultListSelectionModel {
         // Eclipse complains unless I add this
         private static final long serialVersionUID = 1L;
+
+        NoSelectionModel() {
+            // Empty constructor
+        }
 
         @Override
         public void addSelectionInterval(int index0, int index1) {
@@ -430,7 +434,7 @@ public final class SwingUtil {
         private final Logger logger;
         private final JTextPane textPane;
 
-        public NavigateToHyperlinkListener(Logger logger, JTextPane textPane) {
+        NavigateToHyperlinkListener(Logger logger, JTextPane textPane) {
             this.logger = logger;
             this.textPane = textPane;
         }

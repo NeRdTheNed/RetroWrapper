@@ -269,8 +269,8 @@ public final class Installer {
 
         try {
             final File defaultMinecraftDir = new File(FileUtil.defaultMinecraftDirectory());
-            final File defaultCacheDir = new File(defaultMinecraftDir, "retrowrapper/cache");
-            final File currentCacheDir = new File(workingDirectory, "retrowrapper/cache");
+            final File defaultCacheDir = new File(defaultMinecraftDir, "retrowrapper" + File.separator + "cache");
+            final File currentCacheDir = new File(workingDirectory, "retrowrapper" + File.separator + "cache");
 
             if (defaultMinecraftDir.exists()) {
                 defaultCacheDir.mkdirs();

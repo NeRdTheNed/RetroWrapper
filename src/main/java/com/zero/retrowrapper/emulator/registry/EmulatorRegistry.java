@@ -47,7 +47,7 @@ public final class EmulatorRegistry {
         if (directory.isDirectory()) {
             for (final File file : FileUtil.findFiles(directory, ext)) {
                 if (file.length() < smallestSize) {
-                    final String baseFile = directory.getParent() + "/_invalidFiles/" + file.getAbsolutePath().replace(directory.getAbsolutePath(), "");
+                    final String baseFile = directory.getParent() + File.separator + "_invalidFiles" + File.separator + file.getAbsolutePath().replace(directory.getAbsolutePath(), "");
                     File newDir = new File(baseFile);
 
                     for (int count = 0; newDir.exists(); count++) {
@@ -69,7 +69,7 @@ public final class EmulatorRegistry {
     static {
         moveInvalidFiles(RetroEmulator.getInstance().getCacheDirectory());
         moveInvalidFiles(new File(Launch.minecraftHome, "resources"), "ogg");
-        moveInvalidFiles(new File(Launch.minecraftHome + "/assets/virtual/legacy/"), "ogg");
+        moveInvalidFiles(new File(Launch.minecraftHome + File.separator + "assets" + File.separator + "virtual" + File.separator + "legacy" + File.separator), "ogg");
         handlers = new ArrayList<IHandler>();
         handlers.add(new JoinServerHandler("joinserver.jsp"));
         handlers.add(new SingleResponseHandler("login/session.jsp", "ok".getBytes()));

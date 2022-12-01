@@ -89,8 +89,8 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
 
         try {
             final File defaultMinecraftDir = new File(FileUtil.defaultMinecraftDirectory());
-            final File defaultCacheDir = new File(defaultMinecraftDir, "retrowrapper/cache");
-            final File currentCacheDir = new File(Launch.minecraftHome, "retrowrapper/cache");
+            final File defaultCacheDir = new File(defaultMinecraftDir, "retrowrapper" + File.separator + "cache");
+            final File currentCacheDir = new File(Launch.minecraftHome, "retrowrapper" + File.separator + "cache");
 
             if (defaultMinecraftDir.exists()) {
                 defaultCacheDir.mkdirs();
@@ -257,4 +257,3 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
         return null;
     }
 }
-

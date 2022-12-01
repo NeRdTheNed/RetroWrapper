@@ -116,12 +116,12 @@ public final class FileUtil {
     // TODO @Nullable?
     public static File tryFindResourceFile(String file) {
         final File oldLocation = new File(Launch.assetsDir, file);
-        final File resLocation = new File(Launch.minecraftHome, "resources/" + file);
-        final File virtualLegacyAssets = new File(Launch.minecraftHome, "assets/virtual/legacy/" + file);
-        final File virtualPreAssets = new File(Launch.minecraftHome, "assets/virtual/pre-1.6/" + file);
-        final File defResLocation = new File(defaultMinecraftDirectory(), "resources/" + file);
-        final File defVirtualLegacyAssets = new File(defaultMinecraftDirectory(), "assets/virtual/legacy/" + file);
-        final File defVirtualPreAssets = new File(defaultMinecraftDirectory(), "assets/virtual/pre-1.6/" + file);
+        final File resLocation = new File(Launch.minecraftHome, "resources" + File.separator + file);
+        final File virtualLegacyAssets = new File(Launch.minecraftHome, "assets" + File.separator + "virtual" + File.separator + "legacy" + File.separator + file);
+        final File virtualPreAssets = new File(Launch.minecraftHome, "assets" + File.separator + "virtual" + File.separator + "pre-1.6" + File.separator + file);
+        final File defResLocation = new File(defaultMinecraftDirectory(), "resources" + File.separator + file);
+        final File defVirtualLegacyAssets = new File(defaultMinecraftDirectory(), "assets" + File.separator + "virtual" + File.separator + "legacy" + File.separator + file);
+        final File defVirtualPreAssets = new File(defaultMinecraftDirectory(), "assets" + File.separator + "virtual" + File.separator + "pre-1.6" + File.separator + file);
         return tryFindFirstFile(oldLocation, resLocation, virtualLegacyAssets, virtualPreAssets, defResLocation, defVirtualLegacyAssets, defVirtualPreAssets);
     }
 

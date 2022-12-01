@@ -109,11 +109,11 @@ public final class ResourcesHandler extends EmulatorHandler {
     }
 
     private static JsonObject downloadSoundData(String indexName, String indexURL) {
-        final File jsonCached = new File(RetroEmulator.getInstance().getCacheDirectory() + "/" + indexName, indexName + ".json");
+        final File jsonCached = new File(RetroEmulator.getInstance().getCacheDirectory() + File.separator + indexName, indexName + ".json");
         final File localLegacyJson = FileUtil.tryFindFirstFile(
                                          jsonCached,
-                                         new File(Launch.minecraftHome + "/assets/indexes/" + indexName + ".json"),
-                                         new File(FileUtil.defaultMinecraftDirectory() + "/assets/indexes/" + indexName + ".json")
+                                         new File(Launch.minecraftHome + File.separator + "assets" + File.separator + "indexes" + File.separator + indexName + ".json"),
+                                         new File(FileUtil.defaultMinecraftDirectory() + File.separator + "assets" + File.separator + "indexes" + File.separator + indexName + ".json")
                                      );
 
         if (localLegacyJson != null) {
@@ -195,7 +195,7 @@ public final class ResourcesHandler extends EmulatorHandler {
         }
 
         RetroEmulator.getInstance().getCacheDirectory().mkdir();
-        final File resourceCache = new File(RetroEmulator.getInstance().getCacheDirectory() + "/" + indexName, res);
+        final File resourceCache = new File(RetroEmulator.getInstance().getCacheDirectory() + File.separator + indexName, res);
 
         if (resourceCache.exists()) {
             FileInputStream fis = null;
@@ -225,8 +225,8 @@ public final class ResourcesHandler extends EmulatorHandler {
             final String hash = jsonObjects.get(res).asObject().get("hash").asString();
             LogWrapper.fine(res + " " + hash);
             final File localLauncherObject = FileUtil.tryFindFirstFile(
-                                                 new File(Launch.minecraftHome + "/assets/objects/" + hash.substring(0, 2), hash),
-                                                 new File(FileUtil.defaultMinecraftDirectory() + "/assets/objects/" + hash.substring(0, 2), hash)
+                                                 new File(Launch.minecraftHome + File.separator + "assets" + File.separator + "objects" + File.separator + hash.substring(0, 2), hash),
+                                                 new File(FileUtil.defaultMinecraftDirectory() + File.separator + "assets" + File.separator + "objects" + File.separator + hash.substring(0, 2), hash)
                                              );
 
             if ((localLauncherObject != null) && localLauncherObject.exists()) {

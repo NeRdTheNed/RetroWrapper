@@ -49,7 +49,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
          + "Content-Length: 0\n"
          + "Connection: Closed\r\n\n").getBytes();
 
-    private static final File classiCubeDefaultChar = new File(RetroEmulator.getInstance().getCacheDirectory(), "/classicube/char.png");
+    private static final File classiCubeDefaultChar = new File(RetroEmulator.getInstance().getCacheDirectory(), File.separator + "classicube" + File.separator + "char.png");
 
     // TODO Detect supported skin sizes
     private static final int SKIN_WIDTH = 64;

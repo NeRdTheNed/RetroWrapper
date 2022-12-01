@@ -93,13 +93,23 @@ public final class MetadataUtil {
         return lwjglLibraries;
     }
 
-    public static String[] getLWJGLLibraryNames(JsonObject[] lwjglLibraries) {
+    public static String[] getLibraryNames(JsonObject[] libraries) {
         final Set<String> names = new HashSet<String>();
 
-        for (final JsonObject lib : lwjglLibraries) {
-            final String nameWithVersion = lib.get("name").asString();
+        for (final String nameWithVersion : getLibraryNamesWithVersions(libraries)) {
             final String name = nameWithVersion.substring(0, nameWithVersion.lastIndexOf(':'));
             names.add(name);
+        }
+
+        return names.toArray(new String[0]);
+    }
+
+    public static String[] getLibraryNamesWithVersions(JsonObject[] libraries) {
+        final Set<String> names = new HashSet<String>();
+
+        for (final JsonObject lib : libraries) {
+            final String nameWithVersion = lib.get("name").asString();
+            names.add(nameWithVersion);
         }
 
         return names.toArray(new String[0]);

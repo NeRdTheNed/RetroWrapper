@@ -19,8 +19,12 @@ import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -454,6 +458,12 @@ public final class Installer {
                 "https://libraries.minecraft.net/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar",
                 "111e7bea9c968cdb3d06ef4632bf7ff0824d0f36",
                 32999);
+        // ASM 5.2. This could be older, but there's no reason not to use a newer version.
+        final JsonObject asmAll = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-all:5.2",
+                                  "org/ow2/asm/asm-all/5.2/asm-all-5.2.jar",
+                                  "https://repo1.maven.org/maven2/org/ow2/asm/asm-all/5.2/asm-all-5.2.jar",
+                                  "2ea49e08b876bbd33e0a7ce75c8f371d29e1f10a",
+                                  247787);
         // Log4j API 2.3.2 as a Mojang library JSON object
         // LaunchWrapper 1.12 requires it.
         final JsonObject log4jAPI = MetadataUtil.createMojangLibrary("org.apache.logging.log4j:log4j-api:2.3.2",
@@ -468,9 +478,27 @@ public final class Installer {
                                      "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.3.2/log4j-core-2.3.2.jar",
                                      "fcd866619df2b131be0defc4f63b09b703649031",
                                      833136);
+        // These libraries should be replaced if RetroWrapper's versions are newer
+        final JsonObject[] replaceIfNewerLibraries = {
+            launchWrapperOneTwelve,
+            asmAll,
+            log4jAPI,
+            log4jCore
+        };
+        final String[] replaceIfNewerNames = MetadataUtil.getLibraryNamesWithVersions(replaceIfNewerLibraries);
+        final Map<String, JsonObject> newNamesMap = new HashMap<String, JsonObject>();
+        final int length = replaceIfNewerLibraries.length;
+
+        for (int i = 0; i < length; i++) {
+            newNamesMap.put(replaceIfNewerNames[i], replaceIfNewerLibraries[i]);
+        }
+
         // New versions of LWJGL to use.
         final JsonObject[] lwjglLibraries = MetadataUtil.getLWJGLLibraries(shouldUseM1Natives ? "com/zero/retrowrapper/lwjgl/2.9.4-nightly-20150209-M1.json" : "com/zero/retrowrapper/lwjgl/2.9.4-nightly-20150209.json");
-        final String[] lwjglLibraryNames = MetadataUtil.getLWJGLLibraryNames(lwjglLibraries);
+        final String[] lwjglLibraryNames = MetadataUtil.getLibraryNames(lwjglLibraries);
+        final Collection<JsonObject> libraryReplacements = new ArrayList<JsonObject>();
+        Collections.addAll(libraryReplacements, lwjglLibraries);
+        Collections.addAll(libraryReplacements, replaceIfNewerLibraries);
         // Install the RetroWrapper jar file to the libraries folder
         installRetroWrapperLibrary(libDir, retroWrapperJar, installerLogger);
         // Loop through instances to wrap
@@ -514,59 +542,46 @@ public final class Installer {
                 final JsonArray libraries = versionJson.get("libraries").asArray();
                 final JsonArray newLibraries = Json.array();
                 final Iterator<JsonValue> libraryIterator = libraries.iterator();
-                // If the version already has Log4j API
-                boolean hasLogAPI = false;
-                // If the version already has Log4j core
-                boolean hasLogCore = false;
+                addLibs: while (libraryIterator.hasNext()) {
+                    final JsonObject toAdd = libraryIterator.next().asObject();
 
-                while (libraryIterator.hasNext()) {
-                    final JsonObject library = libraryIterator.next().asObject();
-                    JsonObject toAdd = library;
-                    final String libName = library.get("name").asString();
-
-                    if (shouldUpdateLibraries && libName.contains("net.minecraft:launchwrapper")) {
-                        final String[] libNameSplit = colonPattern.split(libName);
-                        final String libVersion = libNameSplit[libNameSplit.length - 1];
-
-                        if (MetadataUtil.compareSemver(libVersion, "1.12") < 0) {
-                            // Update LaunchWrapper to LaunchWrapper 1.12
-                            toAdd = launchWrapperOneTwelve;
-                        }
-                    } else if (shouldUpdateLibraries && libName.contains("org.apache.logging.log4j:log4j-api")) {
-                        hasLogAPI = true;
-                    } else if (shouldUpdateLibraries && libName.contains("org.apache.logging.log4j:log4j-core")) {
-                        hasLogCore = true;
-                    } else if (shouldUpdateLibraries) {
+                    if (shouldUpdateLibraries) {
+                        final String libName = toAdd.get("name").asString();
                         final String libNameNoVersion = libName.substring(0, libName.lastIndexOf(':'));
 
                         for (final String lwjglLibName : lwjglLibraryNames) {
                             if (lwjglLibName.equals(libNameNoVersion)) {
-                                toAdd = null;
-                                break;
+                                // Unconditionally replace LWJGL libraries
+                                continue addLibs;
+                            }
+                        }
+
+                        for (final String newLibraryNameWithVersion : replaceIfNewerNames) {
+                            final String newLibraryName = newLibraryNameWithVersion.substring(0, newLibraryNameWithVersion.lastIndexOf(':'));
+
+                            if (newLibraryName.equals(libNameNoVersion)) {
+                                final String[] libNameSplit = colonPattern.split(libName);
+                                final String libVersion = libNameSplit[libNameSplit.length - 1];
+                                final String[] newLibNameSplit = colonPattern.split(newLibraryNameWithVersion);
+                                final String newLibVersion = newLibNameSplit[newLibNameSplit.length - 1];
+
+                                if (MetadataUtil.compareSemver(libVersion, newLibVersion) < 0) {
+                                    // Replace this library if RetroWrapper's version is newer
+                                    continue addLibs;
+                                }
+
+                                // As the existing version is newer, remove the replacement
+                                libraryReplacements.remove(newNamesMap.get(newLibraryNameWithVersion));
                             }
                         }
                     }
 
-                    if (toAdd != null) {
-                        newLibraries.add(toAdd);
-                    }
+                    newLibraries.add(toAdd);
                 }
 
                 if (shouldUpdateLibraries) {
-                    for (final JsonObject lwjglLib : lwjglLibraries) {
-                        newLibraries.add(lwjglLib);
-                    }
-
-                    if (!hasLogAPI) {
-                        // Add Log4j API, LaunchWrapper 1.12 requires it.
-                        // 2.3.2 is the latest (RCE patched) version to support Java 6.
-                        newLibraries.add(log4jAPI);
-                    }
-
-                    if (!hasLogCore) {
-                        // Add Log4j core, LaunchWrapper 1.12 requires it.
-                        // 2.3.2 is the latest (RCE patched) version to support Java 6.
-                        newLibraries.add(log4jCore);
+                    for (final JsonObject library : libraryReplacements) {
+                        newLibraries.add(library);
                     }
                 }
 

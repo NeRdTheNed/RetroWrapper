@@ -55,11 +55,11 @@ public final class RetroTweaker implements ITweaker {
             LogWrapper.warning("Issue getting system properties: " + ExceptionUtils.getStackTrace(e));
         }
 
-        if (RetroTweaker.m1PatchMode == M1PatchMode.ForceEnable) {
+        if (m1PatchMode == M1PatchMode.ForceEnable) {
             M1ColorTweakInjector.isMinecraftFullscreen = false;
         }
 
-        if ((RetroTweaker.m1PatchMode == M1PatchMode.ForceEnable) || ((("aarch64".equals(SystemUtils.OS_ARCH) && SystemUtils.IS_OS_MAC) || (m1PatchMode == M1PatchMode.EnableWindowed) || (m1PatchMode == M1PatchMode.EnableWindowedInverted)) && experimental && (RetroTweaker.m1PatchMode != M1PatchMode.ForceDisable))) {
+        if ((m1PatchMode == M1PatchMode.ForceEnable) || ((("aarch64".equals(SystemUtils.OS_ARCH) && SystemUtils.IS_OS_MAC) || (m1PatchMode == M1PatchMode.EnableWindowed) || (m1PatchMode == M1PatchMode.EnableWindowedInverted)) && experimental && (m1PatchMode != M1PatchMode.ForceDisable))) {
             classLoader.registerTransformer("com.zero.retrowrapper.injector.M1ColorTweakInjector");
         }
     }

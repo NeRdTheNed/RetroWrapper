@@ -47,7 +47,7 @@ public final class NetworkUtil {
     }
 
     public static boolean joinServer(String sessionId, String username, String serverId) {
-        final String profileUUID = NetworkUtil.getUUIDFromUsername(username);
+        final String profileUUID = getUUIDFromUsername(username);
         return joinServerModern(sessionId, profileUUID, serverId) || joinServerLegacy(sessionId, username, serverId);
     }
 

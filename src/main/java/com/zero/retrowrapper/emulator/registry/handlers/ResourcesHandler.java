@@ -386,8 +386,9 @@ public final class ResourcesHandler extends EmulatorHandler {
                 entries.put(name, new ResourceEntry(name, Integer.toString(size), etag));
                 // Add the directories for this resource
                 final String[] pathParts = slashPattern.split(name);
+                final int length = pathParts.length;
 
-                for (int i = 0; i < (pathParts.length - 1); i++) {
+                for (int i = 0; i < (length - 1); i++) {
                     final StringBuilder pathBuilder = new StringBuilder();
 
                     for (int j = 0; j <= i; j++) {

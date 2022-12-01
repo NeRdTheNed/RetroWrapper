@@ -14,6 +14,7 @@ import java.lang.reflect.Modifier;
 import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import javax.swing.JPanel;
@@ -192,7 +193,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
 
                         if (appletField != null) {
                             LogWrapper.fine("Applet mode: " + appletField.get(mcObj));
-                            appletField.set(mcObj, false);
+                            appletField.set(mcObj, Boolean.FALSE);
                         }
                     }
 
@@ -212,7 +213,9 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
                 new HackThread().start();
             }
         } catch (final Exception e) {
-            LogWrapper.severe("Fatal error while starting RetroWrapper: " + ExceptionUtils.getStackTrace(e));
+            final String context = "Fatal error while starting RetroWrapper";
+            LogWrapper.severe(context + ": " + ExceptionUtils.getStackTrace(e));
+            SwingUtil.showExceptionHandler(Logger.getLogger(RetroTweakInjectorTarget.class.getName()), context, e);
             System.exit(1);
         }
     }

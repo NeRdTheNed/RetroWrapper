@@ -102,18 +102,21 @@ public final class RetroTweakClassWriter extends ClassWriter {
                             transformed = minecraftNetPattern.matcher(constant).replaceAll("session.minecraft.net");
                             LogWrapper.info(replacedWithTextString + transformed);
                         } else if (constant.contains("minecraft.net") || (handler != null)) {
-                            final String prepend = isCom ?
-                                                   constant.contains("https://") || constant.contains("http://") ? "http://" : "" :
-                                                   (constant.contains("https://") ? "https://" : "") + (constant.contains("http://") ? "http://" : "");
-                            String postpend = isCom ?
-                                              constant.replace(comPattern.split(constant)[0] + ".com", "") :
-                                              constant.replace(netPattern.split(constant)[0] + ".net", "");
+                            final StringBuilder newUrl = new StringBuilder();
+                            newUrl.append(isCom ?
+                                          constant.contains("https://") || constant.contains("http://") ? "http://" : "" :
+                                          (constant.contains("https://") ? "https://" : "") + (constant.contains("http://") ? "http://" : ""));
+                            newUrl.append("127.0.0.1:");
+                            newUrl.append(RetroTweakInjectorTarget.localServerPort);
+                            newUrl.append(isCom ?
+                                          constant.replace(comPattern.split(constant)[0] + ".com", "") :
+                                          constant.replace(netPattern.split(constant)[0] + ".net", ""));
 
                             if (constant.contains("login.minecraft.net") && (EmulatorRegistry.getHandlerByUrl(constant) == null)) {
-                                postpend += "/login/session.jsp";
+                                newUrl.append("/login/session.jsp");
                             }
 
-                            transformed = prepend + "127.0.0.1:" + RetroTweakInjectorTarget.localServerPort + postpend;
+                            transformed = newUrl.toString();
                             LogWrapper.info(replacedWithTextString + transformed);
                         } else {
                             transformed = constant;

@@ -62,11 +62,11 @@ public final class M1ColorTweakInjector implements IClassTransformer {
 
     public static boolean isMinecraftFullscreen = true;
 
-    private static String reloadTexturesMethodName = null;
-    private static String reloadTexturesClassName = null;
+    private static String reloadTexturesMethodName;
+    private static String reloadTexturesClassName;
 
-    private static Object reloadTexturesInstance = null;
-    private static Method reloadTexturesMethod = null;
+    private static Object reloadTexturesInstance;
+    private static Method reloadTexturesMethod;
 
     /**
      * TODO WIP patches

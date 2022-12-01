@@ -24,7 +24,7 @@ public final class EmulatorRegistry {
     }
 
     private static final List<IHandler> handlers;
-    private static final int smallestSize = 16;
+    private static final long smallestSize = 16;
 
     private static void moveInvalidFiles(File directory, String... ext) {
         final String toPrint;
@@ -72,10 +72,10 @@ public final class EmulatorRegistry {
         moveInvalidFiles(new File(Launch.minecraftHome + File.separator + "assets" + File.separator + "virtual" + File.separator + "legacy" + File.separator), "ogg");
         handlers = new ArrayList<IHandler>();
         handlers.add(new JoinServerHandler("joinserver.jsp"));
-        handlers.add(new SingleResponseHandler("login/session.jsp", "ok".getBytes()));
-        handlers.add(new SingleResponseHandler("session?name=", "ok".getBytes()));
-        handlers.add(new SingleResponseHandler("/game/?n=", "0".getBytes()));
-        handlers.add(new SingleResponseHandler("haspaid.jsp", "true".getBytes()));
+        handlers.add(new SingleResponseHandler("login/session.jsp", "ok"));
+        handlers.add(new SingleResponseHandler("session?name=", "ok"));
+        handlers.add(new SingleResponseHandler("/game/?n=", "0"));
+        handlers.add(new SingleResponseHandler("haspaid.jsp", "true"));
         handlers.add(new SaveHandler());
         handlers.add(new LoadHandler());
         handlers.add(new ListmapsHandler());

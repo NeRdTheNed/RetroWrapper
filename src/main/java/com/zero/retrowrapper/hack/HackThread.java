@@ -26,6 +26,7 @@ import net.minecraft.launchwrapper.LogWrapper;
 public final class HackThread extends Thread {
     // TODO Refactor
     JLabel label;
+    private JButton button;
     RetroPlayer player;
 
     void setupSwingGUI() {
@@ -64,10 +65,11 @@ public final class HackThread extends Thread {
         final JTextField z = new JTextField();
         z.setBounds(50, 164, 200, 30);
         frame.add(z);
-        final JButton b = new JButton("Teleport");
-        b.setBounds(50, 202, 200, 40);
-        b.addActionListener(new TeleportActionListener(x, y, z));
-        frame.add(b);
+        button = new JButton("Setting up hacks...");
+        button.setBounds(50, 202, 200, 40);
+        button.addActionListener(new TeleportActionListener(x, y, z));
+        button.setEnabled(false);
+        frame.add(button);
         frame.setVisible(true);
     }
 
@@ -86,17 +88,17 @@ public final class HackThread extends Thread {
             player.minecraft = RetroTweakInjectorTarget.minecraftField.get(RetroTweakInjectorTarget.applet);
             final Class<?> mcClass = JavaUtil.getMostSuper(player.minecraft.getClass());
             LogWrapper.fine("Minecraft class: " + mcClass.getName());
+            button.setText("Finding mob class...");
 
             // TODO Is this safe?
-            while (true) {
-                if (RetroTweakClassWriter.mobClass != null) {
-                    break;
-                }
+            while (RetroTweakClassWriter.mobClass == null) {
+                Thread.sleep(1000);
             }
 
             LogWrapper.fine("Mob class: " + RetroTweakClassWriter.mobClass);
             player.playerObj = null;
             final Class<?> mobClass = RetroTweakInjectorTarget.getaClass(RetroTweakClassWriter.mobClass);
+            button.setText("Finding player...");
 
             while (player.playerObj == null) {
                 for (final Field f : mcClass.getDeclaredFields()) {
@@ -110,12 +112,15 @@ public final class HackThread extends Thread {
                 Thread.sleep(1000);
             }
 
+            button.setText("Teleport");
             LogWrapper.fine("Player class: " + player.playerObj.getClass().getName());
             player.entityClass = JavaUtil.getMostSuper(mobClass);
             LogWrapper.fine("Entity class: " + player.entityClass.getName());
             player.setAABB();
 
             if (player.isAABBNonNull()) {
+                button.setEnabled(true);
+
                 while (true) {
                     player.tick();
                     Thread.sleep(100);

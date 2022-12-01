@@ -13,7 +13,7 @@ import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LogWrapper;
 
 public final class RetroEmulator extends Thread {
-    ServerSocket server;
+    private final ServerSocket server;
 
     private static RetroEmulator instance;
 

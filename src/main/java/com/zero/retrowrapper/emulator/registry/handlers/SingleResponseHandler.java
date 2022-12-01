@@ -8,9 +8,9 @@ import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
 public final class SingleResponseHandler extends EmulatorHandler {
     private final byte[] toWrite;
 
-    public SingleResponseHandler(String url, byte[] toWrite) {
+    public SingleResponseHandler(String url, String toWrite) {
         super(url);
-        this.toWrite = toWrite;
+        this.toWrite = toWrite.getBytes();
     }
 
     public void handle(OutputStream os, String get, byte[] data) throws IOException {

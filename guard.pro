@@ -38,6 +38,7 @@
 # Bonus optimisations
 
 -optimizationpasses 999
+-dontpreverify
 # Not currently used
 #-mergeinterfacesaggressively
 #-overloadaggressively

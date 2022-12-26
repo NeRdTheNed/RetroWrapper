@@ -17,7 +17,7 @@ plugins {
 import org.apache.tools.ant.filters.ReplaceTokens
 
 // Reproducible builds! https://docs.gradle.org/4.9/userguide/working_with_files.html#sec:reproducible_archives
-tasks.withType(AbstractArchiveTask) {
+tasks.withType(AbstractArchiveTask).configureEach {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
 }
@@ -165,7 +165,7 @@ processResources {
 }
 
 // Ensures that the encoding of source files is set to UTF-8, see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
@@ -175,7 +175,9 @@ configurations {
 }
 
 // This task uses ProGuard to shrink the built .jar's file size and optimise the bytecode, mainly by removing unused shadowed dependencies.
-task proguard(dependsOn: shadowJar, type: proguard.gradle.ProGuardTask) {
+tasks.register('proguard', proguard.gradle.ProGuardTask) {
+    dependsOn(shadowJar)
+
     injars 'build/libs/' + rootProject.name + '-' + version + '-debug.jar'
     outjars 'build/libs/' + rootProject.name + '-' + version + '.jar'
 
@@ -203,14 +205,16 @@ jar {
 }
 
 // This task creates a .jar file containing the source code of this project.
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
+tasks.register('sourcesJar', Jar) {
+    archiveClassifier = 'sources'
     from sourceSets.main.allSource
 }
 
 // This task creates a Java 6 - 8 compatible MultiMC instance with the current build of RetroWrapper.
 // This instance is intended to have parity with the standard launcher.
-task createMultiMCInstance(dependsOn: proguard, type: Zip) {
+tasks.register('createMultiMCInstance', Zip) {
+    dependsOn(proguard)
+
     inputs.property 'rrVersion', project.version
     inputs.property 'versionWithMetadata', versionWithMetadata
     archiveFileName = rootProject.name + '-' + project.version + '-MultiMC.J6.zip'
@@ -231,7 +235,9 @@ task createMultiMCInstance(dependsOn: proguard, type: Zip) {
 
 // This task creates a Java 9+ compatible MultiMC instance with the current build of RetroWrapper.
 // This instance uses newer libraries than the standard launcher so LaunchWrapper can run on Java 9+.
-task createJ9MultiMCInstance(dependsOn: proguard, type: Zip) {
+tasks.register('createJ9MultiMCInstance', Zip) {
+    dependsOn(proguard)
+
     inputs.property 'rrVersion', project.version
     inputs.property 'versionWithMetadata', versionWithMetadata
     archiveFileName = rootProject.name + '-' + project.version + '-MultiMC.J9+.zip'

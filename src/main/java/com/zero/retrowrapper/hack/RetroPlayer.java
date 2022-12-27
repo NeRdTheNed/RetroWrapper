@@ -9,30 +9,31 @@ import net.minecraft.launchwrapper.LogWrapper;
 
 final class RetroPlayer {
     private Field x, y, z, x2, y2, z2;
-    private double ax, ay, az;
     private Object aabb;
-    Class<?> entityClass;
-    Object playerObj;
-
-    private final HackRunnable thread;
-    Field playerField;
-    Object minecraft;
     private boolean modeFloat;
 
-    RetroPlayer(HackRunnable thread) {
+    private final HackRunnable thread;
+    private final Object minecraft;
+    private final Field playerField;
+    private final Field aabbField;
+
+    RetroPlayer(HackRunnable thread, Object minecraft, Field playerField, Field aabbField) {
         this.thread = thread;
+        this.minecraft = minecraft;
+        this.playerField = playerField;
+        this.aabbField = aabbField;
     }
 
-    void tick() throws IllegalArgumentException, IllegalAccessException, InterruptedException {
+    void tick() throws InterruptedException {
         try {
-            playerObj = playerField.get(minecraft);
+            final Object playerObj = playerField.get(minecraft);
+            final Object tempAabb = playerObj != null ? aabbField.get(playerObj) : null;
+            final boolean changed = setAABB(tempAabb);
 
-            if (playerObj != null) {
-                setAABB();
-                ax = getVariable(x2, aabb) - getX();
-                ay = getVariable(y2, aabb) - getY();
-                az = getVariable(z2, aabb) - getZ();
-                thread.setLabelText(getLabelText());
+            if (isAABBNonNull()) {
+                thread.setLabelText(getX(), getY(), getZ());
+            } else if (changed) {
+                thread.setLabelText("null");
             }
         } catch (final Exception e) {
             LogWrapper.warning("Something went wrong with RetroPlayer on tick: " + ExceptionUtils.getStackTrace(e));
@@ -40,117 +41,101 @@ final class RetroPlayer {
         }
     }
 
-    private String getLabelText() {
-        Double tempX = null, tempY = null, tempZ = null;
+    private boolean setAABB(Object tempAABB) {
+        if (tempAABB != aabb) {
+            aabb = tempAABB;
+            final boolean aabbNotNull = aabb != null;
 
-        try {
-            tempX = Math.floor(getX() * 10.0) / 10.0;
-            tempY = Math.floor(getY() * 10.0) / 10.0;
-            tempZ = Math.floor(getZ() * 10.0) / 10.0;
-        } catch (final Exception e) {
-            LogWrapper.warning("Something went wrong with getting the label text from RetroPlayer: " + ExceptionUtils.getStackTrace(e));
+            if (aabbNotNull) {
+                int doubleCount = 0;
+                fieldLoop: for (final Field f : aabb.getClass().getDeclaredFields()) {
+                    if (Modifier.isPublic(f.getModifiers()) && (f.getType().equals(Double.TYPE) || f.getType().equals(Float.TYPE))) {
+                        if (f.getType().equals(Float.TYPE)) {
+                            modeFloat = true;
+                        }
+
+                        switch (doubleCount) {
+                        case 0:
+                            x = f;
+                            break;
+
+                        case 1:
+                            y = f;
+                            break;
+
+                        case 2:
+                            z = f;
+                            break;
+
+                        case 3:
+                            x2 = f;
+                            break;
+
+                        case 4:
+                            y2 = f;
+                            break;
+
+                        default:
+                            z2 = f;
+                            break fieldLoop;
+                        }
+
+                        doubleCount++;
+                    }
+                }
+            } else {
+                x = y = z = x2 = y2 = z2 = null;
+            }
+
+            thread.setTeleportActive(aabbNotNull);
+            return true;
         }
 
-        return "<html>Position:<br>&nbsp&nbsp&nbsp;x: " + tempX + "<br>&nbsp&nbsp&nbsp;y: " + tempY + "<br>&nbsp&nbsp&nbsp;z: " + tempZ + "</html>";
+        return false;
     }
 
-    void setAABB() throws IllegalArgumentException, IllegalAccessException {
-        boolean flag2 = false;
-
-        for (final Field f : entityClass.getDeclaredFields()) {
-            if (!flag2) {
-                if (f.getType().equals(Float.TYPE)) {
-                    flag2 = true;
-                }
-            } else if (!f.getType().isPrimitive()) {
-                aabb = f.get(playerObj);
-                break;
-            }
-        }
-
-        if (aabb != null) {
-            int doubleCount = 0;
-
-            for (final Field f : aabb.getClass().getDeclaredFields()) {
-                if (Modifier.isPublic(f.getModifiers()) && (f.getType().equals(Double.TYPE) || f.getType().equals(Float.TYPE))) {
-                    if (f.getType().equals(Float.TYPE)) {
-                        modeFloat = true;
-                    }
-
-                    switch (doubleCount) {
-                    case 0:
-                        x = f;
-                        break;
-
-                    case 1:
-                        y = f;
-                        break;
-
-                    case 2:
-                        z = f;
-                        break;
-
-                    case 3:
-                        x2 = f;
-                        break;
-
-                    case 4:
-                        y2 = f;
-                        break;
-
-                    case 5:
-                        z2 = f;
-                        break;
-
-                    default:
-                        return;
-                    }
-
-                    doubleCount++;
-                }
-            }
-        }
-    }
-
-    public boolean isAABBNonNull() {
+    boolean isAABBNonNull() {
         return aabb != null;
     }
 
-    private double getX() throws IllegalArgumentException, IllegalAccessException {
+    double getX() throws IllegalArgumentException, IllegalAccessException {
         return getVariable(x, aabb);
     }
 
-    private double getY() throws IllegalArgumentException, IllegalAccessException {
+    double getY() throws IllegalArgumentException, IllegalAccessException {
         return getVariable(y, aabb);
     }
 
-    private double getZ() throws IllegalArgumentException, IllegalAccessException {
+    double getZ() throws IllegalArgumentException, IllegalAccessException {
         return getVariable(z, aabb);
     }
 
     private double getVariable(Field f, Object o) throws IllegalArgumentException, IllegalAccessException {
-        if (modeFloat) {
-            return f.getFloat(o);
-        }
-
-        return f.getDouble(o);
+        return o == null ? 0.0 : modeFloat ? f.getFloat(o) : f.getDouble(o);
     }
 
     void teleport(double dx, double dy, double dz) throws IllegalArgumentException, IllegalAccessException {
+        final double ax = getVariable(x2, aabb) - getX();
+        final double ay = getVariable(y2, aabb) - getY();
+        final double az = getVariable(z2, aabb) - getZ();
+        final double dax = dx + ax;
+        final double day = dy + ay;
+        final double daz = dz + az;
+
         if (modeFloat) {
-            x.set(aabb, (float) dx);
-            y.set(aabb, (float) dy);
-            z.set(aabb, (float) dz);
-            x2.set(aabb, (float)(dx + ax));
-            y2.set(aabb, (float)(dy + ay));
-            z2.set(aabb, (float)(dz + az));
+            x.setFloat(aabb, (float) dx);
+            y.setFloat(aabb, (float) dy);
+            z.setFloat(aabb, (float) dz);
+            x2.setFloat(aabb, (float) dax);
+            y2.setFloat(aabb, (float) day);
+            z2.setFloat(aabb, (float) daz);
         } else {
-            x.set(aabb, dx);
-            y.set(aabb, dy);
-            z.set(aabb, dz);
-            x2.set(aabb, dx + ax);
-            y2.set(aabb, dy + ay);
-            z2.set(aabb, dz + az);
+            x.setDouble(aabb, dx);
+            y.setDouble(aabb, dy);
+            z.setDouble(aabb, dz);
+            x2.setDouble(aabb, dax);
+            y2.setDouble(aabb, day);
+            z2.setDouble(aabb, daz);
         }
     }
 }

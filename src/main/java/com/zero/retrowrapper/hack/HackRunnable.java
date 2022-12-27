@@ -1,10 +1,13 @@
 package com.zero.retrowrapper.hack;
 
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.Field;
-import java.util.regex.Pattern;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.concurrent.Callable;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,18 +23,35 @@ import org.objectweb.asm.RetroTweakClassWriter;
 
 import com.zero.retrowrapper.injector.RetroTweakInjectorTarget;
 import com.zero.retrowrapper.util.JavaUtil;
+import com.zero.retrowrapper.util.SwingUtil;
 
 import net.minecraft.launchwrapper.LogWrapper;
 
 public final class HackRunnable implements Runnable {
+    static final NumberFormat inputNumberFormat = NumberFormat.getNumberInstance();
+    static final NumberFormat outputNumberFormat = NumberFormat.getNumberInstance();
+
+    static {
+        outputNumberFormat.setMaximumFractionDigits(2);
+    }
+
     // TODO Refactor
-    JLabel label;
     JButton button;
     RetroPlayer player;
 
-    public void run() {
-        player = new RetroPlayer(this);
+    JTextField xf;
+    JTextField yf;
+    JTextField zf;
 
+    JLabel xl;
+    JLabel yl;
+    JLabel zl;
+
+    JButton xrel;
+    JButton yrel;
+    JButton zrel;
+
+    public void run() {
         try {
             SwingUtilities.invokeAndWait(new SetupSwingRunnable());
         } catch (final Exception e) {
@@ -40,66 +60,93 @@ public final class HackRunnable implements Runnable {
         }
 
         try {
-            RetroTweakInjectorTarget.minecraftField.setAccessible(true);
-            player.minecraft = RetroTweakInjectorTarget.minecraftField.get(RetroTweakInjectorTarget.applet);
-            final Class<?> mcClass = JavaUtil.getMostSuper(player.minecraft.getClass());
-            LogWrapper.fine("Minecraft class: " + mcClass.getName());
-            button.setText("Finding mob class...");
+            player = constructPlayer(this, button);
 
-            // TODO Is this safe?
-            while (RetroTweakClassWriter.mobClass == null) {
-                Thread.sleep(1000L);
-            }
-
-            LogWrapper.fine("Mob class: " + RetroTweakClassWriter.mobClass);
-            player.playerObj = null;
-            final Class<?> mobClass = RetroTweakInjectorTarget.getaClass(RetroTweakClassWriter.mobClass);
-            button.setText("Finding player...");
-
-            while (player.playerObj == null) {
-                for (final Field f : mcClass.getDeclaredFields()) {
-                    if (mobClass.isAssignableFrom(f.getType()) || f.getType().equals(mobClass)) {
-                        player.playerField = f;
-                        player.playerObj = f.get(player.minecraft);
-                        break;
-                    }
-                }
-
-                Thread.sleep(1000L);
-            }
-
-            button.setText("Teleport");
-            LogWrapper.fine("Player class: " + player.playerObj.getClass().getName());
-            player.entityClass = JavaUtil.getMostSuper(mobClass);
-            LogWrapper.fine("Entity class: " + player.entityClass.getName());
-            player.setAABB();
-
-            if (player.isAABBNonNull()) {
-                button.setEnabled(true);
-
-                while (true) {
-                    player.tick();
-                    Thread.sleep(100L);
-                }
+            while (true) {
+                player.tick();
+                Thread.sleep(100L);
             }
         } catch (final Exception e) {
             LogWrapper.warning("Something went wrong with the hack thread: " + ExceptionUtils.getStackTrace(e));
         }
     }
 
-    void setLabelText(final String text) {
+    private static RetroPlayer constructPlayer(HackRunnable self, JButton button) throws Exception {
+        RetroTweakInjectorTarget.minecraftField.setAccessible(true);
+        final Object minecraft = RetroTweakInjectorTarget.minecraftField.get(RetroTweakInjectorTarget.applet);
+        final Class<?> mcClass = JavaUtil.getMostSuper(minecraft.getClass());
+        LogWrapper.fine("Minecraft class: " + mcClass.getName());
+        button.setText("Finding mob class...");
+
+        // TODO Is this safe?
+        while (RetroTweakClassWriter.mobClass == null) {
+            Thread.sleep(1000L);
+        }
+
+        LogWrapper.fine("Mob class: " + RetroTweakClassWriter.mobClass);
+        Object playerObj = null;
+        final Class<?> mobClass = RetroTweakInjectorTarget.getaClass(RetroTweakClassWriter.mobClass);
+        button.setText("Finding player...");
+        Field playerField = null;
+
+        while (playerObj == null) {
+            for (final Field f : mcClass.getDeclaredFields()) {
+                if (mobClass.isAssignableFrom(f.getType()) || f.getType().equals(mobClass)) {
+                    playerField = f;
+                    playerObj = f.get(minecraft);
+                    break;
+                }
+            }
+
+            Thread.sleep(1000L);
+        }
+
+        LogWrapper.fine("Player class: " + playerObj.getClass().getName());
+        final Class<?> entityClass = JavaUtil.getMostSuper(mobClass);
+        LogWrapper.fine("Entity class: " + entityClass.getName());
+        boolean foundFloat = false;
+        Field aabbField = null;
+
+        for (final Field f : entityClass.getDeclaredFields()) {
+            if (!foundFloat) {
+                if (f.getType().equals(Float.TYPE)) {
+                    foundFloat = true;
+                }
+            } else if (!f.getType().isPrimitive()) {
+                aabbField = f;
+                break;
+            }
+        }
+
+        return new RetroPlayer(self, minecraft, playerField, aabbField);
+    }
+
+    void setLabelText(final double x, final double y, final double z) {
+        setLabelText(outputNumberFormat.format(x), outputNumberFormat.format(y), outputNumberFormat.format(z));
+    }
+
+    void setLabelText(final String all) {
+        setLabelText(all, all, all);
+    }
+
+    void setLabelText(final String x, final String y, final String z) {
         try {
-            SwingUtilities.invokeLater(new LabelRunnable(text));
+            SwingUtilities.invokeLater(new LabelRunnable(x, y, z));
         } catch (final Exception e) {
             // TODO Better error handling
             LogWrapper.warning("Something went wrong with setting the label text in the hack thread: " + ExceptionUtils.getStackTrace(e));
         }
     }
 
-    private final class TeleportActionListener implements ActionListener {
-        private final Pattern commaPattern = Pattern.compile(",", Pattern.LITERAL);
-        private final Pattern spacePattern = Pattern.compile(" ", Pattern.LITERAL);
+    void setTeleportActive(boolean active) {
+        button.setText(active ? "Teleport" : "No player found");
+        button.setEnabled(active);
+        xrel.setEnabled(active);
+        yrel.setEnabled(active);
+        zrel.setEnabled(active);
+    }
 
+    private final class TeleportActionListener implements ActionListener {
         private final JTextField x;
         private final JTextField y;
         private final JTextField z;
@@ -111,13 +158,17 @@ public final class HackRunnable implements Runnable {
         }
 
         public void actionPerformed(ActionEvent e) {
-            try {
-                final double dx = Double.parseDouble(spacePattern.matcher(commaPattern.matcher(x.getText()).replaceAll("")).replaceAll(""));
-                final double dy = Double.parseDouble(spacePattern.matcher(commaPattern.matcher(y.getText()).replaceAll("")).replaceAll(""));
-                final double dz = Double.parseDouble(spacePattern.matcher(commaPattern.matcher(z.getText()).replaceAll("")).replaceAll(""));
-                player.teleport(dx, dy, dz);
-            } catch (final Exception ee) {
-                JOptionPane.showMessageDialog(null, "Exception occurred!\n" + ee.getClass().getName() + "\n" + ee.getMessage());
+            if (player.isAABBNonNull()) {
+                try {
+                    final double dx = inputNumberFormat.parse(x.getText()).doubleValue();
+                    final double dy = inputNumberFormat.parse(y.getText()).doubleValue();
+                    final double dz = inputNumberFormat.parse(z.getText()).doubleValue();
+                    player.teleport(dx, dy, dz);
+                } catch (final ParseException pe) {
+                    JOptionPane.showMessageDialog(null, "Could not parse number from input!\n" + pe.getClass().getName() + "\n" + pe.getMessage());
+                } catch (final Exception ee) {
+                    JOptionPane.showMessageDialog(null, "Exception occurred!\n" + ee.getClass().getName() + "\n" + ee.getMessage());
+                }
             }
         }
     }
@@ -141,49 +192,89 @@ public final class HackRunnable implements Runnable {
             final Dimension dim = new Dimension(654, 310);
             frame.setPreferredSize(dim);
             frame.setMinimumSize(dim);
-            frame.setLayout(null);
+            frame.setLayout(new GridLayout(0, 3));
             frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            frame.setResizable(false);
+            frame.setResizable(true);
             frame.setLocationRelativeTo(null);
-            label = new JLabel("<html>Position:<br>&nbsp&nbsp&nbsp;x: null<br>&nbsp&nbsp&nbsp;y: null<br>&nbsp&nbsp&nbsp;z: null</html>");
-            label.setBounds(30, 10, 500, 80);
-            frame.add(label);
-            final JLabel xl = new JLabel("x:");
-            xl.setBounds(30, 103, 50, 20);
-            frame.add(xl);
-            final JLabel yl = new JLabel("y:");
-            yl.setBounds(30, 135, 50, 20);
-            frame.add(yl);
-            final JLabel zl = new JLabel("z:");
-            zl.setBounds(30, 167, 50, 20);
-            frame.add(zl);
-            final JTextField x = new JTextField();
-            x.setBounds(50, 100, 200, 30);
-            frame.add(x);
-            final JTextField y = new JTextField();
-            y.setBounds(50, 132, 200, 30);
-            frame.add(y);
-            final JTextField z = new JTextField();
-            z.setBounds(50, 164, 200, 30);
-            frame.add(z);
+            xl = new JLabel("x: null");
+            SwingUtil.addJLabelCentered(frame, xl);
+            xf = new JTextField();
+            SwingUtil.addJTextFieldCentered(frame, xf);
+            xrel = new JButton("Copy x coordinate");
+            xrel.addActionListener(new SetNumListener(xf, new Callable<Double>() {
+                public Double call() throws Exception {
+                    return player.getX();
+                }
+            }));
+            xrel.setEnabled(false);
+            SwingUtil.addJButtonCentered(frame, xrel);
+            yl = new JLabel("y: null");
+            SwingUtil.addJLabelCentered(frame, yl);
+            yf = new JTextField();
+            SwingUtil.addJTextFieldCentered(frame, yf);
+            yrel = new JButton("Copy y coordinate");
+            yrel.addActionListener(new SetNumListener(yf, new Callable<Double>() {
+                public Double call() throws Exception {
+                    return player.getY();
+                }
+            }));
+            yrel.setEnabled(false);
+            SwingUtil.addJButtonCentered(frame, yrel);
+            zl = new JLabel("z: null");
+            SwingUtil.addJLabelCentered(frame, zl);
+            zf = new JTextField();
+            SwingUtil.addJTextFieldCentered(frame, zf);
+            zrel = new JButton("Copy z coordinate");
+            zrel.addActionListener(new SetNumListener(zf, new Callable<Double>() {
+                public Double call() throws Exception {
+                    return player.getZ();
+                }
+            }));
+            zrel.setEnabled(false);
+            SwingUtil.addJButtonCentered(frame, zrel);
+            frame.add(new JLabel(""));
             button = new JButton("Setting up hacks...");
-            button.setBounds(50, 202, 200, 40);
-            button.addActionListener(new TeleportActionListener(x, y, z));
+            button.addActionListener(new TeleportActionListener(xf, yf, zf));
             button.setEnabled(false);
             frame.add(button);
+            frame.add(new JLabel(""));
             frame.setVisible(true);
         }
     }
 
     private final class LabelRunnable implements Runnable {
-        private final String text;
+        final String x;
+        final String y;
+        final String z;
 
-        LabelRunnable(String text) {
-            this.text = text;
+        LabelRunnable(final String x, final String y, final String z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
         }
 
         public void run() {
-            label.setText(text);
+            xl.setText("x: " + x);
+            yl.setText("y: " + y);
+            zl.setText("z: " + z);
+        }
+    }
+
+    private static final class SetNumListener implements ActionListener {
+        final JTextField f;
+        final Callable<Double> d;
+
+        SetNumListener(JTextField f, Callable<Double> d) {
+            this.f = f;
+            this.d = d;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            try {
+                f.setText(outputNumberFormat.format(d.call()));
+            } catch (final Exception e1) {
+                LogWrapper.warning("???: " + ExceptionUtils.getStackTrace(e1));
+            }
         }
     }
 }

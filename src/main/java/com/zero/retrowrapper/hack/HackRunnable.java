@@ -28,7 +28,6 @@ import com.zero.retrowrapper.util.SwingUtil;
 import net.minecraft.launchwrapper.LogWrapper;
 
 public final class HackRunnable implements Runnable {
-    static final NumberFormat inputNumberFormat = NumberFormat.getNumberInstance();
     static final NumberFormat outputNumberFormat = NumberFormat.getNumberInstance();
 
     static {
@@ -150,6 +149,8 @@ public final class HackRunnable implements Runnable {
     }
 
     private static final class TeleportActionListener implements ActionListener {
+        private static final NumberFormat inputNumberFormat = NumberFormat.getNumberInstance();
+
         private final RetroPlayer player;
 
         private final JTextField x;

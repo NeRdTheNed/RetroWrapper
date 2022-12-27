@@ -8,10 +8,10 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import net.minecraft.launchwrapper.LogWrapper;
 
 final class RetroPlayer {
-    private Field x, y, z, x2, y2, z2;
     private Object aabb;
-    private boolean modeFloat;
 
+    private final Field x, y, z, x2, y2, z2;
+    private final boolean modeFloat;
     private final HackRunnable thread;
     private final Object minecraft;
     private final Field playerField;
@@ -22,16 +22,75 @@ final class RetroPlayer {
         this.minecraft = minecraft;
         this.playerField = playerField;
         this.aabbField = aabbField;
+        Field xTemp = null;
+        Field yTemp = null;
+        Field zTemp = null;
+        Field x2Temp = null;
+        Field y2Temp = null;
+        Field z2Temp = null;
+        boolean tempMode = false;
+        int doubleCount = 0;
+        fieldLoop: for (final Field f : aabbField.getType().getDeclaredFields()) {
+            if (Modifier.isPublic(f.getModifiers()) && (f.getType().equals(Double.TYPE) || f.getType().equals(Float.TYPE))) {
+                if (f.getType().equals(Float.TYPE)) {
+                    tempMode = true;
+                }
+
+                switch (doubleCount) {
+                case 0:
+                    xTemp = f;
+                    break;
+
+                case 1:
+                    yTemp = f;
+                    break;
+
+                case 2:
+                    zTemp = f;
+                    break;
+
+                case 3:
+                    x2Temp = f;
+                    break;
+
+                case 4:
+                    y2Temp = f;
+                    break;
+
+                default:
+                    z2Temp = f;
+                    break fieldLoop;
+                }
+
+                doubleCount++;
+            }
+        }
+
+        x = xTemp;
+        y = yTemp;
+        z = zTemp;
+        x2 = x2Temp;
+        y2 = y2Temp;
+        z2 = z2Temp;
+        modeFloat = tempMode;
     }
 
     void tick() throws InterruptedException {
         try {
-            final boolean changed = setAABB(getAABBFromPlayerOrNull());
+            final Object tempAABB = getAABBFromPlayerOrNull();
+            final boolean isTempNotNull = tempAABB != null;
 
-            if (aabb != null) {
+            if (tempAABB != aabb) {
+                aabb = tempAABB;
+                thread.setTeleportActive(isTempNotNull);
+
+                if (isTempNotNull) {
+                    thread.setLabelText(getX(), getY(), getZ());
+                } else {
+                    thread.setLabelText("null");
+                }
+            } else if (isTempNotNull) {
                 thread.setLabelText(getX(), getY(), getZ());
-            } else if (changed) {
-                thread.setLabelText("null");
             }
         } catch (final Exception e) {
             LogWrapper.warning("Something went wrong with RetroPlayer on tick: " + ExceptionUtils.getStackTrace(e));
@@ -39,84 +98,43 @@ final class RetroPlayer {
         }
     }
 
-    private Object getAABBFromPlayerOrNull() throws IllegalArgumentException, IllegalAccessException {
+    private Object getAABBFromPlayerOrNull() throws IllegalAccessException {
         final Object playerObj = playerField.get(minecraft);
         return playerObj != null ? aabbField.get(playerObj) : null;
     }
 
-    private boolean setAABB(Object tempAABB) {
-        if (tempAABB != aabb) {
-            aabb = tempAABB;
-            final boolean aabbNotNull = aabb != null;
-
-            if (aabbNotNull) {
-                int doubleCount = 0;
-                fieldLoop: for (final Field f : aabb.getClass().getDeclaredFields()) {
-                    if (Modifier.isPublic(f.getModifiers()) && (f.getType().equals(Double.TYPE) || f.getType().equals(Float.TYPE))) {
-                        if (f.getType().equals(Float.TYPE)) {
-                            modeFloat = true;
-                        }
-
-                        switch (doubleCount) {
-                        case 0:
-                            x = f;
-                            break;
-
-                        case 1:
-                            y = f;
-                            break;
-
-                        case 2:
-                            z = f;
-                            break;
-
-                        case 3:
-                            x2 = f;
-                            break;
-
-                        case 4:
-                            y2 = f;
-                            break;
-
-                        default:
-                            z2 = f;
-                            break fieldLoop;
-                        }
-
-                        doubleCount++;
-                    }
-                }
-            } else {
-                x = y = z = x2 = y2 = z2 = null;
-            }
-
-            thread.setTeleportActive(aabbNotNull);
-            return true;
-        }
-
-        return false;
-    }
-
-    double getX() throws IllegalArgumentException, IllegalAccessException {
+    double getX() throws IllegalAccessException {
         return getVariable(x);
     }
 
-    double getY() throws IllegalArgumentException, IllegalAccessException {
+    double getY() throws IllegalAccessException {
         return getVariable(y);
     }
 
-    double getZ() throws IllegalArgumentException, IllegalAccessException {
+    double getZ() throws IllegalAccessException {
         return getVariable(z);
     }
 
-    private double getVariable(Field f) throws IllegalArgumentException, IllegalAccessException {
+    private double getX2() throws IllegalAccessException {
+        return getVariable(x2);
+    }
+
+    private double getY2() throws IllegalAccessException {
+        return getVariable(y2);
+    }
+
+    private double getZ2() throws IllegalAccessException {
+        return getVariable(z2);
+    }
+
+    private double getVariable(Field f) throws IllegalAccessException {
         return modeFloat ? f.getFloat(aabb) : f.getDouble(aabb);
     }
 
-    void teleport(double dx, double dy, double dz) throws IllegalArgumentException, IllegalAccessException {
-        final double ax = getVariable(x2) - getX();
-        final double ay = getVariable(y2) - getY();
-        final double az = getVariable(z2) - getZ();
+    void teleport(double dx, double dy, double dz) throws IllegalAccessException {
+        final double ax = getX2() - getX();
+        final double ay = getY2() - getY();
+        final double az = getZ2() - getZ();
         final double dax = dx + ax;
         final double day = dy + ay;
         final double daz = dz + az;

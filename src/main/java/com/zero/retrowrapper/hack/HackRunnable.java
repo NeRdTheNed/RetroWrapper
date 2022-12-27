@@ -7,7 +7,6 @@ import java.awt.event.ActionListener;
 import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.concurrent.Callable;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -59,9 +58,9 @@ public final class HackRunnable implements Runnable {
 
         try {
             final RetroPlayer player = constructPlayer(this, button);
-            xrel.addActionListener(new SetNumListener(xf, new GetXCallable(player)));
-            yrel.addActionListener(new SetNumListener(yf, new GetYCallable(player)));
-            zrel.addActionListener(new SetNumListener(zf, new GetZCallable(player)));
+            xrel.addActionListener(new SetNumListener(xf, new GetXSupplier(player)));
+            yrel.addActionListener(new SetNumListener(yf, new GetYSupplier(player)));
+            zrel.addActionListener(new SetNumListener(zf, new GetZSupplier(player)));
             button.addActionListener(new TeleportActionListener(player, xf, yf, zf));
 
             while (true) {
@@ -252,56 +251,60 @@ public final class HackRunnable implements Runnable {
         }
     }
 
+    private interface DoubleSupplier {
+        double get() throws Exception;
+    }
+
     private static final class SetNumListener implements ActionListener {
         private final JTextField f;
-        private final Callable<Double> d;
+        private final DoubleSupplier d;
 
-        SetNumListener(JTextField f, Callable<Double> d) {
+        SetNumListener(JTextField f, DoubleSupplier d) {
             this.f = f;
             this.d = d;
         }
 
         public void actionPerformed(ActionEvent e) {
             try {
-                f.setText(outputNumberFormat.format(d.call()));
+                f.setText(outputNumberFormat.format(d.get()));
             } catch (final Exception e1) {
                 LogWrapper.warning("???: " + ExceptionUtils.getStackTrace(e1));
             }
         }
     }
 
-    private static final class GetXCallable implements Callable<Double> {
+    private static final class GetXSupplier implements DoubleSupplier {
         private final RetroPlayer player;
 
-        GetXCallable(RetroPlayer player) {
+        GetXSupplier(RetroPlayer player) {
             this.player = player;
         }
 
-        public Double call() throws Exception {
+        public double get() throws Exception {
             return player.getX();
         }
     }
 
-    private static final class GetYCallable implements Callable<Double> {
+    private static final class GetYSupplier implements DoubleSupplier {
         private final RetroPlayer player;
 
-        GetYCallable(RetroPlayer player) {
+        GetYSupplier(RetroPlayer player) {
             this.player = player;
         }
 
-        public Double call() throws Exception {
+        public double get() throws Exception {
             return player.getY();
         }
     }
 
-    private static final class GetZCallable implements Callable<Double> {
+    private static final class GetZSupplier implements DoubleSupplier {
         private final RetroPlayer player;
 
-        GetZCallable(RetroPlayer player) {
+        GetZSupplier(RetroPlayer player) {
             this.player = player;
         }
 
-        public Double call() throws Exception {
+        public double get() throws Exception {
             return player.getZ();
         }
     }

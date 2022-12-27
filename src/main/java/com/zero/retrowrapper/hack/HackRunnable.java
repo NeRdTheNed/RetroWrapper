@@ -37,7 +37,6 @@ public final class HackRunnable implements Runnable {
 
     // TODO Refactor
     JButton button;
-    RetroPlayer player;
 
     JTextField xf;
     JTextField yf;
@@ -60,7 +59,11 @@ public final class HackRunnable implements Runnable {
         }
 
         try {
-            player = constructPlayer(this, button);
+            final RetroPlayer player = constructPlayer(this, button);
+            xrel.addActionListener(new SetNumListener(xf, new GetXCallable(player)));
+            yrel.addActionListener(new SetNumListener(yf, new GetYCallable(player)));
+            zrel.addActionListener(new SetNumListener(zf, new GetZCallable(player)));
+            button.addActionListener(new TeleportActionListener(player, xf, yf, zf));
 
             while (true) {
                 player.tick();
@@ -131,7 +134,7 @@ public final class HackRunnable implements Runnable {
 
     void setLabelText(final String x, final String y, final String z) {
         try {
-            SwingUtilities.invokeLater(new LabelRunnable(x, y, z));
+            SwingUtilities.invokeLater(new LabelRunnable(xl, yl, zl, x, y, z));
         } catch (final Exception e) {
             // TODO Better error handling
             LogWrapper.warning("Something went wrong with setting the label text in the hack thread: " + ExceptionUtils.getStackTrace(e));
@@ -146,29 +149,30 @@ public final class HackRunnable implements Runnable {
         zrel.setEnabled(active);
     }
 
-    private final class TeleportActionListener implements ActionListener {
+    private static final class TeleportActionListener implements ActionListener {
+        private final RetroPlayer player;
+
         private final JTextField x;
         private final JTextField y;
         private final JTextField z;
 
-        TeleportActionListener(JTextField x, JTextField y, JTextField z) {
+        TeleportActionListener(RetroPlayer player, JTextField x, JTextField y, JTextField z) {
+            this.player = player;
             this.x = x;
             this.y = y;
             this.z = z;
         }
 
         public void actionPerformed(ActionEvent e) {
-            if (player.isAABBNonNull()) {
-                try {
-                    final double dx = inputNumberFormat.parse(x.getText()).doubleValue();
-                    final double dy = inputNumberFormat.parse(y.getText()).doubleValue();
-                    final double dz = inputNumberFormat.parse(z.getText()).doubleValue();
-                    player.teleport(dx, dy, dz);
-                } catch (final ParseException pe) {
-                    JOptionPane.showMessageDialog(null, "Could not parse number from input!\n" + pe.getClass().getName() + "\n" + pe.getMessage());
-                } catch (final Exception ee) {
-                    JOptionPane.showMessageDialog(null, "Exception occurred!\n" + ee.getClass().getName() + "\n" + ee.getMessage());
-                }
+            try {
+                final double dx = inputNumberFormat.parse(x.getText()).doubleValue();
+                final double dy = inputNumberFormat.parse(y.getText()).doubleValue();
+                final double dz = inputNumberFormat.parse(z.getText()).doubleValue();
+                player.teleport(dx, dy, dz);
+            } catch (final ParseException pe) {
+                JOptionPane.showMessageDialog(null, "Could not parse number from input!\n" + pe.getClass().getName() + "\n" + pe.getMessage());
+            } catch (final Exception ee) {
+                JOptionPane.showMessageDialog(null, "Exception occurred!\n" + ee.getClass().getName() + "\n" + ee.getMessage());
             }
         }
     }
@@ -178,10 +182,6 @@ public final class HackRunnable implements Runnable {
         }
 
         public void run() {
-            setupSwingGUI();
-        }
-
-        void setupSwingGUI() {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             } catch (final Exception e) {
@@ -201,11 +201,6 @@ public final class HackRunnable implements Runnable {
             xf = new JTextField();
             SwingUtil.addJTextFieldCentered(frame, xf);
             xrel = new JButton("Copy x coordinate");
-            xrel.addActionListener(new SetNumListener(xf, new Callable<Double>() {
-                public Double call() throws Exception {
-                    return player.getX();
-                }
-            }));
             xrel.setEnabled(false);
             SwingUtil.addJButtonCentered(frame, xrel);
             yl = new JLabel("y: null");
@@ -213,11 +208,6 @@ public final class HackRunnable implements Runnable {
             yf = new JTextField();
             SwingUtil.addJTextFieldCentered(frame, yf);
             yrel = new JButton("Copy y coordinate");
-            yrel.addActionListener(new SetNumListener(yf, new Callable<Double>() {
-                public Double call() throws Exception {
-                    return player.getY();
-                }
-            }));
             yrel.setEnabled(false);
             SwingUtil.addJButtonCentered(frame, yrel);
             zl = new JLabel("z: null");
@@ -225,16 +215,10 @@ public final class HackRunnable implements Runnable {
             zf = new JTextField();
             SwingUtil.addJTextFieldCentered(frame, zf);
             zrel = new JButton("Copy z coordinate");
-            zrel.addActionListener(new SetNumListener(zf, new Callable<Double>() {
-                public Double call() throws Exception {
-                    return player.getZ();
-                }
-            }));
             zrel.setEnabled(false);
             SwingUtil.addJButtonCentered(frame, zrel);
             frame.add(new JLabel(""));
             button = new JButton("Setting up hacks...");
-            button.addActionListener(new TeleportActionListener(xf, yf, zf));
             button.setEnabled(false);
             frame.add(button);
             frame.add(new JLabel(""));
@@ -242,12 +226,19 @@ public final class HackRunnable implements Runnable {
         }
     }
 
-    private final class LabelRunnable implements Runnable {
-        final String x;
-        final String y;
-        final String z;
+    private static final class LabelRunnable implements Runnable {
+        private final JLabel xl;
+        private final JLabel yl;
+        private final JLabel zl;
 
-        LabelRunnable(final String x, final String y, final String z) {
+        private final String x;
+        private final String y;
+        private final String z;
+
+        LabelRunnable(JLabel xl, JLabel yl, JLabel zl, final String x, final String y, final String z) {
+            this.xl = xl;
+            this.yl = yl;
+            this.zl = zl;
             this.x = x;
             this.y = y;
             this.z = z;
@@ -261,8 +252,8 @@ public final class HackRunnable implements Runnable {
     }
 
     private static final class SetNumListener implements ActionListener {
-        final JTextField f;
-        final Callable<Double> d;
+        private final JTextField f;
+        private final Callable<Double> d;
 
         SetNumListener(JTextField f, Callable<Double> d) {
             this.f = f;
@@ -275,6 +266,42 @@ public final class HackRunnable implements Runnable {
             } catch (final Exception e1) {
                 LogWrapper.warning("???: " + ExceptionUtils.getStackTrace(e1));
             }
+        }
+    }
+
+    private static final class GetXCallable implements Callable<Double> {
+        private final RetroPlayer player;
+
+        GetXCallable(RetroPlayer player) {
+            this.player = player;
+        }
+
+        public Double call() throws Exception {
+            return player.getX();
+        }
+    }
+
+    private static final class GetYCallable implements Callable<Double> {
+        private final RetroPlayer player;
+
+        GetYCallable(RetroPlayer player) {
+            this.player = player;
+        }
+
+        public Double call() throws Exception {
+            return player.getY();
+        }
+    }
+
+    private static final class GetZCallable implements Callable<Double> {
+        private final RetroPlayer player;
+
+        GetZCallable(RetroPlayer player) {
+            this.player = player;
+        }
+
+        public Double call() throws Exception {
+            return player.getZ();
         }
     }
 }

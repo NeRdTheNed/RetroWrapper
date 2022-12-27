@@ -26,11 +26,9 @@ final class RetroPlayer {
 
     void tick() throws InterruptedException {
         try {
-            final Object playerObj = playerField.get(minecraft);
-            final Object tempAabb = playerObj != null ? aabbField.get(playerObj) : null;
-            final boolean changed = setAABB(tempAabb);
+            final boolean changed = setAABB(getAABBFromPlayerOrNull());
 
-            if (isAABBNonNull()) {
+            if (aabb != null) {
                 thread.setLabelText(getX(), getY(), getZ());
             } else if (changed) {
                 thread.setLabelText("null");
@@ -39,6 +37,11 @@ final class RetroPlayer {
             LogWrapper.warning("Something went wrong with RetroPlayer on tick: " + ExceptionUtils.getStackTrace(e));
             Thread.sleep(1000L);
         }
+    }
+
+    private Object getAABBFromPlayerOrNull() throws IllegalArgumentException, IllegalAccessException {
+        final Object playerObj = playerField.get(minecraft);
+        return playerObj != null ? aabbField.get(playerObj) : null;
     }
 
     private boolean setAABB(Object tempAABB) {
@@ -94,30 +97,26 @@ final class RetroPlayer {
         return false;
     }
 
-    boolean isAABBNonNull() {
-        return aabb != null;
-    }
-
     double getX() throws IllegalArgumentException, IllegalAccessException {
-        return getVariable(x, aabb);
+        return getVariable(x);
     }
 
     double getY() throws IllegalArgumentException, IllegalAccessException {
-        return getVariable(y, aabb);
+        return getVariable(y);
     }
 
     double getZ() throws IllegalArgumentException, IllegalAccessException {
-        return getVariable(z, aabb);
+        return getVariable(z);
     }
 
-    private double getVariable(Field f, Object o) throws IllegalArgumentException, IllegalAccessException {
-        return o == null ? 0.0 : modeFloat ? f.getFloat(o) : f.getDouble(o);
+    private double getVariable(Field f) throws IllegalArgumentException, IllegalAccessException {
+        return modeFloat ? f.getFloat(aabb) : f.getDouble(aabb);
     }
 
     void teleport(double dx, double dy, double dz) throws IllegalArgumentException, IllegalAccessException {
-        final double ax = getVariable(x2, aabb) - getX();
-        final double ay = getVariable(y2, aabb) - getY();
-        final double az = getVariable(z2, aabb) - getZ();
+        final double ax = getVariable(x2) - getX();
+        final double ay = getVariable(y2) - getY();
+        final double az = getVariable(z2) - getZ();
         final double dax = dx + ax;
         final double day = dy + ay;
         final double daz = dz + az;

@@ -26,7 +26,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.zero.retrowrapper.emulator.RetroEmulator;
@@ -277,8 +276,8 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
             try {
                 is2 = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid).openStream();
                 reader2 = new InputStreamReader(is2);
-                final JsonObject profile2 = (JsonObject) Json.parse(reader2);
-                final Iterable<JsonValue> properties = (JsonArray) profile2.get("properties");
+                final JsonObject profile2 = Json.parse(reader2).asObject();
+                final Iterable<JsonValue> properties = profile2.get("properties").asArray();
                 String base64 = "";
 
                 for (final JsonValue property : properties) {
@@ -289,14 +288,14 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                     }
                 }
 
-                final JsonObject textures1 = (JsonObject) Json.parse(new String(Base64.decodeBase64(base64)));
-                final JsonObject textures = (JsonObject) textures1.get("textures");
+                final JsonObject textures1 = Json.parse(new String(Base64.decodeBase64(base64))).asObject();
+                final JsonObject textures = textures1.get("textures").asObject();
                 final JsonObject imageLinkJSON;
 
                 if (cape) {
-                    imageLinkJSON = (JsonObject) textures.get("CAPE");
+                    imageLinkJSON = textures.get("CAPE").asObject();
                 } else {
-                    imageLinkJSON = (JsonObject) textures.get("SKIN");
+                    imageLinkJSON = textures.get("SKIN").asObject();
                 }
 
                 if (imageLinkJSON != null) {

@@ -34,7 +34,7 @@ public final class NetworkUtil {
         try {
             is = new URL("https://api.mojang.com/users/profiles/minecraft/" + username + "?at=" + System.currentTimeMillis()).openStream();
             reader = new InputStreamReader(is);
-            final JsonObject profile1 = (JsonObject) Json.parse(reader);
+            final JsonObject profile1 = Json.parse(reader).asObject();
             uuid = profile1.get("id").asString();
         } catch (final Exception e) {
             LogWrapper.warning("Error when trying to get UUID for username " + username + ": " + ExceptionUtils.getStackTrace(e));

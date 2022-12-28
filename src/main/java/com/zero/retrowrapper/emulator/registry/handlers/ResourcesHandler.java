@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.ConcurrentInitializer;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -255,8 +254,17 @@ public final class ResourcesHandler extends EmulatorHandler {
                 }
 
                 final String name = tempname;
+                boolean isClassicSound = false;
+                final int length = CLASSIC_SOUNDS_LIST.length;
 
-                if (!ArrayUtils.contains(CLASSIC_SOUNDS_LIST, name)) {
+                for (int i = 0; i < length; i++) {
+                    if (CLASSIC_SOUNDS_LIST[i].equals(name)) {
+                        isClassicSound = true;
+                        break;
+                    }
+                }
+
+                if (!isClassicSound) {
                     continue;
                 }
 

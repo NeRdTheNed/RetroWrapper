@@ -115,6 +115,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
         this.isCape = isCape;
     }
 
+    @Override
     public void sendHeaders(OutputStream os, String get) throws IOException {
         if (downloadAndCacheSkinOrCape(get)) {
             super.sendHeaders(os, get);

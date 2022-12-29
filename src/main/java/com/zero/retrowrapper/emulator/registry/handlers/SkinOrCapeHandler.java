@@ -13,7 +13,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -37,7 +38,7 @@ import net.minecraft.launchwrapper.LogWrapper;
 
 public final class SkinOrCapeHandler extends EmulatorHandler {
     private static final Pattern pngPattern = Pattern.compile(".png", Pattern.LITERAL);
-    private final HashMap<String, byte[]> imagesCache = new HashMap<String, byte[]>();
+    private final Map<String, byte[]> imagesCache = new ConcurrentHashMap<String, byte[]>();
     // TODO Refactor
     private final boolean isCape;
 

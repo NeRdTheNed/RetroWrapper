@@ -86,7 +86,7 @@ public final class ResourcesHandler extends EmulatorHandler {
     }
 
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
-        JsonObject getObjects;
+        final JsonObject getObjects;
 
         try {
             getObjects = jsonObjects.get();

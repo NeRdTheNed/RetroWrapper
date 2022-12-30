@@ -1,7 +1,5 @@
 package com.zero.retrowrapper.util;
 
-import static org.apache.commons.lang3.StringEscapeUtils.escapeHtml4;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -149,6 +147,11 @@ public final class SwingUtil {
         }
     }
 
+    // TODO This is very inefficient, but it's only called if the exception handler is shown.
+    private static String escapeHtml(String input) {
+        return input.replace("&", "&amp;").replace("\"", "&quot;").replace("'", "&#39;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
     public static void showExceptionHandler(final Logger logger, final String context, final Exception toShow) {
         final String exceptText = ExceptionUtils.getStackTrace(toShow);
         logger.log(Level.FINE, "Displaying exception handler with context \"{0}\" and stacktrace \"{1}\"", new Object[] {context, exceptText});
@@ -172,9 +175,9 @@ public final class SwingUtil {
                              "<p><i>Bad things, man.... bad things.</i></p><br>" +
                              "<p>Please report this issue on GitHub (the link will autofill this information for you):</p><br>" +
                              "<a href=\"https://github.com/NeRdTheNed/RetroWrapper/issues/new?title=" + URLEncoder.encode(githubIssueTitle, "UTF-8") + "&body=" + URLEncoder.encode(githubIssueBody, "UTF-8") + "\">Create an issue on Github!</a><br>" +
-                             "<p>" + newlinePattern.matcher(escapeHtml4(dialogTitle)).replaceAll("<br>") + "</p><br>" +
-                             "<br><p>" + newlinePattern.matcher(escapeHtml4(issueTitle)).replaceAll("<br>") + "</p><br>" +
-                             "<br><p>" + newlinePattern.matcher(escapeHtml4(displayIssueBody)).replaceAll("<br>") + "</p><br>" +
+                             "<p>" + newlinePattern.matcher(escapeHtml(dialogTitle)).replaceAll("<br>") + "</p><br>" +
+                             "<br><p>" + newlinePattern.matcher(escapeHtml(issueTitle)).replaceAll("<br>") + "</p><br>" +
+                             "<br><p>" + newlinePattern.matcher(escapeHtml(displayIssueBody)).replaceAll("<br>") + "</p><br>" +
                              "</html>");
             textPane.addHyperlinkListener(new NavigateToHyperlinkListener(logger, textPane));
             textPane.setCaretPosition(0);

@@ -300,7 +300,8 @@ public final class Installer {
         installerLabel.setFont(installerLabel.getFont().deriveFont(20.0F).deriveFont(Font.BOLD));
         SwingUtil.addJLabelCentered(frame, installerLabel);
         // Version label
-        final JLabel versionLabel = new JLabel(MetadataUtil.VERSION + " - " + MetadataUtil.getInstallerSplashes().get(rand.nextInt(MetadataUtil.getInstallerSplashes().size())));
+        final List<String> installerSplashes = MetadataUtil.getInstallerSplashes();
+        final JLabel versionLabel = new JLabel(MetadataUtil.VERSION + " - " + installerSplashes.get(rand.nextInt(installerSplashes.size())));
         versionLabel.setFont(installerLabel.getFont().deriveFont(12.0F));
         SwingUtil.addJLabelCentered(frame, versionLabel);
         // Working directory text field

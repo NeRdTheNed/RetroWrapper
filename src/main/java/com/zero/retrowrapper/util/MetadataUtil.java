@@ -15,7 +15,6 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
 public final class MetadataUtil {
-    private static List<String> installerSplashes;
     public static final String VERSION;
     private static final String TAG;
     public static final String RELEASE_URL;
@@ -55,25 +54,18 @@ public final class MetadataUtil {
     }
 
     public static List<String> getInstallerSplashes() {
-        if (installerSplashes == null) {
-            List<String> tempSplash;
-            InputStream splashesStream = null;
+        InputStream splashesStream = null;
 
-            try {
-                splashesStream = ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperInstallerSplashes.txt");
-                tempSplash = IOUtils.readLines(splashesStream, "UTF-8");
-            } catch (final Exception e) {
-                final List<String> missingno = new ArrayList<String>();
-                missingno.add("missingno");
-                tempSplash = missingno;
-            } finally {
-                IOUtils.closeQuietly(splashesStream);
-            }
-
-            installerSplashes = tempSplash;
+        try {
+            splashesStream = ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperInstallerSplashes.txt");
+            return IOUtils.readLines(splashesStream, "UTF-8");
+        } catch (final Exception e) {
+            final List<String> missingno = new ArrayList<String>();
+            missingno.add("missingno");
+            return missingno;
+        } finally {
+            IOUtils.closeQuietly(splashesStream);
         }
-
-        return installerSplashes;
     }
 
     public static JsonObject[] getLWJGLLibraries(String jsonFile) {

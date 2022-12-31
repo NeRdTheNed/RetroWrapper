@@ -15,7 +15,7 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 
 public final class MetadataUtil {
-    public static final List<String> INSTALLER_SPLASHES;
+    private static List<String> installerSplashes;
     public static final String VERSION;
     private static final String TAG;
     public static final String RELEASE_URL;
@@ -30,21 +30,6 @@ public final class MetadataUtil {
     private static final Pattern colonPattern = Pattern.compile(":");
 
     static {
-        List<String> tempSplash;
-        InputStream splashesStream = null;
-
-        try {
-            splashesStream = ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperInstallerSplashes.txt");
-            tempSplash = IOUtils.readLines(splashesStream, "UTF-8");
-        } catch (final Exception e) {
-            final List<String> missingno = new ArrayList<String>();
-            missingno.add("missingno");
-            tempSplash = missingno;
-        } finally {
-            IOUtils.closeQuietly(splashesStream);
-        }
-
-        INSTALLER_SPLASHES = tempSplash;
         String tempVer;
         String tempTag;
         InputStream versionStream = null;
@@ -67,6 +52,28 @@ public final class MetadataUtil {
         RELEASE_URL = IS_RELEASE ?
                       "https://github.com/NeRdTheNed/RetroWrapper/releases/download/" + TAG + "/RetroWrapper-" + VERSION + ".jar"
                       : null;
+    }
+
+    public static List<String> getInstallerSplashes() {
+        if (installerSplashes == null) {
+            List<String> tempSplash;
+            InputStream splashesStream = null;
+
+            try {
+                splashesStream = ClassLoader.getSystemResourceAsStream("com/zero/retrowrapper/retrowrapperInstallerSplashes.txt");
+                tempSplash = IOUtils.readLines(splashesStream, "UTF-8");
+            } catch (final Exception e) {
+                final List<String> missingno = new ArrayList<String>();
+                missingno.add("missingno");
+                tempSplash = missingno;
+            } finally {
+                IOUtils.closeQuietly(splashesStream);
+            }
+
+            installerSplashes = tempSplash;
+        }
+
+        return installerSplashes;
     }
 
     public static JsonObject[] getLWJGLLibraries(String jsonFile) {

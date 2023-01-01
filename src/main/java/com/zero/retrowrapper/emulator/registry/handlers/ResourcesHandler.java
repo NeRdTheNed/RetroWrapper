@@ -33,33 +33,6 @@ public final class ResourcesHandler extends EmulatorHandler {
         AWS
     }
 
-    private static final String[] CLASSIC_SOUNDS_LIST = {
-        "sound/step/wood4.ogg",
-        "sound/step/gravel3.ogg",
-        "sound/step/wood2.ogg",
-        "sound/step/gravel1.ogg",
-        "sound/step/grass2.ogg",
-        "sound/step/gravel4.ogg",
-        "sound/step/grass4.ogg",
-        "sound/step/gravel2.ogg",
-        "sound/step/wood1.ogg",
-        "sound/step/stone4.ogg",
-        "sound/step/grass3.ogg",
-        "sound/step/wood3.ogg",
-        "sound/step/stone2.ogg",
-        "sound/step/stone3.ogg",
-        "sound/step/grass1.ogg",
-        "sound/step/stone1.ogg",
-        "sound/loops/ocean.ogg",
-        "sound/loops/cave chimes.ogg",
-        "sound/loops/waterfall.ogg",
-        "sound/loops/birds screaming loop.ogg",
-        "sound/random/wood click.ogg",
-        "music/calm2.ogg",
-        "music/calm3.ogg",
-        "music/calm1.ogg"
-    };
-
     private static final Map<String, String> CLASSIC_ALIAS_MAP;
 
     private static final int smallestSize = 16;
@@ -239,6 +212,32 @@ public final class ResourcesHandler extends EmulatorHandler {
         final StringBuilder builder = new StringBuilder();
 
         if (!resources.isEmpty()) {
+            final String[] classicSoundsList = {
+                "sound/step/wood4.ogg",
+                "sound/step/gravel3.ogg",
+                "sound/step/wood2.ogg",
+                "sound/step/gravel1.ogg",
+                "sound/step/grass2.ogg",
+                "sound/step/gravel4.ogg",
+                "sound/step/grass4.ogg",
+                "sound/step/gravel2.ogg",
+                "sound/step/wood1.ogg",
+                "sound/step/stone4.ogg",
+                "sound/step/grass3.ogg",
+                "sound/step/wood3.ogg",
+                "sound/step/stone2.ogg",
+                "sound/step/stone3.ogg",
+                "sound/step/grass1.ogg",
+                "sound/step/stone1.ogg",
+                "sound/loops/ocean.ogg",
+                "sound/loops/cave chimes.ogg",
+                "sound/loops/waterfall.ogg",
+                "sound/loops/birds screaming loop.ogg",
+                "sound/random/wood click.ogg",
+                "music/calm2.ogg",
+                "music/calm3.ogg",
+                "music/calm1.ogg"
+            };
             final Iterator<JsonObject.Member> libraryIterator = resources.iterator();
             final Map<String, ResourceEntry> entries = new HashMap<String, ResourceEntry>();
 
@@ -255,10 +254,10 @@ public final class ResourcesHandler extends EmulatorHandler {
 
                 final String name = tempname;
                 boolean isClassicSound = false;
-                final int length = CLASSIC_SOUNDS_LIST.length;
+                final int length = classicSoundsList.length;
 
                 for (int i = 0; i < length; i++) {
-                    if (CLASSIC_SOUNDS_LIST[i].equals(name)) {
+                    if (classicSoundsList[i].equals(name)) {
                         isClassicSound = true;
                         break;
                     }

@@ -42,13 +42,6 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
     // TODO Refactor
     private final boolean isCape;
 
-    private static final byte[] HTTP_404_HEADERS =
-        ("HTTP/1.1 404 Not Found\n"
-         + "Date: Mon, 27 Jul 2009 12:28:53 GMT\n"
-         + "Server: Apache/2.2.14 (Win32)\n"
-         + "Content-Length: 0\n"
-         + "Connection: Closed\r\n\n").getBytes();
-
     private static final File classiCubeDefaultChar = new File(RetroEmulator.getInstance().getCacheDirectory(), File.separator + "classicube" + File.separator + "char.png");
 
     // TODO Detect supported skin sizes

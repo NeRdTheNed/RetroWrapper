@@ -53,6 +53,7 @@ import javax.swing.text.JTextComponent;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonArray;
@@ -310,10 +311,11 @@ public final class Installer {
         // TODO Refactor
         workDir.addActionListener(new SelectMinecraftDirectoryActionListener(installerLogger));
         SwingUtil.addJTextFieldCentered(frame, workDir);
-        // TODO Re-add when the Launcher officially supports this
-        /*if (SystemUtils.IS_OS_MAC) {
+
+        if (SystemUtils.IS_OS_MAC) {
             useM1NativesCheckbox = createUseM1NativesCheckbox();
-        }*/
+        }
+
         patchLibrariesCheckbox = createPatchLibrariesCheckbox(useM1NativesCheckbox);
         SwingUtil.addJComponentCentered(frame, patchLibrariesCheckbox);
 
@@ -352,7 +354,7 @@ public final class Installer {
     }
 
     private static JCheckBox createUseM1NativesCheckbox() {
-        final JCheckBox toReturn = new JCheckBox("Patch instances to allow using Apple silicon LWJGL natives (incompatible with 32 bit Java)", shouldUseM1Natives);
+        final JCheckBox toReturn = new JCheckBox("Patch instances to allow using Apple silicon LWJGL natives", shouldUseM1Natives);
         toReturn.addActionListener(new AppleSiliconPatchListener(toReturn));
         return toReturn;
     }

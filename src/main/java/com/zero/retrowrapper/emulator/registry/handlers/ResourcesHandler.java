@@ -290,10 +290,10 @@ public final class ResourcesHandler extends EmulatorHandler {
             // TODO Real timestamp
             for (final String name : names) {
                 final ResourceEntry entry = entries.get(name);
-                builder.append(entry.name);
-                builder.append(',');
-                builder.append(entry.size);
-                builder.append(",1245702004000\n");
+                builder.append(entry.name)
+                .append(',')
+                .append(entry.size)
+                .append(",1245702004000\n");
             }
         }
 
@@ -360,13 +360,13 @@ public final class ResourcesHandler extends EmulatorHandler {
             // TODO LastModified
             for (final String name : names) {
                 final ResourceEntry entry = entries.get(name);
-                builder.append("<Contents><Key>");
-                builder.append(entry.name);
-                builder.append("</Key><ETag>");
-                builder.append(entry.etag);
-                builder.append("</ETag><Size>");
-                builder.append(entry.size);
-                builder.append("</Size><StorageClass>STANDARD</StorageClass></Contents>");
+                builder.append("<Contents><Key>")
+                .append(entry.name)
+                .append("</Key><ETag>")
+                .append(entry.etag)
+                .append("</ETag><Size>")
+                .append(entry.size)
+                .append("</Size><StorageClass>STANDARD</StorageClass></Contents>");
             }
         }
 

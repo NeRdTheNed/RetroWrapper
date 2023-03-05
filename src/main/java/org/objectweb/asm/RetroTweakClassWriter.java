@@ -106,12 +106,12 @@ public final class RetroTweakClassWriter extends ClassWriter {
                             final StringBuilder newUrl = new StringBuilder();
                             newUrl.append(isCom ?
                                           constant.contains("https://") || constant.contains("http://") ? "http://" : "" :
-                                          (constant.contains("https://") ? "https://" : "") + (constant.contains("http://") ? "http://" : ""));
-                            newUrl.append("127.0.0.1:");
-                            newUrl.append(RetroTweakInjectorTarget.localServerPort);
-                            newUrl.append(isCom ?
-                                          constant.replace(comPattern.split(constant)[0] + ".com", "") :
-                                          constant.replace(netPattern.split(constant)[0] + ".net", ""));
+                                          (constant.contains("https://") ? "https://" : "") + (constant.contains("http://") ? "http://" : ""))
+                            .append("127.0.0.1:")
+                            .append(RetroTweakInjectorTarget.localServerPort)
+                            .append(isCom ?
+                                    constant.replace(comPattern.split(constant)[0] + ".com", "") :
+                                    constant.replace(netPattern.split(constant)[0] + ".net", ""));
 
                             if (constant.contains("login.minecraft.net") && (EmulatorRegistry.getHandlerByUrl(constant) == null)) {
                                 newUrl.append("/login/session.jsp");

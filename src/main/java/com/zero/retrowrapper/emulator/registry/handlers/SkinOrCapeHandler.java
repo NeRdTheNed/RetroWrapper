@@ -189,15 +189,8 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
         }
 
         final File imageCache = new File(RetroEmulator.getInstance().getCacheDirectory(), username + fileNameEnd);
-        byte[] skinFileBytes;
         final boolean isClassiCubeUser = RetroTweakInjectorTarget.connectedToClassicServer && !cape && username.endsWith("+");
-
-        if (isClassiCubeUser) {
-            // ClassiCube user
-            skinFileBytes = getImageBytesFromClassiCube(username);
-        } else {
-            skinFileBytes = getImageBytesFromMojang(username, cape);
-        }
+        byte[] skinFileBytes = isClassiCubeUser ? getImageBytesFromClassiCube(username) : getImageBytesFromMojang(username, cape);
 
         if (skinFileBytes != null) {
             FileOutputStream fos = null;
@@ -284,13 +277,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
 
                 final JsonObject textures1 = Json.parse(new String(Base64.decodeBase64(base64))).asObject();
                 final JsonObject textures = textures1.get("textures").asObject();
-                final JsonObject imageLinkJSON;
-
-                if (cape) {
-                    imageLinkJSON = textures.get("CAPE").asObject();
-                } else {
-                    imageLinkJSON = textures.get("SKIN").asObject();
-                }
+                final JsonObject imageLinkJSON = textures.get(cape ? "CAPE" : "SKIN").asObject();
 
                 if (imageLinkJSON != null) {
                     final String imageURL = imageLinkJSON.get("url").asString();
@@ -299,11 +286,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                     return IOUtils.toByteArray(imageStream);
                 }
 
-                if (cape) {
-                    LogWrapper.warning("No cape found for username " + username);
-                } else {
-                    LogWrapper.warning("No skin found for username " + username);
-                }
+                LogWrapper.warning("No " + (cape ? "cape" : "skin") + " found for username " + username);
             } catch (final Exception e) {
                 LogWrapper.warning("Issue downloading skin: " + ExceptionUtils.getStackTrace(e));
             } finally {

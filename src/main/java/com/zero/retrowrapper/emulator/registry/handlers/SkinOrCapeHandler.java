@@ -263,22 +263,22 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
         final String uuid = NetworkUtil.getUUIDFromUsername(username);
 
         if (uuid != null) {
-            InputStream is2 = null;
-            InputStreamReader reader2 = null;
-            InputStream is3 = null;
+            InputStream profileStream = null;
+            InputStreamReader profileStreamReader = null;
+            InputStream imageStream = null;
 
             try {
-                is2 = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid).openStream();
-                reader2 = new InputStreamReader(is2);
-                final JsonObject profile2 = Json.parse(reader2).asObject();
-                final Iterable<JsonValue> properties = profile2.get("properties").asArray();
+                profileStream = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid).openStream();
+                profileStreamReader = new InputStreamReader(profileStream);
+                final JsonObject profile = Json.parse(profileStreamReader).asObject();
+                final Iterable<JsonValue> properties = profile.get("properties").asArray();
                 String base64 = "";
 
                 for (final JsonValue property : properties) {
-                    final JsonObject propertyj = property.asObject();
+                    final JsonObject propertyObj = property.asObject();
 
-                    if ("textures".equalsIgnoreCase(propertyj.get("name").asString())) {
-                        base64 = propertyj.get("value").asString();
+                    if ("textures".equalsIgnoreCase(propertyObj.get("name").asString())) {
+                        base64 = propertyObj.get("value").asString();
                     }
                 }
 
@@ -295,8 +295,8 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                 if (imageLinkJSON != null) {
                     final String imageURL = imageLinkJSON.get("url").asString();
                     LogWrapper.fine(imageURL);
-                    is3 = new URL(imageURL).openStream();
-                    return IOUtils.toByteArray(is3);
+                    imageStream = new URL(imageURL).openStream();
+                    return IOUtils.toByteArray(imageStream);
                 }
 
                 if (cape) {
@@ -307,9 +307,9 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
             } catch (final Exception e) {
                 LogWrapper.warning("Issue downloading skin: " + ExceptionUtils.getStackTrace(e));
             } finally {
-                IOUtils.closeQuietly(is2);
-                IOUtils.closeQuietly(reader2);
-                IOUtils.closeQuietly(is3);
+                IOUtils.closeQuietly(profileStream);
+                IOUtils.closeQuietly(profileStreamReader);
+                IOUtils.closeQuietly(imageStream);
             }
         } else {
             LogWrapper.warning("No UUID found for username " + username + ", could not download skin.");

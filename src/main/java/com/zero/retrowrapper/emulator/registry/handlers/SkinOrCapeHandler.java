@@ -238,9 +238,23 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
             InputStream profileStream = null;
             InputStreamReader profileStreamReader = null;
             InputStream imageStream = null;
+            HttpURLConnection httpConnection = null;
 
             try {
-                profileStream = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid).openStream();
+                final URLConnection profileConnection = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid).openConnection();
+
+                if (profileConnection instanceof HttpURLConnection) {
+                    httpConnection = (HttpURLConnection) profileConnection;
+                }
+
+                profileConnection.connect();
+
+                if ((httpConnection != null) && ((httpConnection.getResponseCode() / 100) != 2)) {
+                    LogWrapper.warning("Error getting profile for skin information: " + NetworkUtil.getResponseAfterErrorAndClose(httpConnection));
+                    return null;
+                }
+
+                profileStream = profileConnection.getInputStream();
                 profileStreamReader = new InputStreamReader(profileStream);
                 final JsonObject profile = Json.parse(profileStreamReader).asObject();
                 final Iterable<JsonValue> properties = profile.get("properties").asArray();
@@ -272,6 +286,10 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                 IOUtils.closeQuietly(profileStream);
                 IOUtils.closeQuietly(profileStreamReader);
                 IOUtils.closeQuietly(imageStream);
+
+                if (httpConnection != null) {
+                    httpConnection.disconnect();
+                }
             }
         } else {
             LogWrapper.warning("No UUID found for username " + username + ", could not download skin.");

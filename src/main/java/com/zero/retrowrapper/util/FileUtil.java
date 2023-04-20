@@ -73,17 +73,19 @@ public final class FileUtil {
         return allDeleted && dir.delete();
     }
 
-    private static List<File> findFiles(File dir) {
-        final List<File> files = new ArrayList<File>();
-
+    private static void findAddFiles(File dir, List<File> files) {
         for (final File file : dir.listFiles()) {
             if (file.isDirectory()) {
-                files.addAll(findFiles(file));
+                findAddFiles(file, files);
             } else {
                 files.add(file);
             }
         }
+    }
 
+    private static List<File> findFiles(File dir) {
+        List<File> files = new ArrayList<File>();
+        findAddFiles(dir, files);
         return files;
     }
 

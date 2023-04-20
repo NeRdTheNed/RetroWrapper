@@ -61,8 +61,6 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
     private static final Pattern tokenPattern = Pattern.compile("token:", Pattern.LITERAL);
     private static final Pattern colonPattern = Pattern.compile(":");
 
-    private static final boolean quitButtonFix = true;
-
     public byte[] transform(final String name, final String transformedName, final byte[] bytes) {
         return bytes;
     }
@@ -139,6 +137,8 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             params.put("haspaid", "true");
             params.put("stand-alone", "true");
             params.put("fullscreen", "false");
+            // Disable the quit button fix if requested
+            final boolean quitButtonFix = !Boolean.parseBoolean(System.getProperties().getProperty("retrowrapper.disableQuitButtonFix"));
             // Experimental
             serverIP = System.getProperties().getProperty("retrowrapper.experimental.classicServerIP");
             String serverPort = System.getProperties().getProperty("retrowrapper.experimental.classicServerPort");

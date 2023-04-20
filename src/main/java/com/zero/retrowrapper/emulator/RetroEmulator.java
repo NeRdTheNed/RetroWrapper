@@ -14,6 +14,7 @@ import net.minecraft.launchwrapper.LogWrapper;
 
 public final class RetroEmulator implements Runnable {
     private final ServerSocket server;
+    private final boolean multithreaded;
 
     private static RetroEmulator instance;
 
@@ -21,8 +22,9 @@ public final class RetroEmulator implements Runnable {
     private File mapsDirectory;
     private File cacheDirectory;
 
-    public RetroEmulator(ServerSocket server) {
+    public RetroEmulator(ServerSocket server, boolean multithreaded) {
         this.server = server;
+        this.multithreaded = multithreaded;
     }
 
     public void run() {
@@ -37,7 +39,7 @@ public final class RetroEmulator implements Runnable {
         cacheDirectory.mkdirs();
 
         try {
-            final ExecutorService threadPool = Executors.newCachedThreadPool();
+            final ExecutorService threadPool = multithreaded ? Executors.newCachedThreadPool() : Executors.newSingleThreadExecutor();
 
             while (true) {
                 try {

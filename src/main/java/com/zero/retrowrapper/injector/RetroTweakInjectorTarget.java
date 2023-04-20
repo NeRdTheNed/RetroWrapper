@@ -106,7 +106,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
 
         final ServerSocket server = new ServerSocket(0);
         localServerPort = server.getLocalPort();
-        new Thread(new RetroEmulator(server)).start();
+        new Thread(new RetroEmulator(server, Boolean.parseBoolean(System.getProperties().getProperty("retrowrapper.multithreadedEmulator")))).start();
 
         try {
             Class<?> clazz;

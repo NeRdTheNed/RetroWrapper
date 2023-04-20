@@ -47,8 +47,7 @@ public final class NetworkUtil {
     }
 
     public static boolean joinServer(String sessionId, String username, String serverId) {
-        final String profileUUID = getUUIDFromUsername(username);
-        return joinServerModern(sessionId, profileUUID, serverId) || joinServerLegacy(sessionId, username, serverId);
+        return joinServerModernWithUsername(sessionId, username, serverId) || joinServerLegacy(sessionId, username, serverId);
     }
 
     private static boolean joinServerLegacy(String sessionId, String username, String serverId) {
@@ -72,8 +71,19 @@ public final class NetworkUtil {
         return false;
     }
 
+    private static boolean joinServerModernWithUsername(String sessionId, String username, String serverId) {
+        final String profileUUID = getUUIDFromUsername(username);
+
+        if (profileUUID == null) {
+            LogWrapper.warning("Could not get UUID from username " + username + ", unable to connect to server with modern authentication method.");
+            return false;
+        }
+
+        return joinServerModernWithUUID(sessionId, profileUUID, serverId);
+    }
+
     // https://wiki.vg/Protocol_Encryption#Authentication
-    private static boolean joinServerModern(String sessionId, String profileUUID, String serverId) {
+    private static boolean joinServerModernWithUUID(String sessionId, String profileUUID, String serverId) {
         if ((sessionId == null) || (profileUUID == null) || (serverId == null)) {
             LogWrapper.warning("Can't connect to a server if a param is null!");
             return false;

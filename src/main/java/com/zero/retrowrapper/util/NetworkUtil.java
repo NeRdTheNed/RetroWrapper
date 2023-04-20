@@ -32,7 +32,7 @@ public final class NetworkUtil {
         InputStreamReader responseStreamReader = null;
 
         try {
-            responseStream = new URL("https://api.mojang.com/users/profiles/minecraft/" + username + "?at=" + System.currentTimeMillis()).openStream();
+            responseStream = new URL("https://api.mojang.com/users/profiles/minecraft/" + username).openStream();
             responseStreamReader = new InputStreamReader(responseStream);
             final JsonObject profile = Json.parse(responseStreamReader).asObject();
             uuid = profile.get("id").asString();

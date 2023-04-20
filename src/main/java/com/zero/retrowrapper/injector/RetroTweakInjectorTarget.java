@@ -27,6 +27,7 @@ import org.lwjgl.Sys;
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.hack.HackRunnable;
 import com.zero.retrowrapper.util.FileUtil;
+import com.zero.retrowrapper.util.JavaUtil;
 import com.zero.retrowrapper.util.MetadataUtil;
 import com.zero.retrowrapper.util.NetworkUtil;
 import com.zero.retrowrapper.util.SwingUtil;
@@ -59,6 +60,8 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
 
     private static final Pattern tokenPattern = Pattern.compile("token:", Pattern.LITERAL);
     private static final Pattern colonPattern = Pattern.compile(":");
+
+    private static final boolean quitButtonFix = true;
 
     public byte[] transform(final String name, final String transformedName, final byte[] bytes) {
         return bytes;
@@ -167,6 +170,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             final LauncherFake fakeLauncher = new LauncherFake(params, object);
             object.setStub(fakeLauncher);
             object.setSize(854, 480);
+            // On certain versions of Minecraft, this causes the applet mode field to always be set to true, which disables the quit button.
             object.init();
 
             for (final Field field : clazz.getDeclaredFields()) {
@@ -177,13 +181,13 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
                     minecraftField = field;
                     final Field fileField = getWorkingDirField(name);
 
-                    if (veryOld) {
+                    if (veryOld || quitButtonFix) {
                         field.setAccessible(true);
                         final Object mcObj = field.get(object);
                         LogWrapper.fine(mcObj.toString());
                         Field appletField = null;
 
-                        for (final Field f : mcObj.getClass().getDeclaredFields()) {
+                        for (final Field f : (quitButtonFix ? JavaUtil.getMostSuper(mcObj.getClass()) : mcObj.getClass()).getDeclaredFields()) {
                             if (f.getType().equals(Boolean.TYPE) && Modifier.isPublic(f.getModifiers())) {
                                 appletField = f;
                                 break;

@@ -120,37 +120,24 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
         if (downloadAndCacheSkinOrCape(get)) {
             final String username = pngPattern.matcher(get.replace(url, "")).replaceAll("");
-            final String cacheName;
-
-            if (isCape) {
-                cacheName = username + ".cape";
-            } else {
-                cacheName = username;
-            }
-
+            final String cacheName = isCape ? username + ".cape" : username;
             os.write(imagesCache.get(cacheName));
         }
     }
 
     private boolean downloadAndCacheSkinOrCape(String get) {
         final String username = pngPattern.matcher(get.replace(url, "")).replaceAll("");
-        final String cacheName;
-
-        if (isCape) {
-            cacheName = username + ".cape";
-        } else {
-            cacheName = username;
-        }
+        final String cacheName = isCape ? username + ".cape" : username;
 
         if (imagesCache.containsKey(cacheName)) {
             return true;
         }
 
         try {
-            final byte[] bytes3 = downloadSkinOrCape(username, isCape);
+            final byte[] imageBytes = downloadSkinOrCape(username, isCape);
 
-            if (bytes3 != null) {
-                final BufferedImage imgRaw = ImageIO.read(new ByteArrayInputStream(bytes3));
+            if (imageBytes != null) {
+                final BufferedImage imgRaw = ImageIO.read(new ByteArrayInputStream(imageBytes));
                 final Image imgRawCorrectRes;
 
                 if (imgRaw.getWidth() == SKIN_WIDTH) {
@@ -180,15 +167,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
 
     // TODO @Nullable?
     private static byte[] downloadSkinOrCape(String username, boolean cape) {
-        final String fileNameEnd;
-
-        if (cape) {
-            fileNameEnd = ".cape.png";
-        } else {
-            fileNameEnd = ".png";
-        }
-
-        final File imageCache = new File(RetroEmulator.getInstance().getCacheDirectory(), username + fileNameEnd);
+        final File imageCache = new File(RetroEmulator.getInstance().getCacheDirectory(), username + (cape ? ".cape.png" : ".png"));
         final boolean isClassiCubeUser = RetroTweakInjectorTarget.connectedToClassicServer && !cape && username.endsWith("+");
         byte[] skinFileBytes = isClassiCubeUser ? getImageBytesFromClassiCube(username) : getImageBytesFromMojang(username, cape);
 

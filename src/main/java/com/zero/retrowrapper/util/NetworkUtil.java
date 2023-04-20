@@ -12,7 +12,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.PrettyPrint;
 
 import net.minecraft.launchwrapper.LogWrapper;
 
@@ -93,7 +92,6 @@ public final class NetworkUtil {
         final URLConnection urlConnection;
         HttpURLConnection joinSeverConnection = null;
         OutputStream askJoinStream = null;
-        InputStream responseStream = null;
 
         try {
             urlConnection = new URL("https://sessionserver.mojang.com/session/minecraft/join").openConnection();
@@ -124,24 +122,8 @@ public final class NetworkUtil {
                         authenticated = true;
                     }
 
-                    // Check why we failed to authenticate
-                    responseStream = joinSeverConnection.getErrorStream();
-
-                    if (responseStream == null) {
-                        responseStream = joinSeverConnection.getInputStream();
-                    }
-
-                    String failedResponseMessage = "(no response from server)";
-
-                    try {
-                        failedResponseMessage = IOUtils.toString(responseStream);
-                        failedResponseMessage = Json.parse(failedResponseMessage).toString(PrettyPrint.indentWithSpaces(4));
-                    } catch (final Exception e) {
-                        // This should always be JSON, but it's possible that it'll be changed in the future
-                        LogWrapper.warning("Response wasn't JSON?: " + ExceptionUtils.getStackTrace(e));
-                    }
-
-                    LogWrapper.warning("Failed to authenticate connection to server with sessionserver (HTTP code " + respCode + "):\n" + failedResponseMessage);
+                    // Log why we failed to authenticate
+                    LogWrapper.warning("Failed to authenticate connection to server with sessionserver (HTTP code " + respCode + "):\n" + getResponseAfterErrorAndClose(joinSeverConnection));
                 } else {
                     // 204 indicates the authentication was successful
                     authenticated = true;
@@ -153,7 +135,6 @@ public final class NetworkUtil {
             LogWrapper.warning("Exception thrown while trying to connect to sessionserver to authenticate server connection: " + ExceptionUtils.getStackTrace(e));
         } finally {
             IOUtils.closeQuietly(askJoinStream);
-            IOUtils.closeQuietly(responseStream);
 
             if (joinSeverConnection != null) {
                 joinSeverConnection.disconnect();
@@ -186,23 +167,8 @@ public final class NetworkUtil {
                         mppass = null;
                     }
                 } else {
-                    // Check why we failed to get the mppass
-                    responseStream = getMPPassUrlConnection.getErrorStream();
-
-                    if (responseStream == null) {
-                        responseStream = getMPPassUrlConnection.getInputStream();
-                    }
-
-                    String failedResponseMessage;
-
-                    try {
-                        failedResponseMessage = IOUtils.toString(responseStream);
-                    } catch (final Exception e) {
-                        LogWrapper.warning("Issue reading mppass response: " + ExceptionUtils.getStackTrace(e));
-                        failedResponseMessage = "(no response from server)";
-                    }
-
-                    LogWrapper.warning("Failed to verify mppass with BetaCraft (HTTP code " + respCode + "):\n" + failedResponseMessage);
+                    // Log why we failed to get the mppass
+                    LogWrapper.warning("Failed to verify mppass with BetaCraft (HTTP code " + respCode + "):\n" + getResponseAfterErrorAndClose(getMPPassUrlConnection));
                 }
             } else {
                 LogWrapper.severe("URL.openConnection() didn't return instance of HttpURLConnection");
@@ -218,6 +184,67 @@ public final class NetworkUtil {
         }
 
         return mppass;
+    }
+
+    private static String getStatusLine(HttpURLConnection httpUrlConnection) {
+        String httpResp;
+
+        try {
+            String statusLine = httpUrlConnection.getHeaderField(0);
+
+            if ((statusLine == null) || (httpUrlConnection.getHeaderFieldKey(0) != null)) {
+                final int statusCode = httpUrlConnection.getResponseCode();
+
+                if (statusCode != -1) {
+                    statusLine = statusCode + " " + httpUrlConnection.getResponseMessage();
+                }
+            }
+
+            httpResp = statusLine == null ? "(error: connection was possibly not valid HTTP?)" : statusLine;
+        } catch (final Exception ee) {
+            httpResp = "(error occurred when connecting to server: " + ExceptionUtils.getStackTrace(ee) + ")";
+        }
+
+        return httpResp;
+    }
+
+    public static String getResponseAfterErrorAndClose(HttpURLConnection httpUrlConnection) {
+        InputStream responseStream = null;
+
+        try {
+            responseStream = httpUrlConnection.getErrorStream();
+
+            if (responseStream == null) {
+                responseStream = httpUrlConnection.getInputStream();
+            }
+
+            final String serverRes = IOUtils.toString(responseStream);
+            final StringBuilder builder = new StringBuilder();
+            builder.append("HTTP status ");
+            builder.append(getStatusLine(httpUrlConnection));
+
+            if (!"".equals(serverRes.trim())) {
+                builder.append(", response body: ").append(serverRes);
+            } else {
+                builder.append(", no response body.");
+            }
+
+            return builder.toString();
+        } catch (final Exception e) {
+            String url;
+
+            try {
+                url = httpUrlConnection.getURL().toExternalForm();
+            } catch (final Exception ee) {
+                url = "(internal error: this should never happen)";
+            }
+
+            final String httpResp = getStatusLine(httpUrlConnection);
+            return "(RetroWrapper) Exception thrown when reading server response for URL " + url + " with HTTP status " + httpResp + ": " + ExceptionUtils.getStackTrace(e);
+        } finally {
+            IOUtils.closeQuietly(responseStream);
+            httpUrlConnection.disconnect();
+        }
     }
 
     private NetworkUtil() {

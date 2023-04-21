@@ -1,8 +1,8 @@
 package com.zero.retrowrapper.injector;
 
-import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ListIterator;
@@ -85,7 +85,8 @@ public final class M1ColorTweakInjector implements IClassTransformer {
             for (final Object methodNodeO : classNode.methods) {
                 final MethodNode methodNode = (MethodNode) methodNodeO;
                 final Collection<MethodInsnNode> foundSetFullscreenCalls = new ArrayList<MethodInsnNode>();
-                final Collection<MethodInsnNode> foundGetRGBCalls = new ArrayList<MethodInsnNode>();
+                final Collection<MethodInsnNode> foundGlTexImage2DCalls = new ArrayList<MethodInsnNode>();
+                final Collection<MethodInsnNode> foundGlTexSubImage2DCalls = new ArrayList<MethodInsnNode>();
                 final Collection<MethodInsnNode> foundFogFloatBufCalls = new ArrayList<MethodInsnNode>();
                 final Collection<MethodInsnNode> foundSwap3Calls = new ArrayList<MethodInsnNode>();
                 final Collection<MethodInsnNode> foundSwap3DoubleCalls = new ArrayList<MethodInsnNode>();
@@ -135,10 +136,6 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                         final String methodName = methodInsNode.name;
                         final String methodDesc = methodInsNode.desc;
 
-                        if ((opcode == Opcodes.INVOKEVIRTUAL) && "java/awt/image/BufferedImage".equals(methodOwner) && "(IIII[III)[I".equals(methodDesc) && "getRGB".equals(methodName)) {
-                            foundGetRGBCalls.add(methodInsNode);
-                        }
-
                         if (opcode == Opcodes.INVOKESTATIC) {
                             if ("org/lwjgl/opengl/Display".equals(methodOwner) && "(Z)V".equals(methodDesc) && "setFullscreen".equals(methodName)) {
                                 foundSetFullscreenCalls.add(methodInsNode);
@@ -176,6 +173,14 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                                 if ("glFog".equals(methodName) && "(ILjava/nio/FloatBuffer;)V".equals(methodDesc)) {
                                     foundFogFloatBufCalls.add(methodInsNode);
                                 }
+
+                                if ("glTexImage2D".equals(methodName) && "(IIIIIIIILjava/nio/ByteBuffer;)V".equals(methodDesc)) {
+                                    foundGlTexImage2DCalls.add(methodInsNode);
+                                }
+
+                                if ("glTexSubImage2D".equals(methodName) && "(IIIIIIIILjava/nio/ByteBuffer;)V".equals(methodDesc)) {
+                                    foundGlTexSubImage2DCalls.add(methodInsNode);
+                                }
                             }
                         }
                     }
@@ -194,11 +199,16 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     methodNode.instructions.remove(toPatch);
                 }
 
-                for (final MethodInsnNode toPatch : foundGetRGBCalls) {
-                    LogWrapper.fine("Patching call to getRGB at class " + name);
-                    final MethodInsnNode methodInsNode = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "buffImageTweaker", "(Ljava/awt/image/BufferedImage;IIII[III)[I");
+                for (final MethodInsnNode toPatch : foundGlTexImage2DCalls) {
+                    LogWrapper.fine("Patching call to glTexImage2D at class " + name);
+                    final MethodInsnNode methodInsNode = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "bindImageTweaker", "(Ljava/nio/ByteBuffer;)Ljava/nio/ByteBuffer;");
                     methodNode.instructions.insertBefore(toPatch, methodInsNode);
-                    methodNode.instructions.remove(toPatch);
+                }
+
+                for (final MethodInsnNode toPatch : foundGlTexSubImage2DCalls) {
+                    LogWrapper.fine("Patching call to glTexSubImage2D at class " + name);
+                    final MethodInsnNode methodInsNode = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "bindImageTweaker", "(Ljava/nio/ByteBuffer;)Ljava/nio/ByteBuffer;");
+                    methodNode.instructions.insertBefore(toPatch, methodInsNode);
                 }
 
                 // New variable indices
@@ -683,21 +693,27 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         return null;
     }
 
-    public static int[] buffImageTweaker(BufferedImage image, int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize) {
-        final int[] adaptedFormat = image.getRGB(startX, startY, w, h, rgbArray, offset, scansize);
+    private static ByteBuffer standardBuffer;
 
-        if (!isMinecraftFullscreen || (RetroTweaker.m1PatchMode == RetroTweaker.M1PatchMode.ForceEnable)) {
-            final int length = adaptedFormat.length;
-
-            for (int i = 0; i < length; i++) {
-                final int color = adaptedFormat[i];
-                adaptedFormat[i] =
-                    (color & 0xFF00FF00)   |
-                    ((color >> 16) & 0xFF) |
-                    ((color & 0xFF) << 16) ;
-            }
+    public static ByteBuffer bindImageTweaker(ByteBuffer in) {
+        if (isMinecraftFullscreen && (RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable)) {
+            return in;
         }
 
-        return adaptedFormat;
+        final ByteBuffer inAsReadOnly = in.asReadOnlyBuffer();
+
+        if ((standardBuffer == null) || (standardBuffer.capacity() < inAsReadOnly.capacity())) {
+            standardBuffer = ByteBuffer.allocateDirect(inAsReadOnly.capacity());
+        }
+
+        standardBuffer.clear();
+        final ByteBuffer out = standardBuffer;
+
+        for (int i = 0; i < inAsReadOnly.limit(); i++) {
+            out.put(inAsReadOnly.get((i % 4) == 0 ? i + 2 : ((i % 4) == 2 ? i - 2 : i)));
+        }
+
+        out.flip();
+        return out;
     }
 }

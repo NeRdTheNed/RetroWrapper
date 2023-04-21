@@ -3,7 +3,6 @@ package com.zero.retrowrapper.injector;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ListIterator;
@@ -694,27 +693,14 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         return null;
     }
 
-    private static ByteBuffer standardBuffer;
-
     public static ByteBuffer bindImageTweaker(ByteBuffer in) {
-        if (isMinecraftFullscreen && (RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable)) {
-            return in;
+        if (!isMinecraftFullscreen || (RetroTweaker.m1PatchMode == RetroTweaker.M1PatchMode.ForceEnable)) {
+            for (int i = 0; i < in.limit(); i += 4) {
+                final byte B = in.get(i);
+                in.put(i, in.get(i + 2)).put(i + 2, B);
+            }
         }
 
-        final ByteBuffer inAsReadOnly = in.asReadOnlyBuffer();
-
-        if ((standardBuffer == null) || (standardBuffer.capacity() < inAsReadOnly.limit())) {
-            standardBuffer = ByteBuffer.allocateDirect(inAsReadOnly.limit()).order(ByteOrder.nativeOrder());
-        }
-
-        standardBuffer.clear();
-        final ByteBuffer out = standardBuffer;
-
-        for (int i = 0; i < inAsReadOnly.limit(); i++) {
-            out.put(inAsReadOnly.get((i % 4) == 0 ? i + 2 : ((i % 4) == 2 ? i - 2 : i)));
-        }
-
-        out.flip();
-        return out;
+        return in;
     }
 }

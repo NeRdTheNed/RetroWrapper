@@ -703,8 +703,8 @@ public final class M1ColorTweakInjector implements IClassTransformer {
 
         final ByteBuffer inAsReadOnly = in.asReadOnlyBuffer();
 
-        if ((standardBuffer == null) || (standardBuffer.capacity() < inAsReadOnly.capacity())) {
-            standardBuffer = ByteBuffer.allocateDirect(inAsReadOnly.capacity()).order(ByteOrder.nativeOrder());
+        if ((standardBuffer == null) || (standardBuffer.capacity() < inAsReadOnly.limit())) {
+            standardBuffer = ByteBuffer.allocateDirect(inAsReadOnly.limit()).order(ByteOrder.nativeOrder());
         }
 
         standardBuffer.clear();

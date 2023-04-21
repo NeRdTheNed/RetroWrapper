@@ -3,6 +3,7 @@ package com.zero.retrowrapper.injector;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ListIterator;
@@ -703,7 +704,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         final ByteBuffer inAsReadOnly = in.asReadOnlyBuffer();
 
         if ((standardBuffer == null) || (standardBuffer.capacity() < inAsReadOnly.capacity())) {
-            standardBuffer = ByteBuffer.allocateDirect(inAsReadOnly.capacity());
+            standardBuffer = ByteBuffer.allocateDirect(inAsReadOnly.capacity()).order(ByteOrder.nativeOrder());
         }
 
         standardBuffer.clear();

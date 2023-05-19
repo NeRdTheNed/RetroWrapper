@@ -16,7 +16,7 @@ import com.eclipsesource.json.JsonValue;
 
 public final class MetadataUtil {
     public static final String VERSION;
-    private static final String TAG;
+    public static final String TAG;
     public static final String RELEASE_URL;
     static final boolean IS_RELEASE;
 

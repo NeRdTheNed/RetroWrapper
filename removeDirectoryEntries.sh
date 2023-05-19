@@ -15,8 +15,8 @@ do
     advzip "$jarJar" --shrink-store --pedantic -a ./build/libs/temp/libraries/temp/**
     rm -rf ./build/libs/temp/libraries/temp/
     strip-nondeterminism "$jarJar"
-    #advzip --shrink-insane -kzi 9 -p "$jarJar"
     advzip --shrink-extra -kzp "$jarJar"
+    advzip --shrink-insane -kzi 9 -p "$jarJar"
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       ./ci-tools/ect-ubuntu-x86-64 --disable-png --disable-jpg -strip -zip "$jarJar"
       ./ci-tools/ect-ubuntu-x86-64 -9 --disable-png --disable-jpg -strip -zip "$jarJar"
@@ -55,8 +55,8 @@ done
 for file in ./build/libs/*.jar ./build/libs/*.zip
 do
   strip-nondeterminism "$file"
-  #advzip --shrink-insane -kzi 09 -p "$file"
   advzip --shrink-extra -kzp "$file"
+  advzip --shrink-insane -kzi 9 -p "$file"
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     ./ci-tools/ect-ubuntu-x86-64 --disable-png --disable-jpg -strip -zip "$file"
     ./ci-tools/ect-ubuntu-x86-64 -9 --disable-png --disable-jpg -strip -zip "$file"

@@ -34,6 +34,8 @@ jobs:
           cache-disabled: true
           arguments: build --scan --stacktrace --warning-mode all
       - name: Rezip built .jar files to remove directory entries
+        env:
+          BUILD_RELEASE: ${{ github.event.release.prerelease == false }}
         run: bash removeDirectoryEntries.sh
       - name: Draft release
         uses: softprops/action-gh-release@v1

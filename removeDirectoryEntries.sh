@@ -19,6 +19,8 @@ do
     advzip --shrink-extra -kzp "$jarJar"
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       ./ci-tools/ect-ubuntu-x86-64 -9 --disable-png --disable-jpg -strip -zip "$jarJar"
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+      ./ci-tools/ect-0.9.4-mac -9 --disable-png --disable-jpg -strip -zip "$jarJar"
     fi
   done
   echo "test $file"
@@ -49,5 +51,7 @@ do
   advzip --shrink-extra -kzp "$file"
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     ./ci-tools/ect-ubuntu-x86-64 -9 --disable-png --disable-jpg -strip -zip "$file"
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    ./ci-tools/ect-0.9.4-mac -9 --disable-png --disable-jpg -strip -zip "$file"
   fi
 done

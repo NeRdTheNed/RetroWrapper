@@ -16,19 +16,25 @@ do
     rm -rf ./build/libs/temp/libraries/temp/
     strip-nondeterminism "$jarJar"
     advzip --shrink-extra -kzp "$jarJar"
-    advzip --shrink-insane -kzi 9 -p "$jarJar"
+    if [[ "$BUILD_RELEASE" == "true" ]]; then
+      advzip --shrink-insane -kzi 9 -p "$jarJar"
+    fi
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       ./ci-tools/ect-ubuntu-x86-64 --disable-png --disable-jpg -strip -zip "$jarJar"
       ./ci-tools/ect-ubuntu-x86-64 -9 --disable-png --disable-jpg -strip -zip "$jarJar"
-      ./ci-tools/ect-ubuntu-x86-64 -99 --disable-png --disable-jpg -strip -zip "$jarJar"
-      ./ci-tools/ect-ubuntu-x86-64 -30060 --disable-png --disable-jpg -strip -zip "$jarJar"
-      ./ci-tools/ect-ubuntu-x86-64 -90032 --disable-png --disable-jpg -strip -zip "$jarJar"
+      if [[ "$BUILD_RELEASE" == "true" ]]; then
+        ./ci-tools/ect-ubuntu-x86-64 -99 --disable-png --disable-jpg -strip -zip "$jarJar"
+        ./ci-tools/ect-ubuntu-x86-64 -30060 --disable-png --disable-jpg -strip -zip "$jarJar"
+        ./ci-tools/ect-ubuntu-x86-64 -90032 --disable-png --disable-jpg -strip -zip "$jarJar"
+      fi
     elif [[ "$OSTYPE" == "darwin"* ]]; then
       ./ci-tools/ect-0.9.4-mac --disable-png --disable-jpg -strip -zip "$jarJar"
       ./ci-tools/ect-0.9.4-mac -9 --disable-png --disable-jpg -strip -zip "$jarJar"
-      ./ci-tools/ect-0.9.4-mac -99 --disable-png --disable-jpg -strip -zip "$jarJar"
-      ./ci-tools/ect-0.9.4-mac -30060 --disable-png --disable-jpg -strip -zip "$jarJar"
-      ./ci-tools/ect-0.9.4-mac -90032 --disable-png --disable-jpg -strip -zip "$jarJar"
+      if [[ "$BUILD_RELEASE" == "true" ]]; then
+        ./ci-tools/ect-0.9.4-mac -99 --disable-png --disable-jpg -strip -zip "$jarJar"
+        ./ci-tools/ect-0.9.4-mac -30060 --disable-png --disable-jpg -strip -zip "$jarJar"
+        ./ci-tools/ect-0.9.4-mac -90032 --disable-png --disable-jpg -strip -zip "$jarJar"
+      fi
     fi
   done
   echo "test $file"
@@ -56,18 +62,24 @@ for file in ./build/libs/*.jar ./build/libs/*.zip
 do
   strip-nondeterminism "$file"
   advzip --shrink-extra -kzp "$file"
-  advzip --shrink-insane -kzi 9 -p "$file"
+  if [[ "$BUILD_RELEASE" == "true" ]]; then
+    advzip --shrink-insane -kzi 9 -p "$file"
+  fi
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     ./ci-tools/ect-ubuntu-x86-64 --disable-png --disable-jpg -strip -zip "$file"
     ./ci-tools/ect-ubuntu-x86-64 -9 --disable-png --disable-jpg -strip -zip "$file"
-    ./ci-tools/ect-ubuntu-x86-64 -99 --disable-png --disable-jpg -strip -zip "$file"
-    ./ci-tools/ect-ubuntu-x86-64 -30060 --disable-png --disable-jpg -strip -zip "$file"
-    ./ci-tools/ect-ubuntu-x86-64 -90032 --disable-png --disable-jpg -strip -zip "$file"
+    if [[ "$BUILD_RELEASE" == "true" ]]; then
+      ./ci-tools/ect-ubuntu-x86-64 -99 --disable-png --disable-jpg -strip -zip "$file"
+      ./ci-tools/ect-ubuntu-x86-64 -30060 --disable-png --disable-jpg -strip -zip "$file"
+      ./ci-tools/ect-ubuntu-x86-64 -90032 --disable-png --disable-jpg -strip -zip "$file"
+    fi
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     ./ci-tools/ect-0.9.4-mac --disable-png --disable-jpg -strip -zip "$file"
     ./ci-tools/ect-0.9.4-mac -9 --disable-png --disable-jpg -strip -zip "$file"
-    ./ci-tools/ect-0.9.4-mac -99 --disable-png --disable-jpg -strip -zip "$file"
-    ./ci-tools/ect-0.9.4-mac -30060 --disable-png --disable-jpg -strip -zip "$file"
-    ./ci-tools/ect-0.9.4-mac -90032 --disable-png --disable-jpg -strip -zip "$file"
+    if [[ "$BUILD_RELEASE" == "true" ]]; then
+      ./ci-tools/ect-0.9.4-mac -99 --disable-png --disable-jpg -strip -zip "$file"
+      ./ci-tools/ect-0.9.4-mac -30060 --disable-png --disable-jpg -strip -zip "$file"
+      ./ci-tools/ect-0.9.4-mac -90032 --disable-png --disable-jpg -strip -zip "$file"
+    fi
   fi
 done

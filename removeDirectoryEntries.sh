@@ -17,6 +17,9 @@ do
     strip-nondeterminism "$jarJar"
     #advzip --shrink-insane -kzi 9 -p "$jarJar"
     advzip --shrink-extra -kzp "$jarJar"
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+      ./ci-tools/ect-ubuntu-x86-64 -9 --disable-png --disable-jpg -strip -zip "$jarJar"
+    fi
   done
   echo "test $file"
   for jsonFile in ./build/libs/**/**/**.json ./build/libs/**/**.json ./build/libs/**.json
@@ -44,4 +47,7 @@ do
   strip-nondeterminism "$file"
   #advzip --shrink-insane -kzi 09 -p "$file"
   advzip --shrink-extra -kzp "$file"
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    ./ci-tools/ect-ubuntu-x86-64 -9 --disable-png --disable-jpg -strip -zip "$file"
+  fi
 done

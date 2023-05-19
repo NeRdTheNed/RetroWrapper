@@ -328,7 +328,7 @@ public final class SwingUtil {
                     IOUtils.closeQuietly(connectionInputStream);
                 }
 
-                if ((latestRelease != null) && !latestRelease.equals(MetadataUtil.VERSION)) {
+                if ((latestRelease != null) && !latestRelease.equals(MetadataUtil.TAG)) {
                     tempLogger.log(Level.INFO, "Found new update {0}", latestRelease);
                     final JFrame updateFrame = new JFrame();
                     updateFrame.setResizable(true);

@@ -90,6 +90,10 @@ public final class RetroTweakClassWriter extends ClassWriter {
                     LogWrapper.info(foundUrlTextString + constant);
                     transformed = RetroTweakInjectorTarget.serverIP;
                     LogWrapper.info(replacedWithTextString + transformed);
+                } else if ("http://www.minecraft.net/store/loot.jsp".equals(constant)) {
+                    LogWrapper.info(foundUrlTextString + constant);
+                    transformed = "https://web.archive.org/web/20110401175108/http://www.minecraft.net/store/loot.jsp";
+                    LogWrapper.info(replacedWithTextString + transformed);
                 } else {
                     final boolean isNet = constant.contains(".net");
                     final boolean isCom = constant.contains(".com");

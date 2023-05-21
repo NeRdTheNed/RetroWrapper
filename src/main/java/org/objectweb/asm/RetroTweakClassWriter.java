@@ -12,6 +12,7 @@ import net.minecraft.launchwrapper.LogWrapper;
 
 public final class RetroTweakClassWriter extends ClassWriter {
     public static String mobClass;
+    public static String tesClass;
 
     private static final String foundUrlTextString = "Found URL!: ";
     private static final String replacedWithTextString = "Replaced with: ";
@@ -76,6 +77,10 @@ public final class RetroTweakClassWriter extends ClassWriter {
 
                 if ((constant.contains("random.splash") || constant.contains("char.png")) && (mobClass == null)) {
                     mobClass = className;
+                }
+
+                if (constant.contains("Not tesselating!") || constant.contains("Already tesselating!")) {
+                    tesClass = className;
                 }
 
                 final String transformed;

@@ -13,6 +13,7 @@ import org.lwjgl.opengl.Display;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.RetroTweakClassWriter;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -181,6 +182,10 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                                 if ("glTexSubImage2D".equals(methodName) && "(IIIIIIIILjava/nio/ByteBuffer;)V".equals(methodDesc)) {
                                     foundGlTexSubImage2DCalls.add(methodInsNode);
                                 }
+                            }
+                        } else if ((RetroTweakClassWriter.tesClass != null) && ((opcode == Opcodes.INVOKEVIRTUAL) || (opcode == Opcodes.INVOKESPECIAL))) {
+                            if (RetroTweakClassWriter.tesClass.equals(methodOwner) && "(IIII)V".equals(methodDesc)) {
+                                foundSwap4Calls.add(methodInsNode);
                             }
                         }
                     }

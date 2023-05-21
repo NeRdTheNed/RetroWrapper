@@ -80,9 +80,18 @@ public final class SwingUtil {
         addJComponentCentered(container, component);
     }
 
+    //@SafeVarargs
+    private static <T> void addNonNullToCollection(Collection<? super T> collection, T... toAdd) {
+        for (final T entryToAdd : toAdd) {
+            if (entryToAdd != null) {
+                collection.add(entryToAdd);
+            }
+        }
+    }
+
     public static void loadIconsOnFrames() {
         final Collection<File> iconList = new ArrayList<File>();
-        CollectionUtil.addNonNullToCollection(iconList, FileUtil.tryFindResourceFile("icons" + File.separator + "icon_16x16.png"), FileUtil.tryFindResourceFile("icons" + File.separator + "icon_32x32.png"));
+        addNonNullToCollection(iconList, FileUtil.tryFindResourceFile("icons" + File.separator + "icon_16x16.png"), FileUtil.tryFindResourceFile("icons" + File.separator + "icon_32x32.png"));
 
         if (!iconList.isEmpty()) {
             LogWrapper.fine("Loading current icons for window from: " + iconList);

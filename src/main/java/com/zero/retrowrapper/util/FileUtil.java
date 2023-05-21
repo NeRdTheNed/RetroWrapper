@@ -84,7 +84,7 @@ public final class FileUtil {
     }
 
     private static List<File> findFiles(File dir) {
-        List<File> files = new ArrayList<File>();
+        final List<File> files = new ArrayList<File>();
         findAddFiles(dir, files);
         return files;
     }

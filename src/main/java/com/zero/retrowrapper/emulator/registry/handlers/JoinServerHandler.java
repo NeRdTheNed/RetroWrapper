@@ -27,9 +27,8 @@ public final class JoinServerHandler extends EmulatorHandler {
         String username = RetroTweakInjectorTarget.username;
         String sessionId = RetroTweakInjectorTarget.sessionId;
         String serverId = "";
-        final String urlParams = questionMarkPattern.split(get)[1];
 
-        for (final String param : andPattern.split(urlParams)) {
+        for (final String param : andPattern.split(questionMarkPattern.split(get)[1])) {
             final String[] split = equalsPattern.split(param);
             final String key = split[0];
             final String value = split[1];

@@ -205,6 +205,12 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 }
 
                 for (final MethodInsnNode toPatch : foundGlTexImage2DLikeCalls) {
+                    boolean assumesOpenGL12 = true;
+
+                    if (System.getProperties().getProperty("retrowrapper.assumesOpenGL12") != null) {
+                        assumesOpenGL12 = Boolean.parseBoolean(System.getProperties().getProperty("retrowrapper.assumesOpenGL12"));
+                    }
+
                     LogWrapper.fine("Patching call to glTexImage2D / glTexSubImage2D at class " + name);
                     final LabelNode target = new LabelNode();
                     final LabelNode noOpenGL12 = new LabelNode();
@@ -235,10 +241,13 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                         methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
                     }
 
-                    // Check if OpenGL 1.2 is supported
-                    methodNode.instructions.insertBefore(toPatch, getCapabilities);
-                    methodNode.instructions.insertBefore(toPatch, getIsOpenGL12);
-                    methodNode.instructions.insertBefore(toPatch, skipIfNoOpenGL12);
+                    if (!assumesOpenGL12) {
+                        // Check if OpenGL 1.2 is supported
+                        methodNode.instructions.insertBefore(toPatch, getCapabilities);
+                        methodNode.instructions.insertBefore(toPatch, getIsOpenGL12);
+                        methodNode.instructions.insertBefore(toPatch, skipIfNoOpenGL12);
+                    }
+
                     // Change texture type from RGBA to BGRA
                     // Move top two stack values out of the way
                     methodNode.instructions.insertBefore(toPatch, dup2_x1);
@@ -250,12 +259,18 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     // Shuffle value back into position
                     methodNode.instructions.insertBefore(toPatch, dup_x2);
                     methodNode.instructions.insertBefore(toPatch, pop);
-                    // Jump to end
-                    methodNode.instructions.insertBefore(toPatch, gotoEnd);
-                    // Manually change from RGBA to BGRA
-                    methodNode.instructions.insertBefore(toPatch, noOpenGL12);
-                    methodNode.instructions.insertBefore(toPatch, bindImageTweaker);
-                    methodNode.instructions.insertBefore(toPatch, target);
+
+                    if (!assumesOpenGL12) {
+                        // Jump to end
+                        methodNode.instructions.insertBefore(toPatch, gotoEnd);
+                        // Manually change from RGBA to BGRA
+                        methodNode.instructions.insertBefore(toPatch, noOpenGL12);
+                        methodNode.instructions.insertBefore(toPatch, bindImageTweaker);
+                    }
+
+                    if ((RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable) && !assumesOpenGL12) {
+                        methodNode.instructions.insertBefore(toPatch, target);
+                    }
                 }
 
                 // New variable indices

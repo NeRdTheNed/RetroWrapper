@@ -120,8 +120,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
     public void handle(OutputStream os, String get, byte[] data) throws IOException {
         if (downloadAndCacheSkinOrCape(get)) {
             final String username = pngPattern.matcher(get.replace(url, "")).replaceAll("");
-            final String cacheName = isCape ? username + ".cape" : username;
-            os.write(imagesCache.get(cacheName));
+            os.write(imagesCache.get(isCape ? username + ".cape" : username));
         }
     }
 

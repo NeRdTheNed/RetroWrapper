@@ -176,8 +176,7 @@ public final class MouseTweakInjector implements IClassTransformer {
 
     public static Cursor setNativeCursorPatch(Cursor cursor, boolean shouldHide) throws LWJGLException {
         try {
-            final java.awt.Cursor useCursor = shouldHide ? hiddenCursor : normalCursor;
-            Display.getParent().setCursor(useCursor);
+            Display.getParent().setCursor(shouldHide ? hiddenCursor : normalCursor);
         } catch (final Exception e) {
             LogWrapper.warning("Something went wrong when trying to set AWT cursor: " + ExceptionUtils.getStackTrace(e));
         }

@@ -1,12 +1,52 @@
 # RetroWrapper - NeRd fork
 
-This fork of RetroWrapper aims to fix bugs and implement some quality of life changes.
+> A way to play fixed old versions of Minecraft from the vanilla launcher, MultiMC, and more.
 
-Head to the [releases page](https://github.com/NeRdTheNed/RetroWrapper/releases) to grab the newest version! If you find any issues I don't know about or I've accidentally introduced, please report them on the [issues page](https://github.com/NeRdTheNed/RetroWrapper/issues)!
+[![Build status](https://github.com/NeRdTheNed/RetroWrapper/actions/workflows/gradle.yml/badge.svg)](https://github.com/NeRdTheNed/RetroWrapper/actions/workflows/gradle.yml)
 
-Note: Binary distributions of this software bundle classes from the Apache Commons project, which are licensed under the Apache License Version 2.0. A full copy of this license can be found in COMMONS-LICENSE.txt, which should be in the top-level directory of this repository. Binary distributions also include this information under META-INF.
+## Usage
 
-# Original Readme
+RetroWrapper is available as an installer for creating wrapped versions to use in the vanilla launcher, or a MultiMC-formatted instance. Head to the [releases page](https://github.com/NeRdTheNed/RetroWrapper/releases) to grab the newest version! If you find any issues I don't know about or I've accidentally introduced, please report them on the [issues page](https://github.com/NeRdTheNed/RetroWrapper/issues).
+
+## What is RetroWrapper?
+
+RetroWrapper is a collection of patches and fixes for old versions of Minecraft, to restore functionality and fix various compatibility issues. Features include:
+
+Server / website emulation:
+- Classic online level loading and saving emulation
+- Modern server authentication support (with experimental classic server support)
+- Skin, cape, and sound fixes (with offline cache)
+
+Patches:
+- Bit depth fix
+- Classic mouse moving
+- Indev loading / saving
+- macOS native cursor crash fix and input patches
+- Quit button fix
+- (Experimental) M1 windowed colour fixes
+
+Misc:
+- Built-in update checker and crash report helper
+- Java 5+ support (including Java 9+ support!)
+- Multi-platform, launcher, and version support
+- Support for using updated libraries in wrapped instances
+- Support for using M1 LWJGL natives in wrapped instances
+
+Additionally, RetroWrapper includes support for some more obscure features and versions, including the isometric viewer, Minecraft 4K support, and a single player teleport "hack" tool.
+
+RetroWrapper includes an installer for use with the vanilla launcher, which supports Windows, macOS and Linux. MultiMC instances using RetroWrapper can be downloaded from the releases page as well.
+
+## How does RetroWrapper work?
+
+RetroWrapper is built on the same technology that the official Minecraft launcher uses for patching old versions of Minecraft: [LegacyLauncher](https://github.com/Mojang/LegacyLauncher). RetroWrapper uses tweak classes to implement many runtime patches, and to re-direct known URLs to the local server emulator. The server emulator runs locally on your PC, and acts as a replacement for online functionality, such as handling resource downloads, and server authentication.
+
+As RetroWrapper uses LegacyLauncher, it is version independent, and able to run on a number of launchers.
+
+## Credits
+
+Binary distributions of this software bundle classes from the Apache Commons project, which are licensed under the Apache License Version 2.0. A full copy of this license can be found in COMMONS-LICENSE.txt, which should be in the top-level directory of this repository. Binary distributions also include this information under META-INF.
+
+## Original Readme (outdated)
 Enables you to play _fixed_ old versions of minecraft without ever touching .jar files, works even when offline!
 
 Needs Java 7 or higher!!

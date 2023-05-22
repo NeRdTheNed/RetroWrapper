@@ -10,6 +10,7 @@ import java.util.ListIterator;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -573,7 +574,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         // Jump to end
         final JumpInsnNode gotoEnd = new JumpInsnNode(Opcodes.GOTO, target);
         // Manually change from RGBA to BGRA
-        final MethodInsnNode bindImageTweaker = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "bindImageTweaker", "(Ljava/nio/ByteBuffer;)Ljava/nio/ByteBuffer;");
+        final MethodInsnNode bindImageTweaker = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "bindImageTweaker", "(Ljava/nio/ByteBuffer;I)V");
 
         if (RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable) {
             methodNode.instructions.insertBefore(toPatch, getFullscreen);
@@ -604,7 +605,12 @@ public final class M1ColorTweakInjector implements IClassTransformer {
             methodNode.instructions.insertBefore(toPatch, gotoEnd);
             // Manually change from RGBA to BGRA
             methodNode.instructions.insertBefore(toPatch, noOpenGL12);
+            methodNode.instructions.insertBefore(toPatch, new InsnNode(Opcodes.DUP2_X1));
+            methodNode.instructions.insertBefore(toPatch, new InsnNode(Opcodes.POP2));
+            methodNode.instructions.insertBefore(toPatch, new InsnNode(Opcodes.DUP2));
             methodNode.instructions.insertBefore(toPatch, bindImageTweaker);
+            methodNode.instructions.insertBefore(toPatch, new InsnNode(Opcodes.DUP_X2));
+            methodNode.instructions.insertBefore(toPatch, new InsnNode(Opcodes.POP));
         }
 
         if ((RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable) || !assumesOpenGL12) {
@@ -808,14 +814,19 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         return null;
     }
 
-    public static ByteBuffer bindImageTweaker(ByteBuffer in) {
+    public static void bindImageTweaker(ByteBuffer in, int format) {
         if (!isMinecraftFullscreen || (RetroTweaker.m1PatchMode == RetroTweaker.M1PatchMode.ForceEnable)) {
-            for (int i = 0; i < in.limit(); i += 4) {
-                final byte B = in.get(i);
-                in.put(i, in.get(i + 2)).put(i + 2, B);
+            if ((format == GL11.GL_RGBA) || (format == GL12.GL_BGRA)) {
+                for (int i = 0; i < in.limit(); i += 4) {
+                    final byte B = in.get(i);
+                    in.put(i, in.get(i + 2)).put(i + 2, B);
+                }
+            } else if ((format == GL11.GL_RGB) || (format == GL12.GL_BGR)) {
+                for (int i = 0; i < in.limit(); i += 3) {
+                    final byte B = in.get(i);
+                    in.put(i, in.get(i + 2)).put(i + 2, B);
+                }
             }
         }
-
-        return in;
     }
 }

@@ -552,14 +552,15 @@ public final class M1ColorTweakInjector implements IClassTransformer {
 
         // Load constant
         methodNode.instructions.insertBefore(toPatch, loadNew);
-        // Skip ahead
-        methodNode.instructions.insertBefore(toPatch, gotoPost);
 
         if (RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable) {
+            // Skip ahead
+            methodNode.instructions.insertBefore(toPatch, gotoPost);
             methodNode.instructions.insertBefore(toPatch, target);
+            methodNode.instructions.insertBefore(toPatch.getNext(), postTarget);
+        } else {
+            methodNode.instructions.remove(toPatch);
         }
-
-        methodNode.instructions.insertBefore(toPatch.getNext(), postTarget);
     }
 
     private static void patchGlTexImage2DLike(MethodNode methodNode, AbstractInsnNode toPatch, boolean assumesOpenGL12) {

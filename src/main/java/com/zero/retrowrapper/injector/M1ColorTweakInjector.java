@@ -564,10 +564,8 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         // Move top two stack values out of the way
         final InsnNode dup2_x1 = new InsnNode(Opcodes.DUP2_X1);
         final InsnNode pop2 = new InsnNode(Opcodes.POP2);
-        // Pop the old texture type TODO Validate this is GL11.GL_RGBA
-        final InsnNode popOld = new InsnNode(Opcodes.POP);
-        // Replace with GL12.GL_BGRA
-        final LdcInsnNode loadNew = new LdcInsnNode(GL12.GL_BGRA);
+        // Find the converted format
+        final MethodInsnNode convertedFormat = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "convertedFormat", "(I)I");
         // Shuffle value back into position
         final InsnNode dup_x2 = new InsnNode(Opcodes.DUP_X2);
         final InsnNode pop = new InsnNode(Opcodes.POP);
@@ -592,10 +590,8 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         // Move top two stack values out of the way
         methodNode.instructions.insertBefore(toPatch, dup2_x1);
         methodNode.instructions.insertBefore(toPatch, pop2);
-        // Pop the old texture type TODO Validate this is GL11.GL_RGBA
-        methodNode.instructions.insertBefore(toPatch, popOld);
-        // Replace with GL12.GL_BGRA
-        methodNode.instructions.insertBefore(toPatch, loadNew);
+        // Find the converted format
+        methodNode.instructions.insertBefore(toPatch, convertedFormat);
         // Shuffle value back into position
         methodNode.instructions.insertBefore(toPatch, dup_x2);
         methodNode.instructions.insertBefore(toPatch, pop);
@@ -812,6 +808,25 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         }
 
         return null;
+    }
+
+    public static int convertedFormat(int inputFormat) {
+        switch (inputFormat) {
+        case GL11.GL_RGBA:
+            return GL12.GL_BGRA;
+
+        case GL11.GL_RGB:
+            return GL12.GL_BGR;
+
+        case GL12.GL_BGRA:
+            return GL11.GL_RGBA;
+
+        case GL12.GL_BGR:
+            return GL11.GL_RGB;
+
+        default:
+            return inputFormat;
+        }
     }
 
     public static void bindImageTweaker(ByteBuffer in, int format) {

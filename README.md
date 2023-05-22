@@ -44,7 +44,9 @@ As RetroWrapper uses LegacyLauncher, it is version independent, and able to run 
 
 ## Credits
 
-Binary distributions of this software bundle classes from the Apache Commons project, which are licensed under the Apache License Version 2.0. A full copy of this license can be found in COMMONS-LICENSE.txt, which should be in the top-level directory of this repository. Binary distributions also include this information under META-INF.
+Binary distributions of this software bundle classes from the [Apache Commons project](https://commons.apache.org/), which are licensed under the Apache License Version 2.0. A full copy of this license can be found in COMMONS-LICENSE.txt, which should be in the top-level directory of this repository. Binary distributions also include this information under META-INF.
+
+Binary distributions of this software bundle classes from [minimal-json](https://github.com/ralfstx/minimal-json), which are licensed under the MIT license. A full copy of this license can be found in MINIMAL-JSON-LICENSE.txt, which should be in the top-level directory of this repository. Binary distributions also include this information under META-INF.
 
 ## Original Readme (outdated)
 Enables you to play _fixed_ old versions of minecraft without ever touching .jar files, works even when offline!

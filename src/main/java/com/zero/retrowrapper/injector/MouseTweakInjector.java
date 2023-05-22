@@ -146,15 +146,7 @@ public final class MouseTweakInjector implements IClassTransformer {
                 for (final MethodInsnNode toPatch : foundNativeCursorMethodCalls) {
                     LogWrapper.fine("Patching call to setNativeCursor at class " + name);
                     // Check if the method deliberately loaded null. This implies the cursor should be shown.
-                    final int shouldHide;
-
-                    if (toPatch.getPrevious().getOpcode() == Opcodes.ACONST_NULL) {
-                        shouldHide = 0;
-                    } else {
-                        shouldHide = 1;
-                    }
-
-                    final LdcInsnNode loadShouldHide = new LdcInsnNode(shouldHide);
+                    final LdcInsnNode loadShouldHide = new LdcInsnNode(toPatch.getPrevious().getOpcode() == Opcodes.ACONST_NULL ? 0 : 1);
                     final MethodInsnNode methodInsNode = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/MouseTweakInjector", "setNativeCursorPatch", "(Lorg/lwjgl/input/Cursor;Z)Lorg/lwjgl/input/Cursor;");
                     methodNode.instructions.insertBefore(toPatch, loadShouldHide);
                     methodNode.instructions.insertBefore(toPatch, methodInsNode);

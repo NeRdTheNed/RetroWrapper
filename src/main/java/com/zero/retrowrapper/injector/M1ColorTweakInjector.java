@@ -217,20 +217,31 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     final AbstractInsnNode p2 = p1.getPrevious();
                     final AbstractInsnNode p3 = p2.getPrevious();
                     final AbstractInsnNode p4 = p3.getPrevious();
-                    boolean isField = false;
+                    AbstractInsnNode foundLoad = null;
 
                     if (assumesOpenGL12 && JavaUtil.areAllOpcodesLoadIns(p3, p4) && (p1.getOpcode() == Opcodes.GETFIELD)) {
                         final FieldInsnNode fieldNode = (FieldInsnNode) p1;
 
                         if ((p2.getOpcode() == Opcodes.ALOAD) && "Ljava/nio/ByteBuffer;".equals(fieldNode.desc)) {
-                            isField = true;
+                            foundLoad = p4;
                         }
+                    } else if (assumesOpenGL12 && JavaUtil.areAllOpcodesLoadIns(p1, p2, p3)) {
+                        foundLoad = p3;
                     }
 
-                    if (isField) {
-                        patchConstVal(methodNode, p4, GL12.GL_BGRA);
-                    } else if (assumesOpenGL12 && JavaUtil.areAllOpcodesLoadIns(p1, p2, p3)) {
-                        patchConstVal(methodNode, p3, GL12.GL_BGRA);
+                    if (foundLoad != null) {
+                        final Number constantVal = JavaUtil.getNumberLoadInsValueOrNull(foundLoad);
+
+                        if (constantVal != null) {
+                            final int constantIntVal = constantVal.intValue();
+                            final int convVal = convertedFormat(constantIntVal);
+
+                            if (constantIntVal != convVal) {
+                                patchConstVal(methodNode, foundLoad, convVal);
+                            }
+                        } else {
+                            patchGlTexImage2DLike(methodNode, toPatch, assumesOpenGL12);
+                        }
                     } else {
                         patchGlTexImage2DLike(methodNode, toPatch, assumesOpenGL12);
                     }

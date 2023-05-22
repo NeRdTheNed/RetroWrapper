@@ -104,6 +104,68 @@ public final class JavaUtil {
         }
     }
 
+    public static Number getNumberLoadInsValueOrNull(AbstractInsnNode load) {
+        switch (load.getOpcode()) {
+        case Opcodes.ICONST_M1:
+            return Integer.valueOf(-1);
+
+        case Opcodes.ICONST_0:
+            return Integer.valueOf(0);
+
+        case Opcodes.ICONST_1:
+            return Integer.valueOf(1);
+
+        case Opcodes.ICONST_2:
+            return Integer.valueOf(2);
+
+        case Opcodes.ICONST_3:
+            return Integer.valueOf(3);
+
+        case Opcodes.ICONST_4:
+            return Integer.valueOf(4);
+
+        case Opcodes.ICONST_5:
+            return Integer.valueOf(5);
+
+        case Opcodes.LCONST_0:
+            return Long.valueOf(0);
+
+        case Opcodes.LCONST_1:
+            return Long.valueOf(1);
+
+        case Opcodes.FCONST_0:
+            return Float.valueOf(0f);
+
+        case Opcodes.FCONST_1:
+            return Float.valueOf(1f);
+
+        case Opcodes.FCONST_2:
+            return Float.valueOf(2f);
+
+        case Opcodes.DCONST_0:
+            return Double.valueOf(0d);
+
+        case Opcodes.DCONST_1:
+            return Double.valueOf(1d);
+
+        case Opcodes.BIPUSH:
+        case Opcodes.SIPUSH:
+            return Integer.valueOf(((IntInsnNode) load).operand);
+
+        case Opcodes.LDC:
+            final LdcInsnNode ldc = (LdcInsnNode) load;
+
+            if (ldc.cst instanceof Number) {
+                return (Number) ldc.cst;
+            }
+
+        // Fall through
+
+        default:
+            return null;
+        }
+    }
+
     private JavaUtil() {
         // As this is a helper class, there should be no reason to instantiate an instance of it.
     }

@@ -212,65 +212,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     }
 
                     LogWrapper.fine("Patching call to glTexImage2D / glTexSubImage2D at class " + name);
-                    final LabelNode target = new LabelNode();
-                    final LabelNode noOpenGL12 = new LabelNode();
-                    final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
-                    final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
-                    // Check if OpenGL 1.2 is supported
-                    final MethodInsnNode getCapabilities = new MethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/GLContext", "getCapabilities", "()Lorg/lwjgl/opengl/ContextCapabilities;");
-                    final FieldInsnNode getIsOpenGL12 = new FieldInsnNode(Opcodes.GETFIELD, "org/lwjgl/opengl/ContextCapabilities", "OpenGL12", "Z");
-                    final JumpInsnNode skipIfNoOpenGL12 = new JumpInsnNode(Opcodes.IFEQ, noOpenGL12);
-                    // Change texture type from RGBA to BGRA
-                    // Move top two stack values out of the way
-                    final InsnNode dup2_x1 = new InsnNode(Opcodes.DUP2_X1);
-                    final InsnNode pop2 = new InsnNode(Opcodes.POP2);
-                    // Pop the old texture type TODO Validate this is GL11.GL_RGBA
-                    final InsnNode popOld = new InsnNode(Opcodes.POP);
-                    // Replace with GL12.GL_BGRA
-                    final LdcInsnNode loadNew = new LdcInsnNode(GL12.GL_BGRA);
-                    // Shuffle value back into position
-                    final InsnNode dup_x2 = new InsnNode(Opcodes.DUP_X2);
-                    final InsnNode pop = new InsnNode(Opcodes.POP);
-                    // Jump to end
-                    final JumpInsnNode gotoEnd = new JumpInsnNode(Opcodes.GOTO, target);
-                    // Manually change from RGBA to BGRA
-                    final MethodInsnNode bindImageTweaker = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "bindImageTweaker", "(Ljava/nio/ByteBuffer;)Ljava/nio/ByteBuffer;");
-
-                    if (RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable) {
-                        methodNode.instructions.insertBefore(toPatch, getFullscreen);
-                        methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
-                    }
-
-                    if (!assumesOpenGL12) {
-                        // Check if OpenGL 1.2 is supported
-                        methodNode.instructions.insertBefore(toPatch, getCapabilities);
-                        methodNode.instructions.insertBefore(toPatch, getIsOpenGL12);
-                        methodNode.instructions.insertBefore(toPatch, skipIfNoOpenGL12);
-                    }
-
-                    // Change texture type from RGBA to BGRA
-                    // Move top two stack values out of the way
-                    methodNode.instructions.insertBefore(toPatch, dup2_x1);
-                    methodNode.instructions.insertBefore(toPatch, pop2);
-                    // Pop the old texture type TODO Validate this is GL11.GL_RGBA
-                    methodNode.instructions.insertBefore(toPatch, popOld);
-                    // Replace with GL12.GL_BGRA
-                    methodNode.instructions.insertBefore(toPatch, loadNew);
-                    // Shuffle value back into position
-                    methodNode.instructions.insertBefore(toPatch, dup_x2);
-                    methodNode.instructions.insertBefore(toPatch, pop);
-
-                    if (!assumesOpenGL12) {
-                        // Jump to end
-                        methodNode.instructions.insertBefore(toPatch, gotoEnd);
-                        // Manually change from RGBA to BGRA
-                        methodNode.instructions.insertBefore(toPatch, noOpenGL12);
-                        methodNode.instructions.insertBefore(toPatch, bindImageTweaker);
-                    }
-
-                    if ((RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable) || !assumesOpenGL12) {
-                        methodNode.instructions.insertBefore(toPatch, target);
-                    }
+                    patchGlTexImage2DLike(methodNode, toPatch, assumesOpenGL12);
                 }
 
                 // New variable indices
@@ -556,6 +498,68 @@ public final class M1ColorTweakInjector implements IClassTransformer {
             }
         } else {
             LogWrapper.warning("Could not find reload textures method");
+        }
+    }
+
+    private static void patchGlTexImage2DLike(MethodNode methodNode, AbstractInsnNode toPatch, boolean assumesOpenGL12) {
+        final LabelNode target = new LabelNode();
+        final LabelNode noOpenGL12 = new LabelNode();
+        final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
+        final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
+        // Check if OpenGL 1.2 is supported
+        final MethodInsnNode getCapabilities = new MethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/GLContext", "getCapabilities", "()Lorg/lwjgl/opengl/ContextCapabilities;");
+        final FieldInsnNode getIsOpenGL12 = new FieldInsnNode(Opcodes.GETFIELD, "org/lwjgl/opengl/ContextCapabilities", "OpenGL12", "Z");
+        final JumpInsnNode skipIfNoOpenGL12 = new JumpInsnNode(Opcodes.IFEQ, noOpenGL12);
+        // Change texture type from RGBA to BGRA
+        // Move top two stack values out of the way
+        final InsnNode dup2_x1 = new InsnNode(Opcodes.DUP2_X1);
+        final InsnNode pop2 = new InsnNode(Opcodes.POP2);
+        // Pop the old texture type TODO Validate this is GL11.GL_RGBA
+        final InsnNode popOld = new InsnNode(Opcodes.POP);
+        // Replace with GL12.GL_BGRA
+        final LdcInsnNode loadNew = new LdcInsnNode(GL12.GL_BGRA);
+        // Shuffle value back into position
+        final InsnNode dup_x2 = new InsnNode(Opcodes.DUP_X2);
+        final InsnNode pop = new InsnNode(Opcodes.POP);
+        // Jump to end
+        final JumpInsnNode gotoEnd = new JumpInsnNode(Opcodes.GOTO, target);
+        // Manually change from RGBA to BGRA
+        final MethodInsnNode bindImageTweaker = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "bindImageTweaker", "(Ljava/nio/ByteBuffer;)Ljava/nio/ByteBuffer;");
+
+        if (RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable) {
+            methodNode.instructions.insertBefore(toPatch, getFullscreen);
+            methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+        }
+
+        if (!assumesOpenGL12) {
+            // Check if OpenGL 1.2 is supported
+            methodNode.instructions.insertBefore(toPatch, getCapabilities);
+            methodNode.instructions.insertBefore(toPatch, getIsOpenGL12);
+            methodNode.instructions.insertBefore(toPatch, skipIfNoOpenGL12);
+        }
+
+        // Change texture type from RGBA to BGRA
+        // Move top two stack values out of the way
+        methodNode.instructions.insertBefore(toPatch, dup2_x1);
+        methodNode.instructions.insertBefore(toPatch, pop2);
+        // Pop the old texture type TODO Validate this is GL11.GL_RGBA
+        methodNode.instructions.insertBefore(toPatch, popOld);
+        // Replace with GL12.GL_BGRA
+        methodNode.instructions.insertBefore(toPatch, loadNew);
+        // Shuffle value back into position
+        methodNode.instructions.insertBefore(toPatch, dup_x2);
+        methodNode.instructions.insertBefore(toPatch, pop);
+
+        if (!assumesOpenGL12) {
+            // Jump to end
+            methodNode.instructions.insertBefore(toPatch, gotoEnd);
+            // Manually change from RGBA to BGRA
+            methodNode.instructions.insertBefore(toPatch, noOpenGL12);
+            methodNode.instructions.insertBefore(toPatch, bindImageTweaker);
+        }
+
+        if ((RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable) || !assumesOpenGL12) {
+            methodNode.instructions.insertBefore(toPatch, target);
         }
     }
 

@@ -10,6 +10,7 @@ import java.util.ListIterator;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL12;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -86,8 +87,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
             for (final Object methodNodeO : classNode.methods) {
                 final MethodNode methodNode = (MethodNode) methodNodeO;
                 final Collection<MethodInsnNode> foundSetFullscreenCalls = new ArrayList<MethodInsnNode>();
-                final Collection<MethodInsnNode> foundGlTexImage2DCalls = new ArrayList<MethodInsnNode>();
-                final Collection<MethodInsnNode> foundGlTexSubImage2DCalls = new ArrayList<MethodInsnNode>();
+                final Collection<MethodInsnNode> foundGlTexImage2DLikeCalls = new ArrayList<MethodInsnNode>();
                 final Collection<MethodInsnNode> foundFogFloatBufCalls = new ArrayList<MethodInsnNode>();
                 final Collection<MethodInsnNode> foundSwap3Calls = new ArrayList<MethodInsnNode>();
                 final Collection<MethodInsnNode> foundSwap3DoubleCalls = new ArrayList<MethodInsnNode>();
@@ -176,11 +176,11 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                                 }
 
                                 if ("glTexImage2D".equals(methodName) && "(IIIIIIIILjava/nio/ByteBuffer;)V".equals(methodDesc)) {
-                                    foundGlTexImage2DCalls.add(methodInsNode);
+                                    foundGlTexImage2DLikeCalls.add(methodInsNode);
                                 }
 
                                 if ("glTexSubImage2D".equals(methodName) && "(IIIIIIIILjava/nio/ByteBuffer;)V".equals(methodDesc)) {
-                                    foundGlTexSubImage2DCalls.add(methodInsNode);
+                                    foundGlTexImage2DLikeCalls.add(methodInsNode);
                                 }
                             }
                         } else if ((RetroTweakClassWriter.tesClass != null) && ((opcode == Opcodes.INVOKEVIRTUAL) || (opcode == Opcodes.INVOKESPECIAL))) {
@@ -204,16 +204,58 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     methodNode.instructions.remove(toPatch);
                 }
 
-                for (final MethodInsnNode toPatch : foundGlTexImage2DCalls) {
-                    LogWrapper.fine("Patching call to glTexImage2D at class " + name);
-                    final MethodInsnNode methodInsNode = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "bindImageTweaker", "(Ljava/nio/ByteBuffer;)Ljava/nio/ByteBuffer;");
-                    methodNode.instructions.insertBefore(toPatch, methodInsNode);
-                }
+                for (final MethodInsnNode toPatch : foundGlTexImage2DLikeCalls) {
+                    LogWrapper.fine("Patching call to glTexImage2D / glTexSubImage2D at class " + name);
+                    final LabelNode target = new LabelNode();
+                    final LabelNode noOpenGL12 = new LabelNode();
+                    final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
+                    final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
+                    // Check if OpenGL 1.2 is supported
+                    final MethodInsnNode getCapabilities = new MethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/GLContext", "getCapabilities", "()Lorg/lwjgl/opengl/ContextCapabilities;");
+                    final FieldInsnNode getIsOpenGL12 = new FieldInsnNode(Opcodes.GETFIELD, "org/lwjgl/opengl/ContextCapabilities", "OpenGL12", "Z");
+                    final JumpInsnNode skipIfNoOpenGL12 = new JumpInsnNode(Opcodes.IFEQ, noOpenGL12);
+                    // Change texture type from RGBA to BGRA
+                    // Move top two stack values out of the way
+                    final InsnNode dup2_x1 = new InsnNode(Opcodes.DUP2_X1);
+                    final InsnNode pop2 = new InsnNode(Opcodes.POP2);
+                    // Pop the old texture type TODO Validate this is GL11.GL_RGBA
+                    final InsnNode popOld = new InsnNode(Opcodes.POP);
+                    // Replace with GL12.GL_BGRA
+                    final LdcInsnNode loadNew = new LdcInsnNode(GL12.GL_BGRA);
+                    // Shuffle value back into position
+                    final InsnNode dup_x2 = new InsnNode(Opcodes.DUP_X2);
+                    final InsnNode pop = new InsnNode(Opcodes.POP);
+                    // Jump to end
+                    final JumpInsnNode gotoEnd = new JumpInsnNode(Opcodes.GOTO, target);
+                    // Manually change from RGBA to BGRA
+                    final MethodInsnNode bindImageTweaker = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "bindImageTweaker", "(Ljava/nio/ByteBuffer;)Ljava/nio/ByteBuffer;");
 
-                for (final MethodInsnNode toPatch : foundGlTexSubImage2DCalls) {
-                    LogWrapper.fine("Patching call to glTexSubImage2D at class " + name);
-                    final MethodInsnNode methodInsNode = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "bindImageTweaker", "(Ljava/nio/ByteBuffer;)Ljava/nio/ByteBuffer;");
-                    methodNode.instructions.insertBefore(toPatch, methodInsNode);
+                    if (RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable) {
+                        methodNode.instructions.insertBefore(toPatch, getFullscreen);
+                        methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+                    }
+
+                    // Check if OpenGL 1.2 is supported
+                    methodNode.instructions.insertBefore(toPatch, getCapabilities);
+                    methodNode.instructions.insertBefore(toPatch, getIsOpenGL12);
+                    methodNode.instructions.insertBefore(toPatch, skipIfNoOpenGL12);
+                    // Change texture type from RGBA to BGRA
+                    // Move top two stack values out of the way
+                    methodNode.instructions.insertBefore(toPatch, dup2_x1);
+                    methodNode.instructions.insertBefore(toPatch, pop2);
+                    // Pop the old texture type TODO Validate this is GL11.GL_RGBA
+                    methodNode.instructions.insertBefore(toPatch, popOld);
+                    // Replace with GL12.GL_BGRA
+                    methodNode.instructions.insertBefore(toPatch, loadNew);
+                    // Shuffle value back into position
+                    methodNode.instructions.insertBefore(toPatch, dup_x2);
+                    methodNode.instructions.insertBefore(toPatch, pop);
+                    // Jump to end
+                    methodNode.instructions.insertBefore(toPatch, gotoEnd);
+                    // Manually change from RGBA to BGRA
+                    methodNode.instructions.insertBefore(toPatch, noOpenGL12);
+                    methodNode.instructions.insertBefore(toPatch, bindImageTweaker);
+                    methodNode.instructions.insertBefore(toPatch, target);
                 }
 
                 // New variable indices

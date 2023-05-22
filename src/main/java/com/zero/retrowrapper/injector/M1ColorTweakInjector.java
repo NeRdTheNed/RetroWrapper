@@ -212,7 +212,27 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                     }
 
                     LogWrapper.fine("Patching call to glTexImage2D / glTexSubImage2D at class " + name);
-                    patchGlTexImage2DLike(methodNode, toPatch, assumesOpenGL12);
+                    final AbstractInsnNode p1 = toPatch.getPrevious();
+                    final AbstractInsnNode p2 = p1.getPrevious();
+                    final AbstractInsnNode p3 = p2.getPrevious();
+                    final AbstractInsnNode p4 = p3.getPrevious();
+                    boolean isField = false;
+
+                    if (assumesOpenGL12 && JavaUtil.areAllOpcodesLoadIns(p3, p4) && (p1.getOpcode() == Opcodes.GETFIELD)) {
+                        final FieldInsnNode fieldNode = (FieldInsnNode) p1;
+
+                        if ((p2.getOpcode() == Opcodes.ALOAD) && "Ljava/nio/ByteBuffer;".equals(fieldNode.desc)) {
+                            isField = true;
+                        }
+                    }
+
+                    if (isField) {
+                        patchConstVal(methodNode, p4, GL12.GL_BGRA);
+                    } else if (assumesOpenGL12 && JavaUtil.areAllOpcodesLoadIns(p1, p2, p3)) {
+                        patchConstVal(methodNode, p3, GL12.GL_BGRA);
+                    } else {
+                        patchGlTexImage2DLike(methodNode, toPatch, assumesOpenGL12);
+                    }
                 }
 
                 // New variable indices
@@ -499,6 +519,33 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         } else {
             LogWrapper.warning("Could not find reload textures method");
         }
+    }
+
+    private static void patchConstVal(MethodNode methodNode, AbstractInsnNode toPatch, int constant) {
+        final LabelNode target = new LabelNode();
+        final LabelNode postTarget = new LabelNode();
+        final FieldInsnNode getFullscreen = new FieldInsnNode(Opcodes.GETSTATIC, "com/zero/retrowrapper/injector/M1ColorTweakInjector", "isMinecraftFullscreen", "Z");
+        final JumpInsnNode skipIfFullscreen = new JumpInsnNode(Opcodes.IFNE, target);
+        // Load constant
+        final LdcInsnNode loadNew = new LdcInsnNode(constant);
+        // Skip ahead
+        final JumpInsnNode gotoPost = new JumpInsnNode(Opcodes.GOTO, postTarget);
+
+        if (RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable) {
+            methodNode.instructions.insertBefore(toPatch, getFullscreen);
+            methodNode.instructions.insertBefore(toPatch, skipIfFullscreen);
+        }
+
+        // Load constant
+        methodNode.instructions.insertBefore(toPatch, loadNew);
+        // Skip ahead
+        methodNode.instructions.insertBefore(toPatch, gotoPost);
+
+        if (RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable) {
+            methodNode.instructions.insertBefore(toPatch, target);
+        }
+
+        methodNode.instructions.insertBefore(toPatch.getNext(), postTarget);
     }
 
     private static void patchGlTexImage2DLike(MethodNode methodNode, AbstractInsnNode toPatch, boolean assumesOpenGL12) {

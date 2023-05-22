@@ -268,7 +268,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                         methodNode.instructions.insertBefore(toPatch, bindImageTweaker);
                     }
 
-                    if ((RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable) && !assumesOpenGL12) {
+                    if ((RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable) || !assumesOpenGL12) {
                         methodNode.instructions.insertBefore(toPatch, target);
                     }
                 }

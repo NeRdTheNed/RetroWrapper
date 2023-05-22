@@ -491,33 +491,35 @@ public final class M1ColorTweakInjector implements IClassTransformer {
         Display.setFullscreen(fullscreen);
         isMinecraftFullscreen = (RetroTweaker.m1PatchMode == RetroTweaker.M1PatchMode.EnableWindowedInverted) ^ fullscreen;
 
-        if (((reloadTexturesInstance == null) || (reloadTexturesMethod == null)) && (reloadTexturesMethodName != null) && (reloadTexturesClassName != null)) {
-            try {
-                final Class<?> classWithReloadTextureMethod = RetroTweakInjectorTarget.getaClass(reloadTexturesClassName);
-                reloadTexturesMethod = classWithReloadTextureMethod.getMethod(reloadTexturesMethodName);
-                RetroTweakInjectorTarget.minecraftField.setAccessible(true);
-                final Object minecraft = RetroTweakInjectorTarget.minecraftField.get(RetroTweakInjectorTarget.applet);
-                final Class<?> mcClass = JavaUtil.getMostSuper(minecraft.getClass());
+        if (RetroTweaker.m1PatchMode != RetroTweaker.M1PatchMode.ForceEnable) {
+            if (((reloadTexturesInstance == null) || (reloadTexturesMethod == null)) && (reloadTexturesMethodName != null) && (reloadTexturesClassName != null)) {
+                try {
+                    final Class<?> classWithReloadTextureMethod = RetroTweakInjectorTarget.getaClass(reloadTexturesClassName);
+                    reloadTexturesMethod = classWithReloadTextureMethod.getMethod(reloadTexturesMethodName);
+                    RetroTweakInjectorTarget.minecraftField.setAccessible(true);
+                    final Object minecraft = RetroTweakInjectorTarget.minecraftField.get(RetroTweakInjectorTarget.applet);
+                    final Class<?> mcClass = JavaUtil.getMostSuper(minecraft.getClass());
 
-                for (final Field field : mcClass.getDeclaredFields()) {
-                    if (classWithReloadTextureMethod.isAssignableFrom(field.getType()) || field.getType().equals(classWithReloadTextureMethod)) {
-                        reloadTexturesInstance = field.get(minecraft);
-                        break;
+                    for (final Field field : mcClass.getDeclaredFields()) {
+                        if (classWithReloadTextureMethod.isAssignableFrom(field.getType()) || field.getType().equals(classWithReloadTextureMethod)) {
+                            reloadTexturesInstance = field.get(minecraft);
+                            break;
+                        }
                     }
+                } catch (final Exception e) {
+                    LogWrapper.warning("Exception while trying to get reload textures method: " + ExceptionUtils.getStackTrace(e));
                 }
-            } catch (final Exception e) {
-                LogWrapper.warning("Exception while trying to get reload textures method: " + ExceptionUtils.getStackTrace(e));
             }
-        }
 
-        if ((reloadTexturesInstance != null) && (reloadTexturesMethod != null)) {
-            try {
-                reloadTexturesMethod.invoke(reloadTexturesInstance);
-            } catch (final Exception e) {
-                LogWrapper.warning("Exception while trying to invoke reload textures method: " + ExceptionUtils.getStackTrace(e));
+            if ((reloadTexturesInstance != null) && (reloadTexturesMethod != null)) {
+                try {
+                    reloadTexturesMethod.invoke(reloadTexturesInstance);
+                } catch (final Exception e) {
+                    LogWrapper.warning("Exception while trying to invoke reload textures method: " + ExceptionUtils.getStackTrace(e));
+                }
+            } else {
+                LogWrapper.warning("Could not find reload textures method");
             }
-        } else {
-            LogWrapper.warning("Could not find reload textures method");
         }
     }
 

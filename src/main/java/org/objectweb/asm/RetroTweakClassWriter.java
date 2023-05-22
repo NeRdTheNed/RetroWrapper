@@ -99,6 +99,10 @@ public final class RetroTweakClassWriter extends ClassWriter {
                     LogWrapper.info(foundUrlTextString + constant);
                     transformed = "https://web.archive.org/web/20110401175108/http://www.minecraft.net/store/loot.jsp";
                     LogWrapper.info(replacedWithTextString + transformed);
+                } else if ("http://snoop.minecraft.net/".equals(constant)) {
+                    // Ignore the snooper URL
+                    transformed = constant;
+                    LogWrapper.warning("No handler for " + transformed + ", did not replace.");
                 } else {
                     final boolean isNet = constant.contains(".net");
                     final boolean isCom = constant.contains(".com");

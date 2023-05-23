@@ -156,9 +156,9 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                 return true;
             }
 
-            LogWrapper.warning("Could not get skin for " + username);
+            LogWrapper.warning("Could not get " + (isCape ? "cape" : "skin") + " for " + username);
         } catch (final Exception e) {
-            LogWrapper.warning("Exception thrown while trying to get skin: " + ExceptionUtils.getStackTrace(e));
+            LogWrapper.warning("Exception thrown while trying to get " + (isCape ? "cape" : "skin") + ": " + ExceptionUtils.getStackTrace(e));
         }
 
         return false;
@@ -177,7 +177,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                 fos = new FileOutputStream(imageCache);
                 fos.write(skinFileBytes);
             } catch (final Exception e) {
-                LogWrapper.warning("Could not write skin to file: " + ExceptionUtils.getStackTrace(e));
+                LogWrapper.warning("Could not write " + (cape ? "cape" : "skin") + " to file: " + ExceptionUtils.getStackTrace(e));
             } finally {
                 IOUtils.closeQuietly(fos);
             }
@@ -284,7 +284,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
 
                 LogWrapper.warning("No " + (cape ? "cape" : "skin") + " found for username " + username);
             } catch (final Exception e) {
-                LogWrapper.warning("Issue downloading skin: " + ExceptionUtils.getStackTrace(e));
+                LogWrapper.warning("Issue downloading " + (cape ? "cape" : "skin") + ": " + ExceptionUtils.getStackTrace(e));
             } finally {
                 IOUtils.closeQuietly(profileStream);
                 IOUtils.closeQuietly(profileStreamReader);
@@ -295,7 +295,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                 }
             }
         } else {
-            LogWrapper.warning("No UUID found for username " + username + ", could not download skin.");
+            LogWrapper.warning("No UUID found for username " + username + ", could not download " + (cape ? "cape" : "skin") + ".");
         }
 
         return null;
@@ -313,9 +313,9 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                     return osImg.toByteArray();
                 }
 
-                LogWrapper.warning("Could not use local skin?");
+                LogWrapper.warning("Could not use local skin or cape?");
             } catch (final Exception e) {
-                LogWrapper.warning("Issue using local skin: " + ExceptionUtils.getStackTrace(e));
+                LogWrapper.warning("Issue using local skin or cape: " + ExceptionUtils.getStackTrace(e));
             }
         }
 

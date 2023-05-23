@@ -77,10 +77,12 @@ public final class RetroTweakClassWriter extends ClassWriter {
 
                 if ((constant.contains("random.splash") || constant.contains("char.png")) && (mobClass == null)) {
                     mobClass = className;
+                    LogWrapper.fine("Probably the mob class: " + mobClass);
                 }
 
                 if (constant.contains("Not tesselating!") || constant.contains("Already tesselating!")) {
                     tesClass = className;
+                    LogWrapper.fine("Probably the tessellator class: " + tesClass);
                 }
 
                 final String transformed;

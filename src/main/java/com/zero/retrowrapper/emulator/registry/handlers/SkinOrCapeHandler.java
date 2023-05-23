@@ -1,6 +1,7 @@
 package com.zero.retrowrapper.emulator.registry.handlers;
 
-import java.awt.Image;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -142,13 +143,14 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                 if ((imgRaw.getWidth() == SKIN_WIDTH) && (imgRaw.getHeight() == SKIN_HEIGHT)) {
                     bytes = imageBytes;
                 } else {
-                    final Image imgRawCorrectRes;
+                    final BufferedImage imgRawCorrectRes;
 
                     if (imgRaw.getWidth() == SKIN_WIDTH) {
                         imgRawCorrectRes = imgRaw;
                     } else {
                         // Scale any non-standard sized images (e.g. ClassiCube skins) to have a width of 64
-                        imgRawCorrectRes = imgRaw.getScaledInstance(SKIN_WIDTH, -1, Image.SCALE_SMOOTH);
+                        final double scale = (double) SKIN_WIDTH / (double) imgRaw.getWidth();
+                        imgRawCorrectRes = new AffineTransformOp(AffineTransform.getScaleInstance(scale, scale), AffineTransformOp.TYPE_BICUBIC).filter(imgRaw, new BufferedImage(SKIN_WIDTH, (int)(imgRaw.getHeight() * scale), BufferedImage.TYPE_INT_ARGB));
                     }
 
                     final BufferedImage imgFixed = new BufferedImage(SKIN_WIDTH, SKIN_HEIGHT, BufferedImage.TYPE_INT_ARGB);

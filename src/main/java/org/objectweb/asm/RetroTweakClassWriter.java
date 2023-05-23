@@ -2,6 +2,7 @@ package org.objectweb.asm;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.regex.Pattern;
 
 import com.zero.retrowrapper.emulator.registry.EmulatorRegistry;
@@ -40,6 +41,21 @@ public final class RetroTweakClassWriter extends ClassWriter {
     public RetroTweakClassWriter(int a, String className) {
         super(a);
         this.className = className;
+    }
+
+    private static final HashSet<String> IGNORED_STRINGS;
+
+    static {
+        IGNORED_STRINGS = new HashSet<String>();
+        IGNORED_STRINGS.add("http://snoop.minecraft.net/");
+        IGNORED_STRINGS.add("Failed to authenticate: Can't connect to minecraft.net");
+        IGNORED_STRINGS.add("http://assets.minecraft.net/1_6_has_been_released.flag");
+        IGNORED_STRINGS.add("https://mcoapi.minecraft.net/");
+        IGNORED_STRINGS.add("http://www.minecraft.net/prepurchase.jsp?source=pcgamerdemo");
+    }
+
+    private static boolean isStringIgnored(String str) {
+        return IGNORED_STRINGS.contains(str);
     }
 
     @Override
@@ -101,8 +117,8 @@ public final class RetroTweakClassWriter extends ClassWriter {
                     LogWrapper.info(foundUrlTextString + constant);
                     transformed = "https://web.archive.org/web/20110401175108/http://www.minecraft.net/store/loot.jsp";
                     LogWrapper.info(replacedWithTextString + transformed);
-                } else if ("http://snoop.minecraft.net/".equals(constant)) {
-                    // Ignore the snooper URL
+                } else if (isStringIgnored(constant)) {
+                    LogWrapper.info(foundUrlTextString + constant);
                     transformed = constant;
                     LogWrapper.warning("No handler for " + transformed + ", did not replace.");
                 } else {

@@ -153,8 +153,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                         imgRawCorrectRes = new AffineTransformOp(AffineTransform.getScaleInstance(scale, scale), AffineTransformOp.TYPE_BICUBIC).filter(imgRaw, new BufferedImage(SKIN_WIDTH, (int)(imgRaw.getHeight() * scale), BufferedImage.TYPE_INT_ARGB));
                     }
 
-                    final BufferedImage imgFixed = new BufferedImage(SKIN_WIDTH, SKIN_HEIGHT, BufferedImage.TYPE_INT_ARGB);
-                    imgFixed.getGraphics().drawImage(imgRawCorrectRes, 0, 0, null);
+                    final BufferedImage imgFixed = imgRaw.getSubimage(0, 0, SKIN_WIDTH, SKIN_HEIGHT);
                     final ByteArrayOutputStream osImg = new ByteArrayOutputStream();
                     ImageIO.write(imgFixed, "png", osImg);
                     osImg.flush();

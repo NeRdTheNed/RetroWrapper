@@ -269,13 +269,17 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
 
                 final JsonObject textures1 = Json.parse(new String(Base64.decodeBase64(base64))).asObject();
                 final JsonObject textures = textures1.get("textures").asObject();
-                final JsonObject imageLinkJSON = textures.get(cape ? "CAPE" : "SKIN").asObject();
+                final JsonValue capeOrSkin = textures.get(cape ? "CAPE" : "SKIN");
 
-                if (imageLinkJSON != null) {
-                    final String imageURL = imageLinkJSON.get("url").asString();
-                    LogWrapper.fine(imageURL);
-                    imageStream = new URL(imageURL).openStream();
-                    return IOUtils.toByteArray(imageStream);
+                if (capeOrSkin != null) {
+                    final JsonObject imageLinkJSON = capeOrSkin.asObject();
+
+                    if (imageLinkJSON != null) {
+                        final String imageURL = imageLinkJSON.get("url").asString();
+                        LogWrapper.fine(imageURL);
+                        imageStream = new URL(imageURL).openStream();
+                        return IOUtils.toByteArray(imageStream);
+                    }
                 }
 
                 LogWrapper.warning("No " + (cape ? "cape" : "skin") + " found for username " + username);

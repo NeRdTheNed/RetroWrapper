@@ -42,8 +42,83 @@ public final class RetroTweakClassWriter extends ClassWriter {
         this.className = className;
     }
 
+    private static final String[] minecraftScreen = {
+        " *   * * *   * *** *** *** *** *** ***",
+        " ** ** * **  * *   *   * * * * *    * ",
+        " * * * * * * * **  *   **  *** **   * ",
+        " *   * * *  ** *   *   * * * * *    * ",
+        " *   * * *   * *** *** * * * * *    * "
+    };
+    private static final String[] minecraftScreenBroken = {
+        " *   * * *   * *** *** *** *** *** ***",
+        " ** ** * **  * *   *   * * * * *    * ",
+        " * * * * * * * **  *   **  *** **   * ",
+        " *   * * *  ** *   *   * * * * *    * ",
+        " *     * *   * *** *** * * * * *    * "
+    };
+    private static final String[] minecraftScreen24h = {
+        "  *  *  *   *** *   *   **** *  * *   ",
+        " **  * *     *  **  *      * *  * *   ",
+        "  *  **      *  * * *   **** **** *** ",
+        "  *  * *     *  *  **   *       * *  *",
+        " *** *  *   *** *   *   ****    * *  *"
+    };
+    private static final String[][] minecraftScreenInd = { minecraftScreen, minecraftScreenBroken, minecraftScreen24h };
+
+    private static final String[] retroWrapper = {
+        " *** *** *** *** *** *   * *** *** *** *** *** ***",
+        " * * *    *  * * * * *   * * * * * * * * * *   * *",
+        " **  **   *  **  * * * * * **  *** *** *** **  ** ",
+        " * * *    *  * * * * ** ** * * * * *   *   *   * *",
+        " * * ***  *  * * *** *   * * * * * *   *   *** * *"
+    };
+
+    private static int doesCollectionContainFullLogo(Collection<Item> items) {
+        final int[] indMatches = new int[minecraftScreenInd.length];
+
+        for (final Item item : items) {
+            if (item.b == UTF8) {
+                for (int i = 0; i < minecraftScreenInd.length; i++) {
+                    for (final String str : minecraftScreenInd[i]) {
+                        if (str.equals(item.g)) {
+                            indMatches[i]++;
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < indMatches.length; i++) {
+            if (indMatches[i] == minecraftScreenInd[i].length) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private static int getLogoLineIndex(int splash, String line) {
+        if ((splash >= 0) && (splash < minecraftScreenInd.length)) {
+            for (int i = 0; i < minecraftScreenInd[splash].length; i++) {
+                final String str = minecraftScreenInd[splash][i];
+
+                if (str.equals(line)) {
+                    return i;
+                }
+            }
+        }
+
+        return -1;
+    }
+
     @Override
     public byte[] toByteArray() {
+        boolean replaceLogo = false;
+
+        if (System.getProperties().getProperty("retrowrapper.replaceLogo") != null) {
+            replaceLogo = Boolean.parseBoolean(System.getProperties().getProperty("retrowrapper.replaceLogo"));
+        }
+
         final ClassWriter writer = new ClassWriter(0);
         final byte[] bytes = super.toByteArray();
         final Collection<Item> items = new ArrayList<Item>();
@@ -70,6 +145,8 @@ public final class RetroTweakClassWriter extends ClassWriter {
             writer.e[hash] = item;
         }
 
+        final int logoIndexMatch = replaceLogo ? doesCollectionContainFullLogo(items) : -1;
+
         for (final Item item : items) {
             switch (item.b) {
             case UTF8:
@@ -85,9 +162,12 @@ public final class RetroTweakClassWriter extends ClassWriter {
                     LogWrapper.fine("Probably the tessellator class: " + tesClass);
                 }
 
+                final int tryFindSplashInd = logoIndexMatch >= 0 ? getLogoLineIndex(logoIndexMatch, item.g) : -1;
                 final String transformed;
 
-                if ("minecraft.net".equals(constant)) {
+                if (tryFindSplashInd >= 0) {
+                    transformed = retroWrapper[tryFindSplashInd];
+                } else if ("minecraft.net".equals(constant)) {
                     LogWrapper.info(foundUrlTextString + constant);
                     transformed = "127.0.0.1";
                     LogWrapper.info(replacedWithTextString + transformed);

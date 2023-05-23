@@ -137,21 +137,28 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
 
             if (imageBytes != null) {
                 final BufferedImage imgRaw = ImageIO.read(new ByteArrayInputStream(imageBytes));
-                final Image imgRawCorrectRes;
+                final byte[] bytes;
 
-                if (imgRaw.getWidth() == SKIN_WIDTH) {
-                    imgRawCorrectRes = imgRaw;
+                if ((imgRaw.getWidth() == SKIN_WIDTH) && (imgRaw.getHeight() == SKIN_HEIGHT)) {
+                    bytes = imageBytes;
                 } else {
-                    // Scale any non-standard sized images (e.g. ClassiCube skins) to have a width of 64
-                    imgRawCorrectRes = imgRaw.getScaledInstance(SKIN_WIDTH, -1, Image.SCALE_SMOOTH);
+                    final Image imgRawCorrectRes;
+
+                    if (imgRaw.getWidth() == SKIN_WIDTH) {
+                        imgRawCorrectRes = imgRaw;
+                    } else {
+                        // Scale any non-standard sized images (e.g. ClassiCube skins) to have a width of 64
+                        imgRawCorrectRes = imgRaw.getScaledInstance(SKIN_WIDTH, -1, Image.SCALE_SMOOTH);
+                    }
+
+                    final BufferedImage imgFixed = new BufferedImage(SKIN_WIDTH, SKIN_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+                    imgFixed.getGraphics().drawImage(imgRawCorrectRes, 0, 0, null);
+                    final ByteArrayOutputStream osImg = new ByteArrayOutputStream();
+                    ImageIO.write(imgFixed, "png", osImg);
+                    osImg.flush();
+                    bytes = osImg.toByteArray();
                 }
 
-                final BufferedImage imgFixed = new BufferedImage(SKIN_WIDTH, SKIN_HEIGHT, BufferedImage.TYPE_INT_ARGB);
-                imgFixed.getGraphics().drawImage(imgRawCorrectRes, 0, 0, null);
-                final ByteArrayOutputStream osImg = new ByteArrayOutputStream();
-                ImageIO.write(imgFixed, "png", osImg);
-                osImg.flush();
-                final byte[] bytes = osImg.toByteArray();
                 imagesCache.put(cacheName, bytes);
                 return true;
             }

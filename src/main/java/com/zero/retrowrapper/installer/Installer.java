@@ -607,6 +607,10 @@ public final class Installer {
                     modifiedLaunchArgs = assetsDirPattern.matcher(modifiedLaunchArgs).replaceAll(Matcher.quoteReplacement("--assetsDir ${game_assets} --tweakClass com.zero.retrowrapper.RetroTweaker"));
                 }
 
+                if (!modifiedLaunchArgs.contains("--version ")) {
+                    modifiedLaunchArgs += " --version ${version_name}";
+                }
+
                 versionJson.set("minecraftArguments", modifiedLaunchArgs);
                 final File wrapDir = new File(versions, versionWrapped + File.separator);
                 wrapDir.mkdirs();

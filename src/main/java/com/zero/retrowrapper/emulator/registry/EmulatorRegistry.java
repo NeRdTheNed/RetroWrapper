@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.zero.retrowrapper.RetroTweaker;
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.emulator.registry.handlers.JoinServerHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.ListmapsHandler;
@@ -14,6 +15,7 @@ import com.zero.retrowrapper.emulator.registry.handlers.SaveHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.SingleResponseHandler;
 import com.zero.retrowrapper.emulator.registry.handlers.SkinOrCapeHandler;
 import com.zero.retrowrapper.util.FileUtil;
+import com.zero.retrowrapper.util.MetadataUtil;
 
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LogWrapper;
@@ -82,8 +84,16 @@ public final class EmulatorRegistry {
         handlers.add(new SaveHandler());
         handlers.add(new LoadHandler());
         handlers.add(new ListmapsHandler());
-        handlers.add(new ResourcesHandler("/resources/", ResourcesHandler.ResourcesFormat.CLASSIC, "legacy", LEGACY_JSON, ResourceProviderMode.MOJANG));
-        handlers.add(new ResourcesHandler("/MinecraftResources/", ResourcesHandler.ResourcesFormat.AWS, "pre-1.6", PRE_1_6_JSON, ResourceProviderMode.MOJANG));
+        final String betaCraftIndex = MetadataUtil.getBetaCraftSoundIndexOrNull(RetroTweaker.profile);
+
+        if (betaCraftIndex != null) {
+            handlers.add(new ResourcesHandler("/resources/", ResourcesHandler.ResourcesFormat.CLASSIC, betaCraftIndex, "http://files.betacraft.uk/launcher/v2/assets/indexes/" + betaCraftIndex + ".json", ResourceProviderMode.BETACRAFT));
+            handlers.add(new ResourcesHandler("/MinecraftResources/", ResourcesHandler.ResourcesFormat.AWS, betaCraftIndex, "http://files.betacraft.uk/launcher/v2/assets/indexes/" + betaCraftIndex + ".json", ResourceProviderMode.BETACRAFT));
+        } else {
+            handlers.add(new ResourcesHandler("/resources/", ResourcesHandler.ResourcesFormat.CLASSIC, "legacy", LEGACY_JSON, ResourceProviderMode.MOJANG));
+            handlers.add(new ResourcesHandler("/MinecraftResources/", ResourcesHandler.ResourcesFormat.AWS, "pre-1.6", PRE_1_6_JSON, ResourceProviderMode.MOJANG));
+        }
+
         handlers.add(new SkinOrCapeHandler("/skin/", false));
         handlers.add(new SkinOrCapeHandler("/MinecraftSkins/", false));
         handlers.add(new SkinOrCapeHandler("/cloak/get.jsp?user=", true));

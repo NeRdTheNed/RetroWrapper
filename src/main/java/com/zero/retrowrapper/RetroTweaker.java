@@ -24,9 +24,19 @@ public final class RetroTweaker implements ITweaker {
 
     public static M1PatchMode m1PatchMode = M1PatchMode.OnlyM1MacOS;
 
+    public static String profile;
     private List<String> args;
 
     public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {
+        if (profile != null) {
+            if (RetroTweaker.profile != null) {
+                LogWrapper.warning("Profile changed? Was " + RetroTweaker.profile);
+            }
+
+            RetroTweaker.profile = profile.replace("-wrapped", "").replace("-launcher", "");
+            LogWrapper.fine("Setting profile to " + RetroTweaker.profile);
+        }
+
         this.args = args;
     }
 

@@ -68,28 +68,32 @@ public final class MetadataUtil {
         }
     }
 
-    public static JsonObject[] getLWJGLLibraries(String jsonFile) {
-        JsonObject[] lwjglLibraries;
-        final List<JsonObject> tempLwjglLibs = new ArrayList<JsonObject>();
-        InputStream lwjglLibsStream = null;
+    private static JsonObject[] getJsonArrayFromFile(String jsonFile, String arrayName) {
+        JsonObject[] jsonArray;
+        final List<JsonObject> tempJsonArrayList = new ArrayList<JsonObject>();
+        InputStream jsonStream = null;
 
         try {
-            lwjglLibsStream = ClassLoader.getSystemResourceAsStream(jsonFile);
-            final JsonArray lwjgl = Json.parse(IOUtils.toString(lwjglLibsStream)).asObject().get("libraries").asArray();
+            jsonStream = ClassLoader.getSystemResourceAsStream(jsonFile);
+            final JsonArray gotJsonArray = Json.parse(IOUtils.toString(jsonStream)).asObject().get(arrayName).asArray();
 
-            for (final JsonValue jsonValue : lwjgl) {
-                final JsonObject library = jsonValue.asObject();
-                tempLwjglLibs.add(library);
+            for (final JsonValue jsonValue : gotJsonArray) {
+                final JsonObject object = jsonValue.asObject();
+                tempJsonArrayList.add(object);
             }
 
-            lwjglLibraries = tempLwjglLibs.toArray(new JsonObject[0]);
+            jsonArray = tempJsonArrayList.toArray(new JsonObject[0]);
         } catch (final Exception e) {
-            lwjglLibraries = new JsonObject[0];
+            jsonArray = new JsonObject[0];
         } finally {
-            IOUtils.closeQuietly(lwjglLibsStream);
+            IOUtils.closeQuietly(jsonStream);
         }
 
-        return lwjglLibraries;
+        return jsonArray;
+    }
+
+    public static JsonObject[] getLWJGLLibraries(String jsonFile) {
+        return getJsonArrayFromFile(jsonFile, "libraries");
     }
 
     public static String[] getLibraryNames(JsonObject[] libraries) {
@@ -246,6 +250,26 @@ public final class MetadataUtil {
         }
 
         return artifact;
+    }
+
+    public static String getBetaCraftSoundIndexOrNull(String version) {
+        if (version == null) {
+            return null;
+        }
+
+        final JsonObject[] jsonVersions = getJsonArrayFromFile("com/zero/retrowrapper/betacraft/index-map.json", "items");
+
+        for (final JsonObject jsonVersion : jsonVersions) {
+            if (jsonVersion.get("name").asString().equals(version)) {
+                final String index = jsonVersion.get("index").asString();
+
+                if (!"empty".equals(index)) {
+                    return index;
+                }
+            }
+        }
+
+        return null;
     }
 
     private MetadataUtil() {

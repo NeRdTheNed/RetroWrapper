@@ -33,6 +33,17 @@ public final class ResourcesHandler extends EmulatorHandler {
         AWS
     }
 
+    public enum ResourceProviderMode {
+        MOJANG("launcher"),
+        BETACRAFT("betacraft");
+
+        public final String dir;
+
+        ResourceProviderMode(String dir) {
+            this.dir = dir;
+        }
+    }
+
     private static final Map<String, String> CLASSIC_ALIAS_MAP;
 
     private static final int smallestSize = 16;
@@ -41,6 +52,7 @@ public final class ResourcesHandler extends EmulatorHandler {
     private final ConcurrentInitializer<JsonObject> jsonObjects;
     private final String indexName;
     private final ResourcesFormat resourcesFormat;
+    private final ResourceProviderMode resourceProviderMode;
 
     private final Pattern resourcesPattern;
 
@@ -50,11 +62,12 @@ public final class ResourcesHandler extends EmulatorHandler {
         CLASSIC_ALIAS_MAP.put("sound/random/wood click.ogg", "sound/random/wood_click.ogg");
     }
 
-    public ResourcesHandler(String handle, ResourcesFormat resourcesFormat, String indexName, String indexURL) {
+    public ResourcesHandler(String handle, ResourcesFormat resourcesFormat, String indexName, String indexURL, ResourceProviderMode resourceProviderMode) {
         super(handle);
         this.resourcesFormat = resourcesFormat;
+        this.resourceProviderMode = resourceProviderMode;
         this.indexName = indexName;
-        jsonObjects = new LazyJsonResource(indexName, indexURL);
+        jsonObjects = new LazyJsonResource(indexName, resourceProviderMode.dir, indexURL);
         resourcesPattern = Pattern.compile(handle, Pattern.LITERAL);
     }
 
@@ -113,7 +126,7 @@ public final class ResourcesHandler extends EmulatorHandler {
         }
 
         RetroEmulator.getInstance().getCacheDirectory().mkdir();
-        final File resourceCache = new File(RetroEmulator.getInstance().getCacheDirectory() + File.separator + indexName, res);
+        final File resourceCache = new File(RetroEmulator.getInstance().getCacheDirectory() + File.separator + "indexes" + File.separator + resourceProviderMode.dir + File.separator + indexName, res);
 
         if (resourceCache.exists()) {
             FileInputStream fis = null;
@@ -161,7 +174,20 @@ public final class ResourcesHandler extends EmulatorHandler {
                 LogWrapper.info("No local launcher object for " + res);
             }
 
-            final URL toDownload = new URL("http://resources.download.minecraft.net/" + hash.substring(0, 2) + "/" + hash);
+            final URL toDownload;
+
+            if (resourceProviderMode == ResourceProviderMode.BETACRAFT) {
+                final JsonValue customUrl = getRequest.asObject().get("custom_url");
+
+                if (customUrl != null) {
+                    toDownload = new URL(customUrl.asString());
+                } else {
+                    toDownload = new URL("http://resources.download.minecraft.net/" + hash.substring(0, 2) + "/" + hash);
+                }
+            } else {
+                toDownload = new URL("http://resources.download.minecraft.net/" + hash.substring(0, 2) + "/" + hash);
+            }
+
             is = toDownload.openStream();
             final byte[] resourceBytes = IOUtils.toByteArray(is);
 

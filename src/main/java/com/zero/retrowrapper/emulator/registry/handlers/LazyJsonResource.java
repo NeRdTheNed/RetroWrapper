@@ -25,21 +25,23 @@ import net.minecraft.launchwrapper.LogWrapper;
 
 class LazyJsonResource extends LazyInitializer<JsonObject> {
     private final String indexName;
+    private final String indexDir;
     private final String indexURL;
 
-    LazyJsonResource(final String indexName, final String indexURL) {
+    LazyJsonResource(final String indexName, final String indexDir, final String indexURL) {
         this.indexName = indexName;
+        this.indexDir = indexDir;
         this.indexURL = indexURL;
     }
 
     @Override
     protected JsonObject initialize() throws ConcurrentException {
-        final JsonObject tempObjects = downloadSoundData(indexName, indexURL);
+        final JsonObject tempObjects = downloadSoundData(indexName, indexDir, indexURL);
         return tempObjects != null ? tempObjects : Json.object();
     }
 
-    private static JsonObject downloadSoundData(String indexName, String indexURL) {
-        final File jsonCached = new File(RetroEmulator.getInstance().getCacheDirectory() + File.separator + indexName, indexName + ".json");
+    private static JsonObject downloadSoundData(String indexName, String indexDir, String indexURL) {
+        final File jsonCached = new File(RetroEmulator.getInstance().getCacheDirectory() + File.separator + "indexes" + File.separator + indexDir + File.separator + indexName, indexName + ".json");
         final File localLegacyJson = FileUtil.tryFindFirstFile(
                                          jsonCached,
                                          new File(Launch.minecraftHome + File.separator + "assets" + File.separator + "indexes" + File.separator + indexName + ".json"),

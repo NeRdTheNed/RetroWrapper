@@ -154,6 +154,9 @@ dependencies {
     implementation "com.eclipsesource.minimal-json:minimal-json:${project.minimalJsonVersion}"
 }
 
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
 processResources {
     inputs.property 'version', project.version // Redo this task when version value changes.
     inputs.property 'versionWithMetadata', versionWithMetadata
@@ -161,6 +164,15 @@ processResources {
     filesMatching('com/zero/retrowrapper/retrowrapperVersion.txt') {
         // replace build variables
         expand 'version': versionWithMetadata, 'tag': gitTag
+    }
+
+    // Minify .json files in built .jar
+    doLast {
+        fileTree(dir: outputs.files.asPath, includes: [
+            "**/*.json"
+        ]).each { final File file ->
+            file.text = JsonOutput.toJson(new JsonSlurper().parse(file))
+        }
     }
 }
 

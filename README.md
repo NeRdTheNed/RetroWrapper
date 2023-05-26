@@ -18,6 +18,7 @@ Server / website emulation:
 - Skin, cape, and sound fixes (with offline cache)
 
 Patches:
+- Alpha 1.1.1 grey screen fix
 - Bit depth fix
 - Classic mouse moving
 - Indev loading / saving

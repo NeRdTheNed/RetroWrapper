@@ -16,6 +16,8 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
+import com.zero.retrowrapper.RetroTweaker;
+
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraft.launchwrapper.LogWrapper;
 
@@ -58,8 +60,36 @@ public final class DisplayTweakInjector implements IClassTransformer {
                         final String methodName = methodInsNode.name;
                         final String methodDesc = methodInsNode.desc;
 
-                        if ((opcode == Opcodes.INVOKESTATIC) && "org/lwjgl/opengl/Display".equals(methodOwner) && "()V".equals(methodDesc) && "create".equals(methodName)) {
-                            foundDisplayCreateCalls.add(methodInsNode);
+                        if ((opcode == Opcodes.INVOKESTATIC) && "org/lwjgl/opengl/Display".equals(methodOwner)) {
+                            if ("()V".equals(methodDesc) && "create".equals(methodName)) {
+                                foundDisplayCreateCalls.add(methodInsNode);
+                            }
+
+                            // Alpha 1.1.1 fix
+                            if ("(FFF)V".equals(methodDesc) && "setDisplayConfiguration".equals(methodName)) {
+                                final AbstractInsnNode prev1 = methodInsNode.getPrevious();
+
+                                if (prev1.getOpcode() == Opcodes.FCONST_0) {
+                                    final AbstractInsnNode prev2 = prev1.getPrevious();
+
+                                    if (prev2.getOpcode() == Opcodes.FCONST_0) {
+                                        final AbstractInsnNode prev3 = prev2.getPrevious();
+
+                                        if (prev3.getOpcode() == Opcodes.FCONST_1) {
+                                            LogWrapper.fine("Patching call to Display.setDisplayConfiguration(1.0F, 0.0F, 0.0F) at class " + name);
+                                            methodNode.instructions.insertBefore(methodInsNode.getNext(), new InsnNode(Opcodes.NOP));
+                                            methodNode.instructions.remove(prev3);
+                                            methodNode.instructions.remove(prev2);
+                                            methodNode.instructions.remove(prev1);
+                                            methodNode.instructions.remove(methodInsNode);
+
+                                            if (!"a1.1.1".equals(RetroTweaker.profile)) {
+                                                LogWrapper.warning("Applying Alpha 1.1.1 fix to class " + name + " when profile version isn't Alpha 1.1.1");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

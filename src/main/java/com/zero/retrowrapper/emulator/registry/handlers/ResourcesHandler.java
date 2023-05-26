@@ -182,10 +182,10 @@ public final class ResourcesHandler extends EmulatorHandler {
                 if (customUrl != null) {
                     toDownload = new URL(customUrl.asString());
                 } else {
-                    toDownload = new URL("http://resources.download.minecraft.net/" + hash.substring(0, 2) + "/" + hash);
+                    toDownload = new URL("https://resources.download.minecraft.net/" + hash.substring(0, 2) + "/" + hash);
                 }
             } else {
-                toDownload = new URL("http://resources.download.minecraft.net/" + hash.substring(0, 2) + "/" + hash);
+                toDownload = new URL("https://resources.download.minecraft.net/" + hash.substring(0, 2) + "/" + hash);
             }
 
             is = toDownload.openStream();

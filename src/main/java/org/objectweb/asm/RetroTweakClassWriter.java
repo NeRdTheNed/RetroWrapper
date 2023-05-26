@@ -52,6 +52,7 @@ public final class RetroTweakClassWriter extends ClassWriter {
         IGNORED_STRINGS.add("http://assets.minecraft.net/1_6_has_been_released.flag");
         IGNORED_STRINGS.add("https://mcoapi.minecraft.net/");
         IGNORED_STRINGS.add("http://www.minecraft.net/prepurchase.jsp?source=pcgamerdemo");
+        IGNORED_STRINGS.add("http://www.minecraft.net/store?source=demo");
     }
 
     private static boolean isStringIgnored(String str) {

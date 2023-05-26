@@ -82,7 +82,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             if (MetadataUtil.compareSemver(lwjglVersion, "3.0.0") >= 0) {
                 LogWrapper.info("Somehow, you're using LWJGL " + lwjglVersion + " despite this method calling a LWJGL 2 method. Consider me impressed.");
             } else if (SystemUtils.IS_OS_MAC && (MetadataUtil.compareSemver(lwjglVersion, "2.9.3") < 0)) {
-                LogWrapper.warning("Warning: LWJGL 2.9.3 or higher is recommended on newer versions of MacOS.");
+                LogWrapper.warning("LWJGL 2.9.3 or higher is recommended on newer versions of MacOS.");
             }
         } catch (final Exception e) {
             LogWrapper.warning("There's something wrong with LWJGL: " + ExceptionUtils.getStackTrace(e));

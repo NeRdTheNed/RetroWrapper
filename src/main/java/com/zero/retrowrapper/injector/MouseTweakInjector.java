@@ -120,10 +120,10 @@ public final class MouseTweakInjector implements IClassTransformer {
                             methodNode.instructions.remove(prev);
                             methodNode.instructions.remove(toPatch);
                         } else {
-                            LogWrapper.warning("Warning: Something went wrong when trying to patch " + toPatch.name + " at class " + name);
+                            LogWrapper.warning("Something went wrong when trying to patch " + toPatch.name + " at class " + name);
                         }
                     } else {
-                        LogWrapper.warning("Warning: Something went wrong when trying to patch " + toPatch.name + " at class " + name);
+                        LogWrapper.warning("Something went wrong when trying to patch " + toPatch.name + " at class " + name);
                     }
                 }
 

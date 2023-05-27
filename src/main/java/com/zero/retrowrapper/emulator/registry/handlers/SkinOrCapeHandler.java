@@ -22,7 +22,9 @@ import java.util.zip.ZipInputStream;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -32,8 +34,10 @@ import com.eclipsesource.json.JsonValue;
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.emulator.registry.EmulatorHandler;
 import com.zero.retrowrapper.injector.RetroTweakInjectorTarget;
+import com.zero.retrowrapper.util.FileUtil;
 import com.zero.retrowrapper.util.NetworkUtil;
 
+import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LogWrapper;
 
 public final class SkinOrCapeHandler extends EmulatorHandler {
@@ -268,6 +272,23 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
         return null;
     }
 
+    private static byte[] getBytesAsUnencChars(String toGet) {
+        final byte[] bytes = new byte[toGet.length() * 2];
+
+        for (int i = 0; i < toGet.length(); i++) {
+            final char tempChar = toGet.charAt(i);
+            bytes[(i * 2) + 0] = ((byte) tempChar);
+            bytes[(i * 2) + 1] = ((byte)(tempChar >>> 8));
+        }
+
+        return bytes;
+    }
+
+    private static String hashImageFromUrl(String urlString) {
+        final String basename = FilenameUtils.getBaseName(urlString);
+        return DigestUtils.shaHex(getBytesAsUnencChars(basename));
+    }
+
     private static byte[] getImageBytesFromMojang(String username, String uuid, boolean cape) {
         final JsonObject profile = NetworkUtil.getProfileForUUID(uuid);
 
@@ -275,6 +296,18 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
             final String imageURL = getSkinUrlFromJsonOrNull(profile, cape);
 
             if (imageURL != null) {
+                final String localSkinHash = hashImageFromUrl(imageURL);
+                final File cachedSkin = FileUtil.tryFindFirstFile(
+                                            new File(Launch.minecraftHome, "assets" + File.separator + "skins" + File.separator + localSkinHash.substring(0, 2) + File.separator + localSkinHash),
+                                            new File(FileUtil.defaultMinecraftDirectory(), "assets" + File.separator + "skins" + File.separator + localSkinHash.substring(0, 2) + File.separator + localSkinHash)
+                                        );
+                final byte[] cachedSkinBytes = getImageBytesFromFile(cachedSkin);
+
+                if (cachedSkinBytes != null) {
+                    LogWrapper.info("Using cached launcher skin object " + cachedSkin);
+                    return cachedSkinBytes;
+                }
+
                 LogWrapper.fine(imageURL);
                 InputStream imageStream = null;
 

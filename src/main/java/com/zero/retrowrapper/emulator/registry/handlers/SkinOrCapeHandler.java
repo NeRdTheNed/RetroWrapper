@@ -269,8 +269,8 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
 
         for (int i = 0; i < toGet.length(); i++) {
             final char tempChar = toGet.charAt(i);
-            bytes[(i * 2) + 0] = ((byte) tempChar);
-            bytes[(i * 2) + 1] = ((byte)(tempChar >>> 8));
+            bytes[(i * 2) + 0] = (byte) tempChar;
+            bytes[(i * 2) + 1] = (byte)(tempChar >>> 8);
         }
 
         return bytes;

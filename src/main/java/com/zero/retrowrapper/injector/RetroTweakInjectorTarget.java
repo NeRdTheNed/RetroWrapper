@@ -22,7 +22,6 @@ import javax.swing.JPanel;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.lwjgl.Sys;
 
 import com.zero.retrowrapper.emulator.RetroEmulator;
 import com.zero.retrowrapper.hack.HackRunnable;
@@ -76,7 +75,7 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
         LogWrapper.info("RetroWrapper version " + MetadataUtil.VERSION);
 
         try {
-            final String lwjglVersion = Sys.getVersion();
+            final String lwjglVersion = (String) Class.forName("org.lwjgl.Sys").getMethod("getVersion").invoke(null);
             LogWrapper.info("LWJGL version " + lwjglVersion);
 
             if (MetadataUtil.compareSemver(lwjglVersion, "3.0.0") >= 0) {

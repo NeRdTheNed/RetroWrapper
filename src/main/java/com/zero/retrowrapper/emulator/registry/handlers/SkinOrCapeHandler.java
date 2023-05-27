@@ -301,11 +301,14 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                                             new File(Launch.minecraftHome, "assets" + File.separator + "skins" + File.separator + localSkinHash.substring(0, 2) + File.separator + localSkinHash),
                                             new File(FileUtil.defaultMinecraftDirectory(), "assets" + File.separator + "skins" + File.separator + localSkinHash.substring(0, 2) + File.separator + localSkinHash)
                                         );
-                final byte[] cachedSkinBytes = getImageBytesFromFile(cachedSkin);
 
-                if (cachedSkinBytes != null) {
-                    LogWrapper.info("Using cached launcher skin object " + cachedSkin);
-                    return cachedSkinBytes;
+                if (cachedSkin != null) {
+                    final byte[] cachedSkinBytes = getImageBytesFromFile(cachedSkin);
+
+                    if (cachedSkinBytes != null) {
+                        LogWrapper.info("Using cached launcher skin object " + cachedSkin);
+                        return cachedSkinBytes;
+                    }
                 }
 
                 LogWrapper.fine(imageURL);

@@ -118,9 +118,8 @@ public final class Installer {
                 for (final File f : directories) {
                     if (f.isDirectory()) {
                         final File json = new File(f, f.getName() + ".json");
-                        final File jar = new File(f, f.getName() + ".jar");
 
-                        if (json.exists() && jar.exists() && !f.getName().contains("-wrapped")) {
+                        if (json.exists() && !f.getName().contains("-wrapped")) {
                             final JsonObject versionJson = getVersionJson(f.getName(), installerLogger);
 
                             if ((versionJson != null) && versionJson.getString("type", "").contains("old_") && (MetadataUtil.getLibraryVersionFromMojangVersion(versionJson, "com.zero:retrowrapper") == null)) {
@@ -618,7 +617,12 @@ public final class Installer {
 
                 try {
                     fos = new FileOutputStream(new File(wrapDir, versionWrapped + ".json"));
-                    FileUtils.copyFile(new File(versions, version + File.separator + version + ".jar"), new File(wrapDir, versionWrapped + ".jar"));
+                    final File originalJar = new File(versions, version + File.separator + version + ".jar");
+
+                    if (originalJar.exists()) {
+                        FileUtils.copyFile(originalJar, new File(wrapDir, versionWrapped + ".jar"));
+                    }
+
                     fos.write(versionJson.toString(PrettyPrint.indentWithSpaces(4)).getBytes());
                     finalVersions.add(version);
                 } catch (final IOException ee) {

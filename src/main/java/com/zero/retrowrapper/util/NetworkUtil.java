@@ -29,9 +29,32 @@ public final class NetworkUtil {
         String uuid = null;
         InputStream responseStream = null;
         InputStreamReader responseStreamReader = null;
+        HttpURLConnection httpConnection = null;
 
         try {
-            responseStream = new URL("https://api.mojang.com/users/profiles/minecraft/" + username).openStream();
+            final URLConnection responseConnection = new URL("https://api.mojang.com/users/profiles/minecraft/" + username).openConnection();
+
+            if (responseConnection instanceof HttpURLConnection) {
+                httpConnection = (HttpURLConnection) responseConnection;
+            }
+
+            responseConnection.connect();
+
+            if (httpConnection != null) {
+                final int respCode = httpConnection.getResponseCode();
+
+                if ((respCode / 100) != 2) {
+                    LogWrapper.warning("Error getting UUID for username " + username + ": " + NetworkUtil.getResponseAfterErrorAndClose(httpConnection));
+                    return null;
+                }
+
+                if (respCode == 204) {
+                    LogWrapper.warning("Username " + username + " not found when getting UUID: " + NetworkUtil.getResponseAfterErrorAndClose(httpConnection));
+                    return null;
+                }
+            }
+
+            responseStream = responseConnection.getInputStream();
             responseStreamReader = new InputStreamReader(responseStream);
             final JsonObject profile = Json.parse(responseStreamReader).asObject();
             uuid = profile.get("id").asString();
@@ -40,6 +63,10 @@ public final class NetworkUtil {
         } finally {
             IOUtils.closeQuietly(responseStreamReader);
             IOUtils.closeQuietly(responseStream);
+
+            if (httpConnection != null) {
+                httpConnection.disconnect();
+            }
         }
 
         return uuid;

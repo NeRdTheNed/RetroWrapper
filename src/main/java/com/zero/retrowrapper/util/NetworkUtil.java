@@ -259,7 +259,7 @@ public final class NetworkUtil {
         return mppass;
     }
 
-    private static String getStatusLine(HttpURLConnection httpUrlConnection) {
+    public static String getStatusLine(HttpURLConnection httpUrlConnection) {
         String httpResp;
 
         try {

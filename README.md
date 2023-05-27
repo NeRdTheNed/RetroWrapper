@@ -49,6 +49,8 @@ Binary distributions of this software bundle classes from the [Apache Commons pr
 
 Binary distributions of this software bundle classes from [minimal-json](https://github.com/ralfstx/minimal-json), which are licensed under the MIT license. A full copy of this license can be found in MINIMAL-JSON-LICENSE.txt, which should be in the top-level directory of this repository. Binary distributions also include this information under META-INF.
 
+[Crafatar](https://crafatar.com) is used to download skins and capes if the Mojang API isn't working. Thank you for providing an alternative skin and cape API!
+
 ## Original Readme (outdated)
 Enables you to play _fixed_ old versions of minecraft without ever touching .jar files, works even when offline!
 

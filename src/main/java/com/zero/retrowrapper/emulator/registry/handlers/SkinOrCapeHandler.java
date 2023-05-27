@@ -175,7 +175,7 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
     private static byte[] downloadSkinOrCape(String username, boolean cape) {
         final File imageCache = new File(RetroEmulator.getInstance().getCacheDirectory(), username + (cape ? ".cape.png" : ".png"));
         final boolean isClassiCubeUser = RetroTweakInjectorTarget.connectedToClassicServer && !cape && username.endsWith("+");
-        byte[] skinFileBytes = isClassiCubeUser ? getImageBytesFromClassiCube(username) : getImageBytesFromMojang(username, cape);
+        byte[] skinFileBytes = isClassiCubeUser ? getImageBytesFromClassiCube(username) : getImageBytesFromOfficialUsername(username, cape);
 
         if (skinFileBytes != null) {
             FileOutputStream fos = null;
@@ -268,37 +268,84 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
         return null;
     }
 
-    private static byte[] getImageBytesFromMojang(String username, boolean cape) {
+    private static byte[] getImageBytesFromMojang(String username, String uuid, boolean cape) {
+        final JsonObject profile = NetworkUtil.getProfileForUUID(uuid);
+
+        if (profile != null) {
+            final String imageURL = getSkinUrlFromJsonOrNull(profile, cape);
+
+            if (imageURL != null) {
+                LogWrapper.fine(imageURL);
+                InputStream imageStream = null;
+
+                try {
+                    imageStream = new URL(imageURL).openStream();
+                    return IOUtils.toByteArray(imageStream);
+                } catch (final Exception e) {
+                    LogWrapper.warning("Issue downloading " + (cape ? "cape" : "skin") + ": " + ExceptionUtils.getStackTrace(e));
+                } finally {
+                    IOUtils.closeQuietly(imageStream);
+                }
+            } else {
+                LogWrapper.warning("No " + (cape ? "cape" : "skin") + " found for username " + username);
+            }
+        } else {
+            LogWrapper.warning("No profile found for UUID " + uuid + " from username " + username + ", could not download " + (cape ? "cape" : "skin") + ".");
+        }
+
+        return null;
+    }
+
+    /* Thank you to Crafatar for proving an alternative skin and cape API! */
+    private static byte[] getImageBytesFromCrafatar(String username, String uuid, boolean cape) {
+        LogWrapper.info("Trying Crafatar API while downloading " + (cape ? "cape" : "skin") + " for username " + username);
+        final String imageURL = (cape ? "https://crafatar.com/capes/" : "https://crafatar.com/skins/") + uuid;
+        LogWrapper.fine(imageURL);
+        InputStream imageStream = null;
+        HttpURLConnection httpConnection = null;
+
+        try {
+            final URLConnection responseConnection = new URL(imageURL).openConnection();
+
+            if (responseConnection instanceof HttpURLConnection) {
+                httpConnection = (HttpURLConnection) responseConnection;
+            }
+
+            responseConnection.connect();
+
+            if (httpConnection != null) {
+                final int respCode = httpConnection.getResponseCode();
+
+                if ((respCode / 100) != 2) {
+                    LogWrapper.warning("Issue downloading " + (cape ? "cape" : "skin") + " with Crafatar: " + NetworkUtil.getStatusLine(httpConnection));
+                    return null;
+                }
+            }
+
+            imageStream = responseConnection.getInputStream();
+            return IOUtils.toByteArray(imageStream);
+        } catch (final Exception e) {
+            LogWrapper.warning("Issue downloading " + (cape ? "cape" : "skin") + ": " + ExceptionUtils.getStackTrace(e));
+        } finally {
+            IOUtils.closeQuietly(imageStream);
+
+            if (httpConnection != null) {
+                httpConnection.disconnect();
+            }
+        }
+
+        return null;
+    }
+
+    private static byte[] getImageBytesFromOfficialUsername(String username, boolean cape) {
         final String uuid = NetworkUtil.getUUIDFromUsername(username);
 
         if (uuid != null) {
-            final JsonObject profile = NetworkUtil.getProfileForUUID(uuid);
-
-            if (profile != null) {
-                final String imageURL = getSkinUrlFromJsonOrNull(profile, cape);
-
-                if (imageURL != null) {
-                    LogWrapper.fine(imageURL);
-                    InputStream imageStream = null;
-
-                    try {
-                        imageStream = new URL(imageURL).openStream();
-                        return IOUtils.toByteArray(imageStream);
-                    } catch (final Exception e) {
-                        LogWrapper.warning("Issue downloading " + (cape ? "cape" : "skin") + ": " + ExceptionUtils.getStackTrace(e));
-                    } finally {
-                        IOUtils.closeQuietly(imageStream);
-                    }
-                } else {
-                    LogWrapper.warning("No " + (cape ? "cape" : "skin") + " found for username " + username);
-                }
-            } else {
-                LogWrapper.warning("No profile found for UUID " + uuid + " from username " + username + ", could not download " + (cape ? "cape" : "skin") + ".");
-            }
-        } else {
-            LogWrapper.warning("No UUID found for username " + username + ", could not download " + (cape ? "cape" : "skin") + ".");
+            final byte[] imageBytes = getImageBytesFromMojang(username, uuid, cape);
+            return imageBytes != null ? imageBytes : getImageBytesFromCrafatar(username, uuid, cape);
         }
 
+        LogWrapper.warning("No UUID found for username " + username + ", could not download " + (cape ? "cape" : "skin") + ".");
         return null;
     }
 

@@ -47,7 +47,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.lwjgl.opengl.Display;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
@@ -108,7 +107,12 @@ public final class SwingUtil {
                 }
             }
 
-            Display.setIcon(iconsAsByteBufferArrayList.toArray(new ByteBuffer[0]));
+            try {
+                Class.forName("org.lwjgl.opengl.Display").getMethod("setIcon", java.nio.ByteBuffer[].class).invoke(null, (Object) iconsAsByteBufferArrayList.toArray(new ByteBuffer[0]));
+            } catch (final Exception e) {
+                LogWrapper.warning("LWJGL not loaded: " + ExceptionUtils.getStackTrace(e));
+            }
+
             final Frame[] frames = Frame.getFrames();
 
             if (frames != null) {

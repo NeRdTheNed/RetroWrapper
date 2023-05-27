@@ -94,6 +94,9 @@ public final class Installer {
     static boolean shouldUpdateLibraries = true;
     static boolean shouldShowAllVersions = false;
 
+    private static final String showAllVersionsText = "Show ALL versions (including versions possibly incompatible with RetroWrapper)";
+    private static final String showOnlyCompatVersionsText = "Show only versions detected as compatible with RetroWrapper";
+
     private static JFrame frame;
 
     static boolean refreshList(String givenDirectory, final Logger installerLogger) {
@@ -326,7 +329,7 @@ public final class Installer {
         }
 
         // Show all versions toggle
-        showAllVersionsToggle = new JToggleButton("Show ALL versions (including possibly incompatible versions)");
+        showAllVersionsToggle = new JToggleButton(showAllVersionsText);
         showAllVersionsToggle.addActionListener(new ShowAllVersionsListener(installerLogger));
         SwingUtil.addJButtonCentered(frame, showAllVersionsToggle);
         // List of versions that can be wrapped
@@ -951,6 +954,7 @@ public final class Installer {
 
         public void actionPerformed(ActionEvent e) {
             shouldShowAllVersions = showAllVersionsToggle.isSelected();
+            showAllVersionsToggle.setText(shouldShowAllVersions ? showOnlyCompatVersionsText : showAllVersionsText);
             refreshList(workingDirectory, logger);
         }
     }

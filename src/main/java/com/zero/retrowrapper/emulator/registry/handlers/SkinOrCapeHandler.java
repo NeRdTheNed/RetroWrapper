@@ -238,27 +238,31 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
     }
 
     private static String getSkinUrlFromJsonOrNull(JsonObject profile, boolean cape) {
-        final Iterable<JsonValue> properties = profile.get("properties").asArray();
-        String base64 = "";
+        try {
+            final Iterable<JsonValue> properties = profile.get("properties").asArray();
+            String base64 = "";
 
-        for (final JsonValue property : properties) {
-            final JsonObject propertyObj = property.asObject();
+            for (final JsonValue property : properties) {
+                final JsonObject propertyObj = property.asObject();
 
-            if ("textures".equalsIgnoreCase(propertyObj.get("name").asString())) {
-                base64 = propertyObj.get("value").asString();
+                if ("textures".equalsIgnoreCase(propertyObj.get("name").asString())) {
+                    base64 = propertyObj.get("value").asString();
+                }
             }
-        }
 
-        final JsonObject textures1 = Json.parse(new String(Base64.decodeBase64(base64))).asObject();
-        final JsonObject textures = textures1.get("textures").asObject();
-        final JsonValue capeOrSkin = textures.get(cape ? "CAPE" : "SKIN");
+            final JsonObject textures1 = Json.parse(new String(Base64.decodeBase64(base64))).asObject();
+            final JsonObject textures = textures1.get("textures").asObject();
+            final JsonValue capeOrSkin = textures.get(cape ? "CAPE" : "SKIN");
 
-        if (capeOrSkin != null) {
-            final JsonObject imageLinkJSON = capeOrSkin.asObject();
+            if (capeOrSkin != null) {
+                final JsonObject imageLinkJSON = capeOrSkin.asObject();
 
-            if (imageLinkJSON != null) {
-                return imageLinkJSON.get("url").asString();
+                if (imageLinkJSON != null) {
+                    return imageLinkJSON.get("url").asString();
+                }
             }
+        } catch (final Exception e) {
+            LogWrapper.warning("Error while parsing profile JSON: " + ExceptionUtils.getStackTrace(e));
         }
 
         return null;

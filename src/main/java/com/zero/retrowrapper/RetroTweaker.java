@@ -22,10 +22,26 @@ public final class RetroTweaker implements ITweaker {
         ForceDisable
     }
 
-    public static M1PatchMode m1PatchMode = M1PatchMode.OnlyM1MacOS;
+    public static final M1PatchMode m1PatchMode;
 
     public static String profile;
     private List<String> args;
+
+    static {
+        M1PatchMode tempPatchMode = M1PatchMode.OnlyM1MacOS;
+
+        try {
+            final String patchMode = System.getProperties().getProperty("retrowrapper.forceM1PatchToValue");
+
+            if (patchMode != null) {
+                tempPatchMode = M1PatchMode.valueOf(patchMode);
+            }
+        } catch (final Exception e) {
+            LogWrapper.warning("Issue getting system properties: " + ExceptionUtils.getStackTrace(e));
+        }
+
+        m1PatchMode = tempPatchMode;
+    }
 
     public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {
         if (profile != null) {
@@ -56,11 +72,6 @@ public final class RetroTweaker implements ITweaker {
 
         try {
             experimental = System.getProperties().getProperty("retrowrapper.enableExperimentalPatches") != null;
-            final String patchMode = System.getProperties().getProperty("retrowrapper.forceM1PatchToValue");
-
-            if (patchMode != null) {
-                m1PatchMode = M1PatchMode.valueOf(patchMode);
-            }
         } catch (final Exception e) {
             LogWrapper.warning("Issue getting system properties: " + ExceptionUtils.getStackTrace(e));
         }

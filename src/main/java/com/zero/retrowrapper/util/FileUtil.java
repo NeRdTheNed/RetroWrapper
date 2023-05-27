@@ -11,13 +11,16 @@ import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
 
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LogWrapper;
 
 public final class FileUtil {
     public static String defaultMinecraftDirectory() {
@@ -141,6 +144,17 @@ public final class FileUtil {
         }
 
         return toReturn;
+    }
+
+    public static boolean bytesToFile(byte[] bytes, File imageCache) {
+        try {
+            FileUtils.writeByteArrayToFile(imageCache, bytes);
+            return true;
+        } catch (final Exception e) {
+            LogWrapper.warning("Could not write bytes to file: " + ExceptionUtils.getStackTrace(e));
+        }
+
+        return false;
     }
 
     private FileUtil() {

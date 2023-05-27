@@ -6,7 +6,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -182,15 +181,8 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
         byte[] skinFileBytes = isClassiCubeUser ? getImageBytesFromClassiCube(username) : getImageBytesFromOfficialUsername(username, cape);
 
         if (skinFileBytes != null) {
-            FileOutputStream fos = null;
-
-            try {
-                fos = new FileOutputStream(imageCache);
-                fos.write(skinFileBytes);
-            } catch (final Exception e) {
-                LogWrapper.warning("Could not write " + (cape ? "cape" : "skin") + " to file: " + ExceptionUtils.getStackTrace(e));
-            } finally {
-                IOUtils.closeQuietly(fos);
+            if (!FileUtil.bytesToFile(skinFileBytes, imageCache)) {
+                LogWrapper.warning("Could not write " + (cape ? "cape" : "skin") + " to file");
             }
 
             return skinFileBytes;
@@ -297,9 +289,10 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
 
             if (imageURL != null) {
                 final String localSkinHash = hashImageFromUrl(imageURL);
+                final File defaultCacheSkinFile = new File(FileUtil.defaultMinecraftDirectory(), "assets" + File.separator + "skins" + File.separator + localSkinHash.substring(0, 2) + File.separator + localSkinHash);
                 final File cachedSkin = FileUtil.tryFindFirstFile(
                                             new File(Launch.minecraftHome, "assets" + File.separator + "skins" + File.separator + localSkinHash.substring(0, 2) + File.separator + localSkinHash),
-                                            new File(FileUtil.defaultMinecraftDirectory(), "assets" + File.separator + "skins" + File.separator + localSkinHash.substring(0, 2) + File.separator + localSkinHash)
+                                            defaultCacheSkinFile
                                         );
 
                 if (cachedSkin != null) {
@@ -316,7 +309,13 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
 
                 try {
                     imageStream = new URL(imageURL).openStream();
-                    return IOUtils.toByteArray(imageStream);
+                    final byte[] downloadedBytes = IOUtils.toByteArray(imageStream);
+
+                    if (!FileUtil.bytesToFile(downloadedBytes, defaultCacheSkinFile)) {
+                        LogWrapper.warning("Could not write " + (cape ? "cape" : "skin") + " to launcher object");
+                    }
+
+                    return downloadedBytes;
                 } catch (final Exception e) {
                     LogWrapper.warning("Issue downloading " + (cape ? "cape" : "skin") + ": " + ExceptionUtils.getStackTrace(e));
                 } finally {

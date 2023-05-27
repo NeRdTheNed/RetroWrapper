@@ -2,7 +2,6 @@ package com.zero.retrowrapper.emulator.registry.handlers;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -142,7 +141,6 @@ public final class ResourcesHandler extends EmulatorHandler {
         }
 
         InputStream is = null;
-        FileOutputStream resFile = null;
 
         try {
             final JsonValue getRequest = jsonObjects.get(res);
@@ -194,14 +192,8 @@ public final class ResourcesHandler extends EmulatorHandler {
             if (resourceBytes.length > smallestSize) {
                 resourceCache.getParentFile().mkdirs();
 
-                try {
-                    resFile = new FileOutputStream(resourceCache);
-                    resFile.write(resourceBytes);
-                    resFile.close();
-                } catch (final Exception e) {
-                    LogWrapper.warning("Resource " + res + " not written to cache due to exception: " + ExceptionUtils.getStackTrace(e));
-                } finally {
-                    IOUtils.closeQuietly(resFile);
+                if (!FileUtil.bytesToFile(resourceBytes, resourceCache)) {
+                    LogWrapper.warning("Resource " + res + " not written to cache");
                 }
 
                 return resourceBytes;
@@ -230,7 +222,6 @@ public final class ResourcesHandler extends EmulatorHandler {
             return null;
         } finally {
             IOUtils.closeQuietly(is);
-            IOUtils.closeQuietly(resFile);
         }
     }
 

@@ -22,7 +22,6 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -80,7 +79,11 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
 
                             if ("char.png".equals(entry.getName())) {
                                 final byte[] charBytes = IOUtils.toByteArray(zis);
-                                FileUtils.writeByteArrayToFile(classiCubeDefaultChar, charBytes);
+
+                                if (!FileUtil.bytesToFile(charBytes, classiCubeDefaultChar)) {
+                                    LogWrapper.warning("Could not write ClassiCube default skin to file");
+                                }
+
                                 break;
                             }
 

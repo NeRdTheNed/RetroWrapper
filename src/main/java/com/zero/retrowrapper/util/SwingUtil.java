@@ -24,9 +24,9 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
+import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListSelectionModel;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -57,7 +57,7 @@ import net.minecraft.launchwrapper.LogWrapper;
 public final class SwingUtil {
     private static final Pattern newlinePattern = Pattern.compile("\n", Pattern.LITERAL);
 
-    public static void addJButtonCentered(Container container, JButton component) {
+    public static void addJButtonCentered(Container container, AbstractButton component) {
         component.setHorizontalAlignment(SwingConstants.CENTER);
         component.setVerticalAlignment(SwingConstants.CENTER);
         addJComponentCentered(container, component);

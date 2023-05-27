@@ -283,9 +283,18 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
 
                 profileConnection.connect();
 
-                if ((httpConnection != null) && ((httpConnection.getResponseCode() / 100) != 2)) {
-                    LogWrapper.warning("Error getting profile for skin information: " + NetworkUtil.getResponseAfterErrorAndClose(httpConnection));
-                    return null;
+                if (httpConnection != null) {
+                    final int respCode = httpConnection.getResponseCode();
+
+                    if ((respCode / 100) != 2) {
+                        LogWrapper.warning("Error getting profile for skin information: " + NetworkUtil.getResponseAfterErrorAndClose(httpConnection));
+                        return null;
+                    }
+
+                    if (respCode == 204) {
+                        LogWrapper.warning("UUID did not correspond to a username when getting profile for skin information: " + NetworkUtil.getResponseAfterErrorAndClose(httpConnection));
+                        return null;
+                    }
                 }
 
                 profileStream = profileConnection.getInputStream();

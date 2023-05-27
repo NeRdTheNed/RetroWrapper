@@ -72,6 +72,52 @@ public final class NetworkUtil {
         return uuid;
     }
 
+    public static JsonObject getProfileForUUID(String UUID) {
+        JsonObject profile = null;
+        InputStream responseStream = null;
+        InputStreamReader responseStreamReader = null;
+        HttpURLConnection httpConnection = null;
+
+        try {
+            final URLConnection responseConnection = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + UUID).openConnection();
+
+            if (responseConnection instanceof HttpURLConnection) {
+                httpConnection = (HttpURLConnection) responseConnection;
+            }
+
+            responseConnection.connect();
+
+            if (httpConnection != null) {
+                final int respCode = httpConnection.getResponseCode();
+
+                if ((respCode / 100) != 2) {
+                    LogWrapper.warning("Error getting profile for skin information from UUID " + UUID + ": " + NetworkUtil.getResponseAfterErrorAndClose(httpConnection));
+                    return null;
+                }
+
+                if (respCode == 204) {
+                    LogWrapper.warning("UUID did not correspond to a username when getting profile for skin information from UUID " + UUID + ": " + NetworkUtil.getResponseAfterErrorAndClose(httpConnection));
+                    return null;
+                }
+            }
+
+            responseStream = responseConnection.getInputStream();
+            responseStreamReader = new InputStreamReader(responseStream);
+            profile = Json.parse(responseStreamReader).asObject();
+        } catch (final Exception e) {
+            LogWrapper.warning("Error when trying to get profile for skin information from UUID " + UUID + ": " + ExceptionUtils.getStackTrace(e));
+        } finally {
+            IOUtils.closeQuietly(responseStreamReader);
+            IOUtils.closeQuietly(responseStream);
+
+            if (httpConnection != null) {
+                httpConnection.disconnect();
+            }
+        }
+
+        return profile;
+    }
+
     public static boolean joinServer(String sessionId, String username, String serverId) {
         return joinServerModernWithUsername(sessionId, username, serverId) || joinServerLegacy(sessionId, username, serverId);
     }

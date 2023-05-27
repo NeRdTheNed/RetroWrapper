@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -269,56 +268,28 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
         final String uuid = NetworkUtil.getUUIDFromUsername(username);
 
         if (uuid != null) {
-            InputStream profileStream = null;
-            InputStreamReader profileStreamReader = null;
-            InputStream imageStream = null;
-            HttpURLConnection httpConnection = null;
+            final JsonObject profile = NetworkUtil.getProfileForUUID(uuid);
 
-            try {
-                final URLConnection profileConnection = new URL("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid).openConnection();
-
-                if (profileConnection instanceof HttpURLConnection) {
-                    httpConnection = (HttpURLConnection) profileConnection;
-                }
-
-                profileConnection.connect();
-
-                if (httpConnection != null) {
-                    final int respCode = httpConnection.getResponseCode();
-
-                    if ((respCode / 100) != 2) {
-                        LogWrapper.warning("Error getting profile for skin information: " + NetworkUtil.getResponseAfterErrorAndClose(httpConnection));
-                        return null;
-                    }
-
-                    if (respCode == 204) {
-                        LogWrapper.warning("UUID did not correspond to a username when getting profile for skin information: " + NetworkUtil.getResponseAfterErrorAndClose(httpConnection));
-                        return null;
-                    }
-                }
-
-                profileStream = profileConnection.getInputStream();
-                profileStreamReader = new InputStreamReader(profileStream);
-                final JsonObject profile = Json.parse(profileStreamReader).asObject();
+            if (profile != null) {
                 final String imageURL = getSkinUrlFromJsonOrNull(profile, cape);
 
                 if (imageURL != null) {
                     LogWrapper.fine(imageURL);
-                    imageStream = new URL(imageURL).openStream();
-                    return IOUtils.toByteArray(imageStream);
-                }
+                    InputStream imageStream = null;
 
-                LogWrapper.warning("No " + (cape ? "cape" : "skin") + " found for username " + username);
-            } catch (final Exception e) {
-                LogWrapper.warning("Issue downloading " + (cape ? "cape" : "skin") + ": " + ExceptionUtils.getStackTrace(e));
-            } finally {
-                IOUtils.closeQuietly(profileStream);
-                IOUtils.closeQuietly(profileStreamReader);
-                IOUtils.closeQuietly(imageStream);
-
-                if (httpConnection != null) {
-                    httpConnection.disconnect();
+                    try {
+                        imageStream = new URL(imageURL).openStream();
+                        return IOUtils.toByteArray(imageStream);
+                    } catch (final Exception e) {
+                        LogWrapper.warning("Issue downloading " + (cape ? "cape" : "skin") + ": " + ExceptionUtils.getStackTrace(e));
+                    } finally {
+                        IOUtils.closeQuietly(imageStream);
+                    }
+                } else {
+                    LogWrapper.warning("No " + (cape ? "cape" : "skin") + " found for username " + username);
                 }
+            } else {
+                LogWrapper.warning("No profile found for UUID " + uuid + " from username " + username + ", could not download " + (cape ? "cape" : "skin") + ".");
             }
         } else {
             LogWrapper.warning("No UUID found for username " + username + ", could not download " + (cape ? "cape" : "skin") + ".");

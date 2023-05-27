@@ -44,6 +44,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.JToggleButton;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.event.ListSelectionEvent;
@@ -87,9 +88,11 @@ public final class Installer {
 
     private static JCheckBox patchLibrariesCheckbox;
     private static JCheckBox useM1NativesCheckbox;
+    private static JToggleButton showAllVersionsToggle;
 
     static boolean shouldUseM1Natives = false;
     static boolean shouldUpdateLibraries = true;
+    static boolean shouldShowAllVersions = false;
 
     private static JFrame frame;
 
@@ -122,7 +125,7 @@ public final class Installer {
                         if (json.exists() && !f.getName().contains("-wrapped")) {
                             final JsonObject versionJson = getVersionJson(f.getName(), installerLogger);
 
-                            if ((versionJson != null) && versionJson.getString("type", "").contains("old_") && (MetadataUtil.getLibraryVersionFromMojangVersion(versionJson, "com.zero:retrowrapper") == null)) {
+                            if ((versionJson != null) && (shouldShowAllVersions || versionJson.getString("type", "").contains("old_")) && (MetadataUtil.getLibraryVersionFromMojangVersion(versionJson, "com.zero:retrowrapper") == null)) {
                                 final File fWrapped = new File(versions, f.getName() + "-wrapped");
 
                                 if (fWrapped.isDirectory()) {
@@ -322,7 +325,11 @@ public final class Installer {
             SwingUtil.addJComponentCentered(frame, useM1NativesCheckbox);
         }
 
-        // List of versions that can be wrapper
+        // Show all versions toggle
+        showAllVersionsToggle = new JToggleButton("Show ALL versions (including possibly incompatible versions)");
+        showAllVersionsToggle.addActionListener(new ShowAllVersionsListener(installerLogger));
+        SwingUtil.addJButtonCentered(frame, showAllVersionsToggle);
+        // List of versions that can be wrapped
         final JScrollPane scrollList = new JScrollPane(list);
         list.addListSelectionListener(new VersionSelectionListener());
         SwingUtil.addJComponentCentered(frame, scrollList);
@@ -932,6 +939,19 @@ public final class Installer {
 
         public void actionPerformed(ActionEvent e) {
             shouldUseM1Natives = listenUseM1NativesCheckbox.isSelected();
+        }
+    }
+
+    private static final class ShowAllVersionsListener implements ActionListener {
+        private final Logger logger;
+
+        ShowAllVersionsListener(Logger logger) {
+            this.logger = logger;
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            shouldShowAllVersions = showAllVersionsToggle.isSelected();
+            refreshList(workingDirectory, logger);
         }
     }
 }

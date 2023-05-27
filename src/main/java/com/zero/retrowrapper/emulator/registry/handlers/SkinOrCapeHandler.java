@@ -238,6 +238,33 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
         return null;
     }
 
+    private static String getSkinUrlFromJsonOrNull(JsonObject profile, boolean cape) {
+        final Iterable<JsonValue> properties = profile.get("properties").asArray();
+        String base64 = "";
+
+        for (final JsonValue property : properties) {
+            final JsonObject propertyObj = property.asObject();
+
+            if ("textures".equalsIgnoreCase(propertyObj.get("name").asString())) {
+                base64 = propertyObj.get("value").asString();
+            }
+        }
+
+        final JsonObject textures1 = Json.parse(new String(Base64.decodeBase64(base64))).asObject();
+        final JsonObject textures = textures1.get("textures").asObject();
+        final JsonValue capeOrSkin = textures.get(cape ? "CAPE" : "SKIN");
+
+        if (capeOrSkin != null) {
+            final JsonObject imageLinkJSON = capeOrSkin.asObject();
+
+            if (imageLinkJSON != null) {
+                return imageLinkJSON.get("url").asString();
+            }
+        }
+
+        return null;
+    }
+
     private static byte[] getImageBytesFromMojang(String username, boolean cape) {
         final String uuid = NetworkUtil.getUUIDFromUsername(username);
 
@@ -264,30 +291,12 @@ public final class SkinOrCapeHandler extends EmulatorHandler {
                 profileStream = profileConnection.getInputStream();
                 profileStreamReader = new InputStreamReader(profileStream);
                 final JsonObject profile = Json.parse(profileStreamReader).asObject();
-                final Iterable<JsonValue> properties = profile.get("properties").asArray();
-                String base64 = "";
+                final String imageURL = getSkinUrlFromJsonOrNull(profile, cape);
 
-                for (final JsonValue property : properties) {
-                    final JsonObject propertyObj = property.asObject();
-
-                    if ("textures".equalsIgnoreCase(propertyObj.get("name").asString())) {
-                        base64 = propertyObj.get("value").asString();
-                    }
-                }
-
-                final JsonObject textures1 = Json.parse(new String(Base64.decodeBase64(base64))).asObject();
-                final JsonObject textures = textures1.get("textures").asObject();
-                final JsonValue capeOrSkin = textures.get(cape ? "CAPE" : "SKIN");
-
-                if (capeOrSkin != null) {
-                    final JsonObject imageLinkJSON = capeOrSkin.asObject();
-
-                    if (imageLinkJSON != null) {
-                        final String imageURL = imageLinkJSON.get("url").asString();
-                        LogWrapper.fine(imageURL);
-                        imageStream = new URL(imageURL).openStream();
-                        return IOUtils.toByteArray(imageStream);
-                    }
+                if (imageURL != null) {
+                    LogWrapper.fine(imageURL);
+                    imageStream = new URL(imageURL).openStream();
+                    return IOUtils.toByteArray(imageStream);
                 }
 
                 LogWrapper.warning("No " + (cape ? "cape" : "skin") + " found for username " + username);

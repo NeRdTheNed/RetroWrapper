@@ -22,7 +22,7 @@
             "version": "c0.30_01c"
         },
         {
-            "cachedName": "retrowrapper",
+            "cachedName": "RetroWrapper",
             "cachedRequires": [
                 {
                     "uid": "net.minecraft"

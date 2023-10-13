@@ -37,7 +37,7 @@
     ],
     "mainClass": "net.minecraft.launchwrapper.Launch",
     "minecraftArguments": "${auth_player_name} ${auth_session} --gameDir ${game_directory} --assetsDir ${game_assets} --version ${version_name}",
-    "name": "retrowrapper",
+    "name": "RetroWrapper",
     "requires": [
         {
             "uid": "net.minecraft"

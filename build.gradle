@@ -202,6 +202,11 @@ tasks.register('proguard', proguard.gradle.ProGuardTask) {
     // Add relevant libraries to ProGuard's list of libraries to optimise against.
     libraryjars project.configurations.depsForProGuard
 
+    // Run more optimisation passes on release
+    if (System.getenv('BUILD_RELEASE') == 'true') {
+        optimizationpasses 99
+    }
+
     // The rest of the configs are in this file
     configuration 'guard.pro'
 }

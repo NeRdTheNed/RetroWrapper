@@ -36,6 +36,7 @@ do
         ./ci-tools/ect-0.9.4-mac -90032 --disable-png --disable-jpg -strip -zip "$jarJar"
       fi
     fi
+    java -jar ./ci-tools/JarTighten-1.2.10-all.jar -o -c -E -S -t --mode=MULTI_CHEAP "$jarJar" "$jarJar"
   done
   echo "test $file"
   for jsonFile in ./build/libs/**/**/**.json ./build/libs/**/**.json ./build/libs/**.json
@@ -82,4 +83,5 @@ do
       ./ci-tools/ect-0.9.4-mac -90032 --disable-png --disable-jpg -strip -zip "$file"
     fi
   fi
+  java -jar ./ci-tools/JarTighten-1.2.10-all.jar -o -c -E -S -t --mode=MULTI_CHEAP "$file" "$file"
 done

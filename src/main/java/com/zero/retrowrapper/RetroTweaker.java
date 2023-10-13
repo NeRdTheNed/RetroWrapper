@@ -57,6 +57,19 @@ public final class RetroTweaker implements ITweaker {
     }
 
     public void injectIntoClassLoader(LaunchClassLoader classLoader) {
+        boolean fmlPatch = false;
+
+        try {
+            fmlPatch = Boolean.parseBoolean(System.getProperties().getProperty("retrowrapper.enableFMLPatch"));
+        } catch (final Exception e) {
+            LogWrapper.warning("Issue getting system properties: " + ExceptionUtils.getStackTrace(e));
+        }
+
+        if (fmlPatch) {
+            // FML compatibility patch
+            classLoader.registerTransformer("com.zero.retrowrapper.injector.FML125Injector");
+        }
+
         // URL replacements
         classLoader.registerTransformer("com.zero.retrowrapper.injector.RetroTweakInjector");
         // Patches to use a 24 bit depth buffer when creating displays

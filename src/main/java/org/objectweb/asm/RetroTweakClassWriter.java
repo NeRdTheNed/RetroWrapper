@@ -33,6 +33,9 @@ public final class RetroTweakClassWriter extends ClassWriter {
     private static final int INDY = 18;
     private static final int HANDLE_BASE = 20;
     private static final int TYPE_NORMAL = 30;
+    private static final int TYPE_UNINIT = 31;
+    private static final int TYPE_MERGED = 32;
+    private static final int BSM = 33;
     private static final Pattern minecraftNetPattern = Pattern.compile("www.minecraft.net", Pattern.LITERAL);
     private static final Pattern comPattern = Pattern.compile(".com");
     private static final Pattern netPattern = Pattern.compile(".net");
@@ -69,7 +72,10 @@ public final class RetroTweakClassWriter extends ClassWriter {
             Item next = item;
 
             while (next != null) {
-                items.add(next);
+                if (((next.b != TYPE_NORMAL) && (next.b != TYPE_UNINIT) && (next.b != TYPE_MERGED) && (next.b != BSM))) {
+                    items.add(next);
+                }
+
                 next = next.k;
             }
         }

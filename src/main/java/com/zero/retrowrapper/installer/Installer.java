@@ -466,10 +466,10 @@ public final class Installer {
 
         // LaunchWrapper 1.12 as a Mojang library JSON object
         final JsonObject launchWrapperOneTwelve =  MetadataUtil.createMojangLibrary("net.minecraft:launchwrapper:1.12",
-                "net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar",
-                "https://libraries.minecraft.net/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar",
-                "111e7bea9c968cdb3d06ef4632bf7ff0824d0f36",
-                32999L);
+            "net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar",
+            "https://libraries.minecraft.net/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar",
+            "111e7bea9c968cdb3d06ef4632bf7ff0824d0f36",
+            32999L);
         // ASM 5.2. This could be older, but there's no reason not to use a newer version.
         final JsonObject asmAll = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-all:5.2",
                                   "org/ow2/asm/asm-all/5.2/asm-all-5.2.jar",

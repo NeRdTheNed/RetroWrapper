@@ -46,15 +46,15 @@ checkstyle {
     config = resources.text.fromArchiveEntry(configurations.checkstyleConfig, 'google_checks.xml')
 } */
 
-sourceCompatibility = 1.5
-targetCompatibility = 1.5
-
 final def compiler = javaToolchains.compilerFor {
     languageVersion = JavaLanguageVersion.of(7)
 }
 
 // Tells Gradle to use the previously defined Java 7 compatible JDK.
 java {
+    sourceCompatibility = 1.5
+    targetCompatibility = 1.5
+
     toolchain {
         compiler
     }

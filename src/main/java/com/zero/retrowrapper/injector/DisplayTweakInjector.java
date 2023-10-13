@@ -40,6 +40,7 @@ public final class DisplayTweakInjector implements IClassTransformer {
                 return null;
             }
 
+            boolean changed = false;
             final ClassReader classReader = new ClassReader(bytesOld);
             final ClassNode classNode = new ClassNode();
             classReader.accept(classNode, ClassReader.EXPAND_FRAMES);
@@ -63,6 +64,7 @@ public final class DisplayTweakInjector implements IClassTransformer {
                         if ((opcode == Opcodes.INVOKESTATIC) && "org/lwjgl/opengl/Display".equals(methodOwner)) {
                             if ("()V".equals(methodDesc) && "create".equals(methodName)) {
                                 foundDisplayCreateCalls.add(methodInsNode);
+                                changed = true;
                             }
 
                             // Alpha 1.1.1 fix
@@ -82,6 +84,7 @@ public final class DisplayTweakInjector implements IClassTransformer {
                                             methodNode.instructions.remove(prev2);
                                             methodNode.instructions.remove(prev1);
                                             methodNode.instructions.remove(methodInsNode);
+                                            changed = true;
 
                                             if (!"a1.1.1".equals(RetroTweaker.profile)) {
                                                 LogWrapper.warning("Applying Alpha 1.1.1 fix to class " + name + " when profile version isn't Alpha 1.1.1");
@@ -111,6 +114,10 @@ public final class DisplayTweakInjector implements IClassTransformer {
                     methodNode.instructions.insertBefore(toPatch, createDisplayWithPixelFormat);
                     methodNode.instructions.remove(toPatch);
                 }
+            }
+
+            if (!changed) {
+                return bytesOld;
             }
 
             final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);

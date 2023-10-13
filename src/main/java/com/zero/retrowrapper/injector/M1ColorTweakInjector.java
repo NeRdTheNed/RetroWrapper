@@ -81,6 +81,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                 return null;
             }
 
+            boolean changed = false;
             final ClassReader classReader = new ClassReader(bytesOld);
             final ClassNode classNode = new ClassNode();
             classReader.accept(classNode, ClassReader.EXPAND_FRAMES);
@@ -141,12 +142,14 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                         if (opcode == Opcodes.INVOKESTATIC) {
                             if ("org/lwjgl/opengl/Display".equals(methodOwner) && "(Z)V".equals(methodDesc) && "setFullscreen".equals(methodName)) {
                                 foundSetFullscreenCalls.add(methodInsNode);
+                                changed = true;
                             }
 
                             if ("org/lwjgl/opengl/GL11".equals(methodOwner)) {
                                 for (final String patch3 : toPatch3) {
                                     if (patch3.equals(methodName)) {
                                         foundSwap3Calls.add(methodInsNode);
+                                        changed = true;
                                         break;
                                     }
                                 }
@@ -154,6 +157,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                                 for (final String patch3Dub : toPatch3Double) {
                                     if (patch3Dub.equals(methodName)) {
                                         foundSwap3DoubleCalls.add(methodInsNode);
+                                        changed = true;
                                         break;
                                     }
                                 }
@@ -161,6 +165,7 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                                 for (final String patch4 : toPatch4) {
                                     if (patch4.equals(methodName)) {
                                         foundSwap4Calls.add(methodInsNode);
+                                        changed = true;
                                         break;
                                     }
                                 }
@@ -168,25 +173,30 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                                 for (final String patch4Dub : toPatch4Double) {
                                     if (patch4Dub.equals(methodName)) {
                                         foundSwap4DoubleCalls.add(methodInsNode);
+                                        changed = true;
                                         break;
                                     }
                                 }
 
                                 if ("glFog".equals(methodName) && "(ILjava/nio/FloatBuffer;)V".equals(methodDesc)) {
                                     foundFogFloatBufCalls.add(methodInsNode);
+                                    changed = true;
                                 }
 
                                 if ("glTexImage2D".equals(methodName) && "(IIIIIIIILjava/nio/ByteBuffer;)V".equals(methodDesc)) {
                                     foundGlTexImage2DLikeCalls.add(methodInsNode);
+                                    changed = true;
                                 }
 
                                 if ("glTexSubImage2D".equals(methodName) && "(IIIIIIIILjava/nio/ByteBuffer;)V".equals(methodDesc)) {
                                     foundGlTexImage2DLikeCalls.add(methodInsNode);
+                                    changed = true;
                                 }
                             }
                         } else if ((RetroTweakClassWriter.tesClass != null) && ((opcode == Opcodes.INVOKEVIRTUAL) || (opcode == Opcodes.INVOKESPECIAL))) {
                             if (RetroTweakClassWriter.tesClass.equals(methodOwner) && "(IIII)V".equals(methodDesc)) {
                                 foundSwap4Calls.add(methodInsNode);
+                                changed = true;
                             }
                         }
                     }
@@ -488,6 +498,10 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                         }
                     }
                 }
+            }
+
+            if (!changed) {
+                return bytesOld;
             }
 
             final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);

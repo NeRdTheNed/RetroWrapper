@@ -50,6 +50,7 @@ public final class MouseTweakInjector implements IClassTransformer {
                 return null;
             }
 
+            boolean changed = false;
             final ClassReader classReader = new ClassReader(bytesOld);
             final ClassNode classNode = new ClassNode();
             classReader.accept(classNode, ClassReader.EXPAND_FRAMES);
@@ -76,11 +77,13 @@ public final class MouseTweakInjector implements IClassTransformer {
                         if (opcode == Opcodes.INVOKESTATIC) {
                             if ("org/lwjgl/input/Mouse".equals(methodOwner) && "(Lorg/lwjgl/input/Cursor;)Lorg/lwjgl/input/Cursor;".equals(methodDesc) && "setNativeCursor".equals(methodName)) {
                                 foundNativeCursorMethodCalls.add(methodInsNode);
+                                changed = true;
                             }
 
                             if (System.getProperties().getProperty("retrowrapper.disableMouseReplacementPatches") == null) {
                                 if ("org/lwjgl/input/Mouse".equals(methodOwner) && "()I".equals(methodDesc) && ("getDX".equals(methodName) || "getDY".equals(methodName))) {
                                     foundMouseDXYMethodCalls.add(methodInsNode);
+                                    changed = true;
                                 }
                             }
                         }
@@ -88,10 +91,12 @@ public final class MouseTweakInjector implements IClassTransformer {
                         if ((opcode == Opcodes.INVOKEVIRTUAL) && (System.getProperties().getProperty("retrowrapper.disableMouseReplacementPatches") == null)) {
                             if ("java/awt/PointerInfo".equals(methodOwner) && "()Ljava/awt/Point;".equals(methodDesc) && "getLocation".equals(methodName)) {
                                 foundMouseInfoMethodCalls.add(methodInsNode);
+                                changed = true;
                             }
 
                             if ("java/awt/Robot".equals(methodOwner) && "(II)V".equals(methodDesc) && "mouseMove".equals(methodName)) {
                                 foundMouseMoveMethodCalls.add(methodInsNode);
+                                changed = true;
                             }
                         }
                     }
@@ -152,6 +157,10 @@ public final class MouseTweakInjector implements IClassTransformer {
                     methodNode.instructions.insertBefore(toPatch, methodInsNode);
                     methodNode.instructions.remove(toPatch);
                 }
+            }
+
+            if (!changed) {
+                return bytesOld;
             }
 
             final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);

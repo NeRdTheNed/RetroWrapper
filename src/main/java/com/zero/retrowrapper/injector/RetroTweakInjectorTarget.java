@@ -87,20 +87,34 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
             LogWrapper.warning("There's something wrong with LWJGL: " + ExceptionUtils.getStackTrace(e));
         }
 
-        try {
-            final File defaultMinecraftDir = new File(FileUtil.defaultMinecraftDirectory());
-            final File defaultCacheDir = new File(defaultMinecraftDir, "retrowrapper" + File.separator + "cache");
-            final File currentCacheDir = new File(Launch.minecraftHome, "retrowrapper" + File.separator + "cache");
+        boolean doUpdateCheck = true;
 
-            if (defaultMinecraftDir.exists()) {
-                defaultCacheDir.mkdirs();
-                SwingUtil.checkAndDisplayUpdate(defaultCacheDir);
-            } else {
-                currentCacheDir.mkdirs();
-                SwingUtil.checkAndDisplayUpdate(currentCacheDir);
+        try {
+            if (System.getProperties().getProperty("retrowrapper.doUpdateCheck") != null) {
+                doUpdateCheck = Boolean.parseBoolean(System.getProperties().getProperty("retrowrapper.doUpdateCheck"));
             }
         } catch (final Exception e) {
-            LogWrapper.warning("Update check failed: " + ExceptionUtils.getStackTrace(e));
+            LogWrapper.warning("Issue getting system properties: " + ExceptionUtils.getStackTrace(e));
+        }
+
+        if (doUpdateCheck) {
+            try {
+                final File defaultMinecraftDir = new File(FileUtil.defaultMinecraftDirectory());
+                final File defaultCacheDir = new File(defaultMinecraftDir, "retrowrapper" + File.separator + "cache");
+                final File currentCacheDir = new File(Launch.minecraftHome, "retrowrapper" + File.separator + "cache");
+
+                if (defaultMinecraftDir.exists()) {
+                    defaultCacheDir.mkdirs();
+                    SwingUtil.checkAndDisplayUpdate(defaultCacheDir);
+                } else {
+                    currentCacheDir.mkdirs();
+                    SwingUtil.checkAndDisplayUpdate(currentCacheDir);
+                }
+            } catch (final Exception e) {
+                LogWrapper.warning("Update check failed: " + ExceptionUtils.getStackTrace(e));
+            }
+        } else {
+            LogWrapper.info("Update check disabled, skipping...");
         }
 
         final ServerSocket server = new ServerSocket(0);

@@ -71,6 +71,7 @@ public final class RetroTweaker implements ITweaker {
         }
 
         // URL replacements
+        classLoader.registerTransformer("com.zero.retrowrapper.injector.URLTweakInjector");
         classLoader.registerTransformer("com.zero.retrowrapper.injector.RetroTweakInjector");
         // Patches to use a 24 bit depth buffer when creating displays
         classLoader.registerTransformer("com.zero.retrowrapper.injector.DisplayTweakInjector");

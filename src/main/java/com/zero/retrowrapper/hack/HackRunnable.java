@@ -18,9 +18,9 @@ import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.objectweb.asm.RetroTweakClassWriter;
 
 import com.zero.retrowrapper.injector.RetroTweakInjectorTarget;
+import com.zero.retrowrapper.injector.URLTweakInjector;
 import com.zero.retrowrapper.util.JavaUtil;
 import com.zero.retrowrapper.util.SwingUtil;
 
@@ -80,13 +80,13 @@ public final class HackRunnable implements Runnable {
         button.setText("Finding mob class...");
 
         // TODO Is this safe?
-        while (RetroTweakClassWriter.mobClass == null) {
+        while (URLTweakInjector.mobClass == null) {
             Thread.sleep(1000L);
         }
 
-        LogWrapper.fine("Mob class: " + RetroTweakClassWriter.mobClass);
+        LogWrapper.fine("Mob class: " + URLTweakInjector.mobClass);
         Object playerObj = null;
-        final Class<?> mobClass = RetroTweakInjectorTarget.getaClass(RetroTweakClassWriter.mobClass);
+        final Class<?> mobClass = RetroTweakInjectorTarget.getaClass(URLTweakInjector.mobClass);
         button.setText("Finding player...");
         Field playerField = null;
 

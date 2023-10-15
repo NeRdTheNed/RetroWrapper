@@ -7,10 +7,8 @@ import javax.imageio.ImageIO;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.RetroTweakClassWriter;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.JumpInsnNode;
@@ -40,20 +38,12 @@ public final class RetroTweakInjector implements IClassTransformer {
                 return null;
             }
 
-            final ClassReader cr = new ClassReader(bytesOld);
-            final ClassNode classNodeOld = new ClassNode();
-            cr.accept(classNodeOld, ClassReader.EXPAND_FRAMES);
-            final RetroTweakClassWriter cw = new RetroTweakClassWriter(0, classNodeOld.name.replace('/', '.'));
-            // TODO The linter doesn't like this for some reason
-            final ClassVisitor s = new NoOpClassVisitor(cw);
-            cr.accept(s, 0);
-            final byte[] bytes = cw.toByteArray();
-            final ClassReader classReader = new ClassReader(bytes);
+            final ClassReader classReader = new ClassReader(bytesOld);
             final ClassNode classNode = new ClassNode();
             classReader.accept(classNode, ClassReader.EXPAND_FRAMES);
 
             if (!classNode.interfaces.contains("java/lang/Runnable")) {
-                return bytes;
+                return bytesOld;
             }
 
             MethodNode runMethod = null;
@@ -68,7 +58,7 @@ public final class RetroTweakInjector implements IClassTransformer {
             }
 
             if (runMethod == null) {
-                return bytes;
+                return bytesOld;
             }
 
             LogWrapper.fine("Probably the Minecraft class (it has run && is applet!): " + name);
@@ -122,11 +112,5 @@ public final class RetroTweakInjector implements IClassTransformer {
         SwingUtil.loadIconsOnFrames();
         LogWrapper.fine("Setting gameDir to: " + Launch.minecraftHome);
         return Launch.minecraftHome;
-    }
-
-    private static final class NoOpClassVisitor extends ClassVisitor {
-        NoOpClassVisitor(RetroTweakClassWriter cw) {
-            super(Opcodes.ASM4, cw);
-        }
     }
 }

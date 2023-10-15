@@ -15,7 +15,6 @@ import org.lwjgl.opengl.GL12;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.RetroTweakClassWriter;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
@@ -193,8 +192,8 @@ public final class M1ColorTweakInjector implements IClassTransformer {
                                     changed = true;
                                 }
                             }
-                        } else if ((RetroTweakClassWriter.tesClass != null) && ((opcode == Opcodes.INVOKEVIRTUAL) || (opcode == Opcodes.INVOKESPECIAL))) {
-                            if (RetroTweakClassWriter.tesClass.equals(methodOwner) && "(IIII)V".equals(methodDesc)) {
+                        } else if ((URLTweakInjector.tesClass != null) && ((opcode == Opcodes.INVOKEVIRTUAL) || (opcode == Opcodes.INVOKESPECIAL))) {
+                            if (URLTweakInjector.tesClass.equals(methodOwner) && "(IIII)V".equals(methodDesc)) {
                                 foundSwap4Calls.add(methodInsNode);
                                 changed = true;
                             }

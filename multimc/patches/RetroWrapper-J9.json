@@ -39,6 +39,10 @@
             "url": "https://repo1.maven.org/maven2/"
         },
         {
+            "name": "org.ow2.asm:asm-deprecated:7.1",
+            "url": "https://repo1.maven.org/maven2/"
+        },
+        {
             "name": "net.java.jinput:jinput:2.0.5"
         },
         {

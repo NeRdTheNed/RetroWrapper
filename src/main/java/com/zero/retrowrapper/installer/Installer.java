@@ -496,6 +496,11 @@ public final class Installer {
                                        "https://repo1.maven.org/maven2/org/ow2/asm/asm-analysis/9.6/asm-analysis-9.6.jar",
                                        "9ce6c7b174bd997fc2552dff47964546bd7a5ec3",
                                        34041L);
+        final JsonObject asmDeprecated = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-deprecated:7.1",
+                                         "org/ow2/asm/asm-deprecated/7.1/asm-deprecated-7.1.jar",
+                                         "https://repo1.maven.org/maven2/org/ow2/asm/asm-deprecated/7.1/asm-deprecated-7.1.jar",
+                                         "004ad3a41a931f2ef0aa8f8dc5d7c82090d744c1",
+                                         9152L);
         // Log4j API 2.3.2 as a Mojang library JSON object
         // LaunchWrapper 1.12 requires it.
         final JsonObject log4jAPI = MetadataUtil.createMojangLibrary("org.apache.logging.log4j:log4j-api:2.3.2",
@@ -517,6 +522,7 @@ public final class Installer {
             asmUtil,
             asmTree,
             asmAnalysis,
+            asmDeprecated,
             launchWrapperOneTwelve,
             log4jAPI,
             log4jCore

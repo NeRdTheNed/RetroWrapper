@@ -470,12 +470,32 @@ public final class Installer {
             "https://libraries.minecraft.net/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar",
             "111e7bea9c968cdb3d06ef4632bf7ff0824d0f36",
             32999L);
-        // ASM 5.2. This could be older, but there's no reason not to use a newer version.
-        final JsonObject asmAll = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-all:5.2",
-                                  "org/ow2/asm/asm-all/5.2/asm-all-5.2.jar",
-                                  "https://repo1.maven.org/maven2/org/ow2/asm/asm-all/5.2/asm-all-5.2.jar",
-                                  "2ea49e08b876bbd33e0a7ce75c8f371d29e1f10a",
-                                  247787L);
+        // ASM 9.6. This could be older, but there's no reason not to use a newer version.
+        final JsonObject asm = MetadataUtil.createMojangLibrary("org.ow2.asm:asm:9.6",
+                               "org/ow2/asm/asm/9.6/asm-9.6.jar",
+                               "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.6/asm-9.6.jar",
+                               "aa205cf0a06dbd8e04ece91c0b37c3f5d567546a",
+                               123598L);
+        final JsonObject asmCommons = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-commons:9.6",
+                                      "org/ow2/asm/asm-commons/9.6/asm-commons-9.6.jar",
+                                      "https://repo1.maven.org/maven2/org/ow2/asm/asm-commons/9.6/asm-commons-9.6.jar",
+                                      "f1a9e5508eff490744144565c47326c8648be309",
+                                      72194L);
+        final JsonObject asmUtil = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-util:9.6",
+                                   "org/ow2/asm/asm-util/9.6/asm-util-9.6.jar",
+                                   "https://repo1.maven.org/maven2/org/ow2/asm/asm-util/9.6/asm-util-9.6.jar",
+                                   "f77caf84eb93786a749b2baa40865b9613e3eaee",
+                                   91131L);
+        final JsonObject asmTree = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-tree:9.6",
+                                   "org/ow2/asm/asm-tree/9.6/asm-tree-9.6.jar",
+                                   "https://repo1.maven.org/maven2/org/ow2/asm/asm-tree/9.6/asm-tree-9.6.jar",
+                                   "c0cdda9d211e965d2a4448aa3fd86110f2f8c2de",
+                                   51935L);
+        final JsonObject asmAnalysis = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-analysis:9.6",
+                                       "org/ow2/asm/asm-analysis/9.6/asm-analysis-9.6.jar",
+                                       "https://repo1.maven.org/maven2/org/ow2/asm/asm-analysis/9.6/asm-analysis-9.6.jar",
+                                       "9ce6c7b174bd997fc2552dff47964546bd7a5ec3",
+                                       34041L);
         // Log4j API 2.3.2 as a Mojang library JSON object
         // LaunchWrapper 1.12 requires it.
         final JsonObject log4jAPI = MetadataUtil.createMojangLibrary("org.apache.logging.log4j:log4j-api:2.3.2",
@@ -492,8 +512,12 @@ public final class Installer {
                                      833136L);
         // These libraries should be replaced if RetroWrapper's versions are newer
         final JsonObject[] replaceIfNewerLibraries = {
+            asm,
+            asmCommons,
+            asmUtil,
+            asmTree,
+            asmAnalysis,
             launchWrapperOneTwelve,
-            asmAll,
             log4jAPI,
             log4jCore
         };
@@ -560,6 +584,11 @@ public final class Installer {
                     if (shouldUpdateLibraries) {
                         final String libName = toAdd.get("name").asString();
                         final String libNameNoVersion = libName.substring(0, libName.lastIndexOf(':'));
+
+                        if ("org.ow2.asm:asm-all".equals(libNameNoVersion)) {
+                            // Unconditionally replace ASM-all
+                            continue;
+                        }
 
                         for (final String lwjglLibName : lwjglLibraryNames) {
                             if (lwjglLibName.equals(libNameNoVersion)) {

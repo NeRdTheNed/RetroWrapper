@@ -19,23 +19,23 @@
             "name": "net.sf.jopt-simple:jopt-simple:5.0.4"
         },
         {
-            "name": "org.ow2.asm:asm:5.2",
+            "name": "org.ow2.asm:asm:9.6",
             "url": "https://repo1.maven.org/maven2/"
         },
         {
-            "name": "org.ow2.asm:asm-commons:5.2",
+            "name": "org.ow2.asm:asm-commons:9.6",
             "url": "https://repo1.maven.org/maven2/"
         },
         {
-            "name": "org.ow2.asm:asm-util:5.2",
+            "name": "org.ow2.asm:asm-util:9.6",
             "url": "https://repo1.maven.org/maven2/"
         },
         {
-            "name": "org.ow2.asm:asm-tree:5.2",
+            "name": "org.ow2.asm:asm-tree:9.6",
             "url": "https://repo1.maven.org/maven2/"
         },
         {
-            "name": "org.ow2.asm:asm-analysis:5.2",
+            "name": "org.ow2.asm:asm-analysis:9.6",
             "url": "https://repo1.maven.org/maven2/"
         },
         {

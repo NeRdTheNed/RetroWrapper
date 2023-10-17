@@ -37,9 +37,9 @@ do
       fi
     fi
     if [[ "$BUILD_RELEASE" == "true" ]]; then
-      java -jar ./ci-tools/JarTighten-1.2.10-all.jar -o -c -E -S -t -z -j --mode=MULTI_CHEAP "$jarJar" "$jarJar"
+      java -jar ./ci-tools/JarTighten-1.2.11-all.jar -x -o -c -E -S -t -z -j --mode=MULTI_CHEAP "$jarJar" "$jarJar"
     else
-      java -jar ./ci-tools/JarTighten-1.2.10-all.jar -o -c -E -S -t --mode=MULTI_CHEAP "$jarJar" "$jarJar"
+      java -jar ./ci-tools/JarTighten-1.2.11-all.jar -x -o -c -E -S -t --mode=MULTI_CHEAP "$jarJar" "$jarJar"
     fi
   done
   echo "test $file"
@@ -87,9 +87,14 @@ do
       ./ci-tools/ect-0.9.4-mac -90032 --disable-png --disable-jpg -strip -zip "$file"
     fi
   fi
-  if [[ "$BUILD_RELEASE" == "true" ]]; then
-    java -jar ./ci-tools/JarTighten-1.2.10-all.jar -o -c -E -S -t -z -j --mode=MULTI_CHEAP "$file" "$file"
+  if [[ $file == *.jar ]]; then
+      extra_args="-x"
   else
-    java -jar ./ci-tools/JarTighten-1.2.10-all.jar -o -c -E -S -t --mode=MULTI_CHEAP "$file" "$file"
+      extra_args=""
+  fi
+  if [[ "$BUILD_RELEASE" == "true" ]]; then
+    java -jar ./ci-tools/JarTighten-1.2.11-all.jar $extra_args -o -c -E -S -t -z -j --mode=MULTI_CHEAP "$file" "$file"
+  else
+    java -jar ./ci-tools/JarTighten-1.2.11-all.jar $extra_args -o -c -E -S -t --mode=MULTI_CHEAP "$file" "$file"
   fi
 done

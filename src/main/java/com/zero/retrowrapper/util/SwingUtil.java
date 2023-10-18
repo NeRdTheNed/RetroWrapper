@@ -457,19 +457,30 @@ public final class SwingUtil {
 
         public void hyperlinkUpdate(HyperlinkEvent event) {
             if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                final URL eventURL = event.getURL();
+
                 try {
                     final Class<?> desktopClass = Class.forName("java.awt.Desktop");
                     final Method getDesktop = desktopClass.getMethod("getDesktop");
                     final Object desktopObject = getDesktop.invoke(null);
                     final Method browse = desktopClass.getMethod("browse", URI.class);
-                    browse.invoke(desktopObject, event.getURL().toURI());
+                    browse.invoke(desktopObject, eventURL.toURI());
                 } catch (final Exception e) {
                     if ((e instanceof NoSuchMethodException) || (e instanceof ClassNotFoundException)) {
                         logger.log(Level.WARNING, "Are you running RetroWrapper on Java 5?");
                     }
 
                     logger.log(Level.WARNING, "Could not open link from hyperlinkUpdate", e);
-                    JOptionPane.showMessageDialog(textPane, "Your platform doesn't let Java open links!\nPlease browse to " + event.getURL() + " manually.\nThanks for putting up with this!", "Sorry", JOptionPane.INFORMATION_MESSAGE);
+                    String urlString = null;
+
+                    try {
+                        final URI uri = eventURL.toURI();
+                        urlString = new URI(uri.getScheme(), uri.getAuthority(), uri.getPath(), null, uri.getFragment()).toString();
+                    } catch (final Exception e1) {
+                        urlString = eventURL.toString();
+                    }
+
+                    JOptionPane.showMessageDialog(textPane, "Your platform doesn't let Java open links!\nPlease browse to " + urlString + " manually.\nThanks for putting up with this!", "Sorry", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
         }

@@ -77,22 +77,22 @@ public final class FileUtil {
     }
 
     private static void findAddFiles(File dir, List<File> files) {
-        for (final File file : dir.listFiles()) {
-            if (file.isDirectory()) {
-                findAddFiles(file, files);
-            } else {
-                files.add(file);
+        final File[] filesArr = dir.listFiles();
+
+        if (filesArr != null) {
+            for (final File file : filesArr) {
+                if (file.isDirectory()) {
+                    findAddFiles(file, files);
+                } else {
+                    files.add(file);
+                }
             }
         }
     }
 
     private static List<File> findFiles(File dir) {
         final List<File> files = new ArrayList<File>();
-
-        if (dir.isDirectory()) {
-            findAddFiles(dir, files);
-        }
-
+        findAddFiles(dir, files);
         return files;
     }
 

@@ -88,7 +88,11 @@ public final class FileUtil {
 
     private static List<File> findFiles(File dir) {
         final List<File> files = new ArrayList<File>();
-        findAddFiles(dir, files);
+
+        if (dir.isDirectory()) {
+            findAddFiles(dir, files);
+        }
+
         return files;
     }
 

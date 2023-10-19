@@ -23,6 +23,7 @@ public final class RetroTweaker implements ITweaker {
     }
 
     public static final M1PatchMode m1PatchMode;
+    public static final int bitDepthFixBits;
 
     public static String profile;
     private List<String> args;
@@ -41,6 +42,19 @@ public final class RetroTweaker implements ITweaker {
         }
 
         m1PatchMode = tempPatchMode;
+        int tempBitDepthFixBits = 24;
+
+        try {
+            final String bitDepthStr = System.getProperties().getProperty("retrowrapper.bitDepthFixBits");
+
+            if (bitDepthStr != null) {
+                tempBitDepthFixBits = Integer.parseInt(bitDepthStr);
+            }
+        } catch (final Exception e) {
+            LogWrapper.warning("Issue getting system properties: " + ExceptionUtils.getStackTrace(e));
+        }
+
+        bitDepthFixBits = tempBitDepthFixBits;
     }
 
     public void acceptOptions(List<String> args, File gameDir, File assetsDir, String profile) {
@@ -74,7 +88,10 @@ public final class RetroTweaker implements ITweaker {
         classLoader.registerTransformer("com.zero.retrowrapper.injector.URLTweakInjector");
         classLoader.registerTransformer("com.zero.retrowrapper.injector.RetroTweakInjector");
         // Patches to use a 24 bit depth buffer when creating displays
-        classLoader.registerTransformer("com.zero.retrowrapper.injector.DisplayTweakInjector");
+
+        if (bitDepthFixBits > 0) {
+            classLoader.registerTransformer("com.zero.retrowrapper.injector.DisplayTweakInjector");
+        }
 
         // Patches to fix crash bugs on macOS related to mouse movement + some tweaks to display the cursor correctly
         if (SystemUtils.IS_OS_MAC) {

@@ -103,7 +103,7 @@ public final class DisplayTweakInjector implements IClassTransformer {
                     final TypeInsnNode newPixelFormat = new TypeInsnNode(Opcodes.NEW, "org/lwjgl/opengl/PixelFormat");
                     final InsnNode dup = new InsnNode(Opcodes.DUP);
                     final MethodInsnNode initPixelFormat = new MethodInsnNode(Opcodes.INVOKESPECIAL, "org/lwjgl/opengl/PixelFormat", "<init>", "()V");
-                    final IntInsnNode push24 = new IntInsnNode(Opcodes.BIPUSH, 24);
+                    final IntInsnNode push24 = new IntInsnNode(Opcodes.BIPUSH, RetroTweaker.bitDepthFixBits);
                     final MethodInsnNode setDepthBitsTo24 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "org/lwjgl/opengl/PixelFormat", "withDepthBits", "(I)Lorg/lwjgl/opengl/PixelFormat;");
                     final MethodInsnNode createDisplayWithPixelFormat = new MethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "create", "(Lorg/lwjgl/opengl/PixelFormat;)V");
                     methodNode.instructions.insertBefore(toPatch, newPixelFormat);

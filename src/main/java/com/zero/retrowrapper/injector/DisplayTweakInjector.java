@@ -5,17 +5,16 @@ import java.util.Collection;
 import java.util.ListIterator;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.lwjgl.LWJGLException;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.PixelFormat;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 
 import com.zero.retrowrapper.RetroTweaker;
 
@@ -29,15 +28,6 @@ public final class DisplayTweakInjector implements IClassTransformer {
      *   ALL RIGHTS TO MOJANG
      *
      */
-
-    public static void createDisplay() throws LWJGLException {
-        try {
-            Display.create(new PixelFormat().withDepthBits(24));
-        } catch (final LWJGLException e) {
-            LogWrapper.warning("Unable to use 24 bit depth buffer: " + ExceptionUtils.getStackTrace(e));
-            Display.create();
-        }
-    }
 
     /**
      * This is a patch to always use a 24 bit depth buffer when creating the display.
@@ -110,7 +100,17 @@ public final class DisplayTweakInjector implements IClassTransformer {
                 for (final MethodInsnNode toPatch : foundDisplayCreateCalls) {
                     LogWrapper.fine("Patching call to Display.create() at class " + name);
                     // Replace calls to Display.create() with Display.create(new PixelFormat().withDepthBits(24))
-                    final MethodInsnNode createDisplayWithPixelFormat = new MethodInsnNode(Opcodes.INVOKESTATIC, "com/zero/retrowrapper/injector/DisplayTweakInjector", "createDisplay", "()V");
+                    final TypeInsnNode newPixelFormat = new TypeInsnNode(Opcodes.NEW, "org/lwjgl/opengl/PixelFormat");
+                    final InsnNode dup = new InsnNode(Opcodes.DUP);
+                    final MethodInsnNode initPixelFormat = new MethodInsnNode(Opcodes.INVOKESPECIAL, "org/lwjgl/opengl/PixelFormat", "<init>", "()V");
+                    final IntInsnNode push24 = new IntInsnNode(Opcodes.BIPUSH, 24);
+                    final MethodInsnNode setDepthBitsTo24 = new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "org/lwjgl/opengl/PixelFormat", "withDepthBits", "(I)Lorg/lwjgl/opengl/PixelFormat;");
+                    final MethodInsnNode createDisplayWithPixelFormat = new MethodInsnNode(Opcodes.INVOKESTATIC, "org/lwjgl/opengl/Display", "create", "(Lorg/lwjgl/opengl/PixelFormat;)V");
+                    methodNode.instructions.insertBefore(toPatch, newPixelFormat);
+                    methodNode.instructions.insertBefore(toPatch, dup);
+                    methodNode.instructions.insertBefore(toPatch, initPixelFormat);
+                    methodNode.instructions.insertBefore(toPatch, push24);
+                    methodNode.instructions.insertBefore(toPatch, setDepthBitsTo24);
                     methodNode.instructions.insertBefore(toPatch, createDisplayWithPixelFormat);
                     methodNode.instructions.remove(toPatch);
                 }

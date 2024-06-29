@@ -97,7 +97,10 @@ shadowJar {
 
     // Currently, this merges all licences from each library into one file, as well as the same for notices.
     // TODO: Come up with a better way to do this. Ideally I'd rename the file based on the library.
-    append 'META-INF/LICENSE.txt'
+    //append 'META-INF/LICENSE.txt'
+    exclude 'META-INF/LICENSE.txt'
+    from 'COMMONS-LICENSE.txt'
+    from 'MINIMAL-JSON-LICENSE.txt'
     append 'META-INF/NOTICE.txt'
 
     // Relocate libraries to prevent them from leaking into the classpath for other applications

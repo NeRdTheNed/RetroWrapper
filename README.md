@@ -45,9 +45,11 @@ As RetroWrapper uses LegacyLauncher, it is version independent, and able to run 
 
 ## Credits
 
-Binary distributions of this software bundle classes from the [Apache Commons project](https://commons.apache.org/), which are licensed under the Apache License Version 2.0. A full copy of this license can be found in COMMONS-LICENSE.txt, which should be in the top-level directory of this repository. Binary distributions also include this information under META-INF.
+RetroWrapper is licensed under the MIT license. A full copy of this license can be found in LICENSE.md, which should be in the top-level directory of this repository. Binary distributions also include this information in the root folder of the compiled jar.
 
-Binary distributions of this software bundle classes from [minimal-json](https://github.com/ralfstx/minimal-json), which are licensed under the MIT license. A full copy of this license can be found in MINIMAL-JSON-LICENSE.txt, which should be in the top-level directory of this repository. Binary distributions also include this information under META-INF.
+Binary distributions of this software bundle classes from the [Apache Commons project](https://commons.apache.org/), which are licensed under the Apache License Version 2.0. A full copy of this license can be found in COMMONS-LICENSE.txt, which should be in the top-level directory of this repository. Binary distributions also include this information in the root folder of the compiled jar.
+
+Binary distributions of this software bundle classes from [minimal-json](https://github.com/ralfstx/minimal-json), which are licensed under the MIT license. A full copy of this license can be found in MINIMAL-JSON-LICENSE.txt, which should be in the top-level directory of this repository. Binary distributions also include this information in the root folder of the compiled jar.
 
 [Crafatar](https://crafatar.com) is used to download skins and capes if the Mojang API isn't working. Thank you for providing an alternative skin and cape API!
 

@@ -470,32 +470,32 @@ public final class Installer {
             "https://libraries.minecraft.net/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar",
             "111e7bea9c968cdb3d06ef4632bf7ff0824d0f36",
             32999L);
-        // ASM 9.6. This could be older, but there's no reason not to use a newer version.
-        final JsonObject asm = MetadataUtil.createMojangLibrary("org.ow2.asm:asm:9.6",
-                               "org/ow2/asm/asm/9.6/asm-9.6.jar",
-                               "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.6/asm-9.6.jar",
-                               "aa205cf0a06dbd8e04ece91c0b37c3f5d567546a",
-                               123598L);
-        final JsonObject asmCommons = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-commons:9.6",
-                                      "org/ow2/asm/asm-commons/9.6/asm-commons-9.6.jar",
-                                      "https://repo1.maven.org/maven2/org/ow2/asm/asm-commons/9.6/asm-commons-9.6.jar",
-                                      "f1a9e5508eff490744144565c47326c8648be309",
-                                      72194L);
-        final JsonObject asmUtil = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-util:9.6",
-                                   "org/ow2/asm/asm-util/9.6/asm-util-9.6.jar",
-                                   "https://repo1.maven.org/maven2/org/ow2/asm/asm-util/9.6/asm-util-9.6.jar",
-                                   "f77caf84eb93786a749b2baa40865b9613e3eaee",
-                                   91131L);
-        final JsonObject asmTree = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-tree:9.6",
-                                   "org/ow2/asm/asm-tree/9.6/asm-tree-9.6.jar",
-                                   "https://repo1.maven.org/maven2/org/ow2/asm/asm-tree/9.6/asm-tree-9.6.jar",
-                                   "c0cdda9d211e965d2a4448aa3fd86110f2f8c2de",
-                                   51935L);
-        final JsonObject asmAnalysis = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-analysis:9.6",
-                                       "org/ow2/asm/asm-analysis/9.6/asm-analysis-9.6.jar",
-                                       "https://repo1.maven.org/maven2/org/ow2/asm/asm-analysis/9.6/asm-analysis-9.6.jar",
-                                       "9ce6c7b174bd997fc2552dff47964546bd7a5ec3",
-                                       34041L);
+        // ASM 9.7. This could be older, but there's no reason not to use a newer version.
+        final JsonObject asm = MetadataUtil.createMojangLibrary("org.ow2.asm:asm:9.7",
+                               "org/ow2/asm/asm/9.7/asm-9.7.jar",
+                               "https://repo1.maven.org/maven2/org/ow2/asm/asm/9.7/asm-9.7.jar",
+                               "073d7b3086e14beb604ced229c302feff6449723",
+                               125428L);
+        final JsonObject asmCommons = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-commons:9.7",
+                                      "org/ow2/asm/asm-commons/9.7/asm-commons-9.7.jar",
+                                      "https://repo1.maven.org/maven2/org/ow2/asm/asm-commons/9.7/asm-commons-9.7.jar",
+                                      "e86dda4696d3c185fcc95d8d311904e7ce38a53f",
+                                      73426L);
+        final JsonObject asmUtil = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-util:9.7",
+                                   "org/ow2/asm/asm-util/9.7/asm-util-9.7.jar",
+                                   "https://repo1.maven.org/maven2/org/ow2/asm/asm-util/9.7/asm-util-9.7.jar",
+                                   "c0655519f24d92af2202cb681cd7c1569df6ead6",
+                                   93784L);
+        final JsonObject asmTree = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-tree:9.7",
+                                   "org/ow2/asm/asm-tree/9.7/asm-tree-9.7.jar",
+                                   "https://repo1.maven.org/maven2/org/ow2/asm/asm-tree/9.7/asm-tree-9.7.jar",
+                                   "e446a17b175bfb733b87c5c2560ccb4e57d69f1a",
+                                   51934L);
+        final JsonObject asmAnalysis = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-analysis:9.7",
+                                       "org/ow2/asm/asm-analysis/9.7/asm-analysis-9.7.jar",
+                                       "https://repo1.maven.org/maven2/org/ow2/asm/asm-analysis/9.7/asm-analysis-9.7.jar",
+                                       "e4a258b7eb96107106c0599f0061cfc1832fe07a",
+                                       34776L);
         final JsonObject asmDeprecated = MetadataUtil.createMojangLibrary("org.ow2.asm:asm-deprecated:7.1",
                                          "org/ow2/asm/asm-deprecated/7.1/asm-deprecated-7.1.jar",
                                          "https://repo1.maven.org/maven2/org/ow2/asm/asm-deprecated/7.1/asm-deprecated-7.1.jar",

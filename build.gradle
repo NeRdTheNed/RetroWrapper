@@ -79,6 +79,8 @@ repositories {
 }
 
 shadowJar {
+    from 'LICENSE.md'
+
     dependencies {
         exclude(dependency("org.ow2.asm:asm-all:${project.asmVersion}"))
         exclude(dependency("net.minecraft:launchwrapper:${project.launchwrapperVersion}"))
@@ -225,6 +227,7 @@ jar {
 tasks.register('sourcesJar', Jar) {
     archiveClassifier = 'sources'
     from sourceSets.main.allSource
+    from 'LICENSE.md'
 }
 
 // This task creates a Java 6 - 8 compatible MultiMC instance with the current build of RetroWrapper.

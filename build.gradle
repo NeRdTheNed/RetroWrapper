@@ -3,14 +3,14 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.guardsquare:proguard-gradle:7.4.0'
+        classpath 'com.guardsquare:proguard-gradle:7.5.0'
     }
 }
 
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'io.github.goooler.shadow' version '8.1.7'
     //id 'checkstyle' // TODO: This is a reminder for me to setup checkstyle.
 }
 

@@ -207,7 +207,8 @@ public final class RetroTweakInjectorTarget implements IClassTransformer {
                         Field appletField = null;
 
                         for (final Field f : (quitButtonFix ? JavaUtil.getMostSuper(mcObj.getClass()) : mcObj.getClass()).getDeclaredFields()) {
-                            if (f.getType().equals(Boolean.TYPE) && Modifier.isPublic(f.getModifiers())) {
+                            // TODO test fix for b1.2_02-20110517 more thoroughly
+                            if (f.getType().equals(Boolean.TYPE) && Modifier.isPublic(f.getModifiers()) && !(Modifier.isFinal(f.getModifiers()) && Modifier.isStatic(f.getModifiers()))) {
                                 appletField = f;
                                 break;
                             }

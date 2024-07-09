@@ -253,6 +253,9 @@ tasks.register('createMultiMCInstance', Zip) {
 
     from(proguard.outputs.files.singleFile) {
         into 'libraries/'
+        rename { String libraryName ->
+            libraryName.replace("RetroWrapper", "retrowrapper")
+        }
     }
 }
 
@@ -276,6 +279,9 @@ tasks.register('createJ9MultiMCInstance', Zip) {
 
     from(proguard.outputs.files.singleFile) {
         into 'libraries/'
+        rename { String libraryName ->
+            libraryName.replace("RetroWrapper", "retrowrapper")
+        }
     }
 }
 
